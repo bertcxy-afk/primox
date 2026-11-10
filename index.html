@@ -41,9 +41,9 @@
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-md mx-auto p-4">
+    <main class="max-w-md mx-auto p-4 space-y-4">
         <!-- Registro Cliente (Usuario Único) -->
-        <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-orange-100">
+        <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
             <h2 class="font-bold text-lg mb-2 text-orange-900">Tus Datos de Usuario</h2>
             <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
             <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
@@ -54,8 +54,14 @@
             </div>
         </section>
 
+        <!-- Sección de Estatus de Mis Pedidos en Vivo para el Cliente -->
+        <section id="client-orders-status-section" class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 hidden">
+            <h3 class="font-bold text-md text-orange-900 mb-2">🔔 Estatus de tus Pedidos Recientes</h3>
+            <div id="client-my-orders-list" class="space-y-2 text-xs"></div>
+        </section>
+
         <!-- Banner / Botón de Agendar a Futuro -->
-        <section class="mb-4">
+        <section>
             <button onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
                 <span>📅 ¿Quieres reservar para otro día u hora?</span>
                 <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold">Agendar Pedido</span>
@@ -290,6 +296,7 @@
                 document.getElementById('client-name').value = sanitizeText(savedName);
                 document.getElementById('client-phone').value = sanitizeText(savedPhone);
                 document.getElementById('user-registered-badge').classList.remove('hidden');
+                loadClientOrders(savedPhone);
             }
 
             const today = new Date().toISOString().split('T')[0];
@@ -337,6 +344,7 @@
                         localStorage.removeItem('temp_lat');
                         localStorage.removeItem('temp_lng');
                         window.history.replaceState({}, document.title, window.location.pathname);
+                        if (clientPhone) loadClientOrders(clientPhone);
                     }).catch((error) => {
                         console.error("Error al registrar orden pagada:", error);
                     });
@@ -351,7 +359,52 @@
                 localStorage.setItem('primo_user_name', name);
                 localStorage.setItem('primo_user_phone', phone);
                 document.getElementById('user-registered-badge').classList.remove('hidden');
+                loadClientOrders(phone);
             }
+        }
+
+        // Función para que el cliente vea el estatus de sus propios pedidos en tiempo real
+        function loadClientOrders(phone) {
+            if (!phone) return;
+            db.collection("orders").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
+                let myOrdersHtml = "";
+                let hasOrders = false;
+                snapshot.forEach((doc) => {
+                    hasOrders = true;
+                    const order = doc.data();
+                    const status = order.status || 'Pendiente';
+                    let statusColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                    let statusText = '⏳ Pedido Pendiente de Revisión';
+
+                    if (status === 'Aceptado') {
+                        statusColor = 'bg-green-100 text-green-900 border-green-300';
+                        statusText = '🎉 ¡Pedido Aceptado / En Preparación!';
+                    } else if (status === 'Rechazado') {
+                        statusColor = 'bg-red-100 text-red-900 border-red-300';
+                        statusText = '❌ Pedido Rechazado por el Local';
+                    }
+
+                    myOrdersHtml += `
+                        <div class="p-2.5 rounded-lg border ${statusColor} space-y-1">
+                            <div class="flex justify-between font-bold">
+                                <span>${order.orderType || 'Inmediato'} - Total: $${order.total.toFixed(2)}</span>
+                                <span>${status}</span>
+                            </div>
+                            <p class="font-semibold">${statusText}</p>
+                            ${order.orderType === 'Futuro' ? `<p class="text-xs">📅 Reserva: ${order.scheduleDate} a las ${order.scheduleTime}</p>` : ''}
+                        </div>
+                    `;
+                });
+
+                const section = document.getElementById("client-orders-status-section");
+                const list = document.getElementById("client-my-orders-list");
+                if (hasOrders) {
+                    section.classList.remove("hidden");
+                    list.innerHTML = myOrdersHtml;
+                } else {
+                    section.classList.add("hidden");
+                }
+            });
         }
 
         db.collection("config").doc("main").onSnapshot((doc) => {
@@ -771,6 +824,7 @@
                 updateCartUI();
                 closeCart();
                 closeScheduleModal();
+                loadClientOrders(phone);
             }).catch((error) => {
                 alert("Error al enviar el pedido: " + error.message);
             });
