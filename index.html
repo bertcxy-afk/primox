@@ -1,85 +1,351 @@
-<!DOCTYPE html><html lang="es"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Primo - Comida a Domicilio y Para Llevar</title>    <!-- Tailwind CSS CDN -->    <script src="https://cdn.tailwindcss.com"></script>    <!-- Google Fonts para toque elegante tipo manuscrita -->    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">    <!-- Firebase SDKs -->    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>    <!-- Leaflet CSS & JS para los Mapas Interactivos -->    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>    <!-- Conekta Checkout Script -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Primo - Comida a Domicilio y Para Llevar</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts para toque elegante tipo manuscrita -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- Leaflet CSS & JS para los Mapas Interactivos -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Conekta Checkout Script -->
     <script crossorigin src="https://pay.conekta.com/v1.0/js/conekta-checkout.min.js"></script>
-    <link rel="manifest" href="manifest.json">    <meta name="theme-color" content="#f97316">    <style>        #delivery-map, #schedule-map { height: 200px; width: 100%; border-radius: 0.5rem; z-index: 10; }        .font-handwriting { font-family: 'Caveat', cursive; }    </style></head><body class="bg-gray-50 text-gray-800 font-sans pb-20">    <!-- Header -->    <header class="bg-orange-500 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">        <h1 class="text-2xl sm:text-3xl font-handwriting tracking-wide flex items-center gap-2">            <span>🍽️</span> PRIMO        </h1>        <div class="flex gap-2">            <button onclick="openCart()" class="bg-orange-600 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 hover:bg-orange-700 transition">                🛒 Carrito (<span id="cart-count">0</span>)            </button>            <button onclick="openScheduleModal()" class="bg-amber-600 px-3 py-1.5 rounded-lg text-sm font-semibold hidden sm:inline-block hover:bg-amber-700 transition">                📅 Agendar            </button>            <button onclick="openAdminLogin()" class="bg-gray-800 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-900 transition">                Admin            </button>        </div>    </header>
-    <!-- Main Container -->    <main class="max-w-md mx-auto p-4 space-y-4">        <!-- Registro Cliente (Usuario Único) -->        <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm border border-orange-100">            <h2 class="font-bold text-lg mb-2 text-orange-900">Tus Datos de Usuario</h2>            <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">            <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional)" class="w-full p-2 border rounded-lg text-sm">                        <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">                ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Usaremos este perfil para confirmar tus compras y reservas.            </div>        </section>
-        <!-- Sección de Estatus de Mis Pedidos y Reservas en Tiempo Real -->        <section id="client-orders-status-section" class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 hidden">            <h3 class="font-bold text-md text-orange-900 mb-1">🔔 Estatus de tus Pedidos y Reservas</h3>            <p class="text-[11px] text-gray-500 mb-3">Se actualiza en tiempo real cuando el local acepta o rechaza.</p>            <div id="client-my-orders-list" class="space-y-2 text-xs"></div>        </section>
-        <!-- Banner / Botón de Agendar a Futuro -->        <section>            <button onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">                <span>📅 ¿Quieres reservar para otro día u hora?</span>                <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold">Agendar Pedido</span>            </button>        </section>
-        <!-- Menú de Comida -->        <section>            <h2 class="font-bold text-xl mb-3">Menú Disponible</h2>            <div id="menu-container" class="space-y-4">                <p class="text-gray-500 text-center py-4">Cargando menú...</p>            </div>        </section>    </main>
-    <!-- Modal Carrito / Checkout Inmediato -->    <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">            <div class="flex justify-between items-center mb-4">                <h3 class="text-lg font-bold">Tu Pedido Inmediato</h3>                <button onclick="closeCart()" class="text-gray-500 font-bold text-lg">✕</button>            </div>            <div id="cart-items" class="space-y-3 mb-4 divide-y"></div>            <div class="border-t pt-3 font-bold text-lg flex justify-between mb-4">                <span>Total:</span>                <span id="cart-total">$0.00</span>            </div>
-            <!-- Método de Pago -->            <div class="mb-4">                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>                <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">                    <option value="efectivo">Efectivo</option>                    <option value="conekta">Conekta (Tarjeta, SPEI y OXXO)</option>
-                    <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>                    <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>                </select>
-                <!-- Si es efectivo -->                <div id="cash-fields">                    <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>                    <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">                    <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>                </div>
-                <!-- Si es Conekta -->                <div id="conekta-fields" class="hidden space-y-2">                    <div id="conekta-checkout-container" style="min-height: 400px;"></div>                </div>
-                <!-- Si es tarjeta (Mercado Pago) -->                <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se descontará una comisión del 3.49% correspondiente al servicio de cobro.</p>                    <div class="bg-white p-2 rounded border border-blue-100 flex justify-between text-xs font-bold text-gray-700">                        <span>Monto neto que recibe el negocio:</span>                        <span id="mp-net-amount" class="text-blue-600">$0.00</span>                    </div>                </div>
-                <!-- Si es transferencia -->                <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">                    <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>                    <p id="company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando CLABE Mercado Pago...</p>                    <p class="text-xs text-orange-700">Por favor realiza tu transferencia SPEI a esta CLABE oficial de Mercado Pago asignada al negocio.</p>                                        <div class="border-t border-orange-200 pt-2 mt-2">                        <label class="block text-xs font-semibold text-orange-900 mb-1">Confirma el monto transferido:</label>                        <input type="number" id="transfer-amount" placeholder="Ej. 150" oninput="calculateTransferChange()" class="w-full p-2 bg-white border rounded-lg text-sm mb-2">                        <p id="transfer-change-text" class="text-xs font-semibold text-green-700"></p>
-                        <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>                        <input type="text" id="transfer-clabe" placeholder="Ej. Folio o CLABE desde donde transferiste" class="w-full p-2 bg-white border rounded-lg text-sm">                    </div>                </div>            </div>
-            <!-- Tipo de Entrega -->            <div class="mb-4">                <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>                <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">                    <option value="local">Asistir al local por mi comida</option>                    <option value="domicilio">Recibir en domicilio</option>                </select>
-                <!-- Si asiste al local -->                <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm">                    <p class="font-semibold">Dirección del local:</p>                    <p id="store-address-display" class="text-gray-600">Cargando dirección...</p>                </div>
-                <!-- Si es a domicilio -->                <div id="domicilio-fields" class="hidden space-y-2">                    <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">                    <label class="block text-xs font-semibold text-gray-700 mt-2">📍 Selecciona tu ubicación exacta en el mapa:</label>                    <div id="delivery-map"></div>                    <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>                </div>            </div>
-            <button onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">                Confirmar Pedido Inmediato            </button>        </div>    </div>
-    <!-- Modal Agendar Pedido a Futuro (Reserva) -->    <div id="schedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">        <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4">            <div class="flex justify-between items-center">                <h3 class="text-lg font-bold text-amber-900">📅 Agendar Pedido a Futuro (Reserva)</h3>                <button onclick="closeScheduleModal()" class="text-gray-500 font-bold text-lg">✕</button>            </div>                        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">                Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para pedidos a futuro solo está disponible el pago por transferencia o tarjeta.            </div>
-            <div>                <label class="block font-semibold text-sm mb-1">Fecha de Recepción:</label>                <input type="date" id="schedule-date" class="w-full p-2 border rounded-lg text-sm">            </div>
-            <div>                <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>                <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">            </div>
-            <!-- Método de Pago exclusivo para Reservas (Sin efectivo) -->            <div>                <label class="block font-semibold text-sm mb-1">Método de Pago para la Reserva:</label>                <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">                    <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>                    <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>                </select>
-                <!-- Si es tarjeta en reserva -->                <div id="schedule-tarjeta-fields" class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago.</p>                </div>
-                <!-- Si es transferencia en reserva -->                <div id="schedule-transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">                    <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>                    <p id="schedule-company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando...</p>                    <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>                    <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o CLABE de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">                </div>            </div>
-            <div>                <label class="block font-semibold text-sm mb-1">Referencias de Entrega:</label>                <input type="text" id="schedule-address" placeholder="Calle, número, fachada o detalles de tu casa" class="w-full p-2 border rounded-lg text-sm mb-2">            </div>
-            <div>                <label class="block text-xs font-semibold text-gray-700 mb-1">📍 Selecciona tu ubicación exacta de entrega en el mapa:</label>                <div id="schedule-map"></div>                <p id="schedule-map-coords-text" class="text-xs text-gray-500 mt-1">Haz clic en el mapa para fijar tu ubicación.</p>            </div>
-            <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">                Enviar Solicitud de Reserva            </button>        </div>    </div>
-    <!-- Modal Admin -->    <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">        <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto">            <div class="flex justify-between items-center mb-4">                <h3 class="text-lg font-bold">Panel Administrador</h3>                <button onclick="closeAdmin()" class="text-gray-500 font-bold text-lg">✕</button>            </div>                        <div id="admin-login-view">                <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">                <button onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold">Ingresar</button>            </div>
-            <div id="admin-panel-view" class="hidden space-y-6">                <!-- Pedidos Entrantes y Reservas -->                <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">                    <div class="flex justify-between items-center mb-2">                        <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo (Acumulados)</h4>                        <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Todo</button>                    </div>                    <div id="admin-orders-list" class="space-y-3 text-sm">                        <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>                    </div>                </div>
-                <!-- Configuración General -->                <div class="border-b pb-4">                    <h4 class="font-bold mb-2">Configuración General</h4>                    <label class="text-xs text-gray-600">CLABE / Cuenta Mercado Pago de la empresa:</label>                    <input type="text" id="admin-company-bank" placeholder="Ej. 722969010040237064" class="w-full p-2 border rounded-lg text-sm mb-2">                    <label class="text-xs text-gray-600">Dirección física del local:</label>                    <input type="text" id="admin-store-address" class="w-full p-2 border rounded-lg text-sm mb-2">                    <button onclick="saveConfig()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Guardar Configuración</button>                </div>
-                <!-- Agregar / Editar Platillo -->                <div class="border-b pb-4">                    <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>                    <input type="hidden" id="edit-dish-id">                    <input type="text" id="dish-name" placeholder="Nombre del platillo" class="w-full p-2 border rounded-lg text-sm mb-2">                    <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm mb-2">                    <input type="text" id="dish-desc" placeholder="Descripción corta" class="w-full p-2 border rounded-lg text-sm mb-2">                    <input type="text" id="dish-img" placeholder="URL de la imagen" class="w-full p-2 border rounded-lg text-sm mb-2">                    <select id="dish-available" class="w-full p-2 border rounded-lg text-sm mb-2">                        <option value="true">Disponible</option>                        <option value="false">Agotado</option>                    </select>                    <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>                </div>
-                <!-- Lista de Platillos -->                <div>                    <h4 class="font-bold mb-2">Menú Actual</h4>                    <div id="admin-dish-list" class="space-y-2 text-sm"></div>                </div>            </div>        </div>    </div>
-    <!-- Script de Firebase y Lógica Protegida -->    <script>        const firebaseConfig = {            apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",            authDomain: "primox-65642.firebaseapp.com",            projectId: "primox-65642",            storageBucket: "primox-65642.firebasestorage.app",            messagingSenderId: "312208205497",            appId: "1:312208205497:web:29382bb18c2facc4fb1d68",            measurementId: "G-37491Y8MRL"        };
-        firebase.initializeApp(firebaseConfig);        const db = firebase.firestore();
-        db.enableNetwork().catch(err => console.log(err));
-        let menuItems = [];        let cart = [];        let storeConfig = { bank: "No configurada", address: "Local principal" };                let deliveryMap = null, deliveryMarker = null, selectedLat = null, selectedLng = null;        let scheduleMap = null, scheduleMarker = null, scheduleLat = null, scheduleLng = null;
-        function sanitizeText(str) {            if (!str) return '';            return str.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();        }
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f97316">
+    <style>
+        #delivery-map, #schedule-map { height: 200px; width: 100%; border-radius: 0.5rem; z-index: 10; }
+        .font-handwriting { font-family: 'Caveat', cursive; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans pb-20">
+    <!-- Header -->
+    <header class="bg-orange-500 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
+        <h1 class="text-2xl sm:text-3xl font-handwriting tracking-wide flex items-center gap-2">
+            <span>🍽️</span> PRIMO
+        </h1>
+        <div class="flex gap-2">
+            <button onclick="openCart()" class="bg-orange-600 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 hover:bg-orange-700 transition">
+                🛒 Carrito (<span id="cart-count">0</span>)
+            </button>
+            <button onclick="openScheduleModal()" class="bg-amber-600 px-3 py-1.5 rounded-lg text-sm font-semibold hidden sm:inline-block hover:bg-amber-700 transition">
+                📅 Agendar
+            </button>
+            <button onclick="openAdminLogin()" class="bg-gray-800 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-900 transition">
+                Admin
+            </button>
+        </div>
+    </header>
 
-        window.addEventListener('DOMContentLoaded', () => {            const savedName = localStorage.getItem('primo_user_name');            const savedPhone = localStorage.getItem('primo_user_phone');            if (savedName && savedPhone) {                document.getElementById('client-name').value = sanitizeText(savedName);                document.getElementById('client-phone').value = sanitizeText(savedPhone);                document.getElementById('user-registered-badge').classList.remove('hidden');                loadClientOrders(savedPhone);            }
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto p-4 space-y-4">
+        <!-- Registro Cliente (Usuario Único) -->
+        <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
+            <h2 class="font-bold text-lg mb-2 text-orange-900">Tus Datos de Usuario</h2>
+            <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
+            <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
+            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional)" class="w-full p-2 border rounded-lg text-sm">
+            
+            <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">
+                ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Usaremos este perfil para confirmar tus compras y reservas.
+            </div>
+        </section>
 
-            const today = new Date().toISOString().split('T')[0];            const dateInput = document.getElementById('schedule-date');            if (dateInput) {                dateInput.min = today;                dateInput.value = today;            }
+        <!-- Sección de Estatus de Mis Pedidos y Reservas en Tiempo Real -->
+        <section id="client-orders-status-section" class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 hidden">
+            <h3 class="font-bold text-md text-orange-900 mb-1">🔔 Estatus de tus Pedidos y Reservas</h3>
+            <p class="text-[11px] text-gray-500 mb-3">Se actualiza en tiempo real cuando el local acepta o rechaza.</p>
+            <div id="client-my-orders-list" class="space-y-2 text-xs"></div>
+        </section>
 
-            const urlParams = new URLSearchParams(window.location.search);            if (urlParams.get('payment') === 'success') {                const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';                const clientPhone = localStorage.getItem('temp_client_phone') || '';                let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
+        <!-- Banner / Botón de Agendar a Futuro -->
+        <section>
+            <button onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
+                <span>📅 ¿Quieres reservar para otro día u hora?</span>
+                <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold">Agendar Pedido</span>
+            </button>
+        </section>
 
-                if (pendingCart.length > 0) {                    const total = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);                    const commission = total * 0.0349;                    const netReceived = total - commission;
+        <!-- Menú de Comida -->
+        <section>
+            <h2 class="font-bold text-xl mb-3">Menú Disponible</h2>
+            <div id="menu-container" class="space-y-4">
+                <p class="text-gray-500 text-center py-4">Cargando menú...</p>
+            </div>
+        </section>
+    </main>
 
-                    db.collection("orders").add({                        clientName: sanitizeText(clientName),                        clientPhone: sanitizeText(clientPhone),                        items: pendingCart,                        total: total,                        commission: commission,                        netReceived: netReceived,                        paymentMethod: 'tarjeta (Mercado Pago)',                        status: 'Pendiente',                        orderType: 'Inmediato',                        timestamp: firebase.firestore.FieldValue.serverTimestamp()                    }).then(() => {                        alert("¡Pago completado y pedido registrado con éxito!");                        localStorage.removeItem('temp_cart');                        window.history.replaceState({}, document.title, window.location.pathname);                        if (clientPhone) loadClientOrders(clientPhone);                    }).catch((error) => {                        console.error("Error al registrar orden pagada:", error);                    });                }            }        });
+    <!-- Modal Carrito / Checkout Inmediato -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Tu Pedido Inmediato</h3>
+                <button onclick="closeCart()" class="text-gray-500 font-bold text-lg">✕</button>
+            </div>
+            <div id="cart-items" class="space-y-3 mb-4 divide-y"></div>
+            <div class="border-t pt-3 font-bold text-lg flex justify-between mb-4">
+                <span>Total:</span>
+                <span id="cart-total">$0.00</span>
+            </div>
 
-        function saveClientIdentity() {            const name = sanitizeText(document.getElementById('client-name').value);            const phone = sanitizeText(document.getElementById('client-phone').value);            if (name && phone) {                localStorage.setItem('primo_user_name', name);                localStorage.setItem('primo_user_phone', phone);                document.getElementById('user-registered-badge').classList.remove('hidden');                loadClientOrders(phone);            }        }
+            <!-- Método de Pago -->
+            <div class="mb-4">
+                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
+                <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <option value="efectivo">Efectivo</option>
+                    <option value="conekta">Conekta (Tarjeta, SPEI y OXXO)</option>
+                    <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
+                    <option value="transferencia">Transferencia (Cuenta)</option>
+                </select>
 
-        function loadClientOrders(phone) {            if (!phone) return;            db.collection("orders").where("clientPhone", "==", phone).onSnapshot((snapshot) => {                let myOrdersHtml = "";                let hasOrders = false;                snapshot.forEach((doc) => {                    hasOrders = true;                    const order = doc.data();                    const status = order.status || 'Pendiente';                    let statusColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';                    let statusText = '⏳ Pedido Pendiente de Revisión';
+                <!-- Si es efectivo -->
+                <div id="cash-fields">
+                    <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>
+                    <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
+                    <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
+                </div>
 
-                    if (status === 'Aceptado') {                        statusColor = 'bg-green-100 text-green-900 border-green-300';                        statusText = '🎉 ¡Pedido Aceptado / En Preparación!';                    } else if (status === 'Rechazado') {                        statusColor = 'bg-red-100 text-red-900 border-red-300';                        statusText = '❌ Pedido Rechazado por el Local';                    }
+                <!-- Contenedor Conekta Checkout Componente -->
+                <div id="conekta-fields" class="hidden space-y-2">
+                    <div id="conekta-checkout-container" style="min-height: 400px;"></div>
+                </div>
 
-                    myOrdersHtml += `                        <div class="p-2.5 rounded-lg border ${statusColor} space-y-1">                            <div class="flex justify-between font-bold">                                <span>${order.orderType || 'Inmediato'} - Total: $${order.total.toFixed(2)}</span>                                <span>${status}</span>                            </div>                            <p class="font-semibold">${statusText}</p>                        </div>                    `;                });
+                <!-- Si es tarjeta (Mercado Pago) -->
+                <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
+                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago.</p>
+                </div>
 
-                const section = document.getElementById("client-orders-status-section");                const list = document.getElementById("client-my-orders-list");                if (hasOrders) {                    section.classList.remove("hidden");                    list.innerHTML = myOrdersHtml;                } else {                    section.classList.add("hidden");                }            });        }
+                <!-- Si es transferencia -->
+                <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
+                    <p class="font-semibold text-orange-800">💳 CLABE para transferencia:</p>
+                    <p id="company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando...</p>
+                </div>
+            </div>
 
-        db.collection("config").doc("main").onSnapshot((doc) => {            if (doc.exists) {                storeConfig = doc.data();                const bankText = sanitizeText(storeConfig.bank) || "No registrada";                document.getElementById("company-bank-info").innerText = bankText;                document.getElementById("schedule-company-bank-info").innerText = bankText;                document.getElementById("store-address-display").innerText = sanitizeText(storeConfig.address) || "No especificada";                document.getElementById("admin-company-bank").value = storeConfig.bank || "";                document.getElementById("admin-store-address").value = storeConfig.address || "";            }        });
+            <!-- Tipo de Entrega -->
+            <div class="mb-4">
+                <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
+                <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <option value="local">Asistir al local por mi comida</option>
+                    <option value="domicilio">Recibir en domicilio</option>
+                </select>
+                <!-- Si asiste al local -->
+                <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm">
+                    <p class="font-semibold">Dirección del local:</p>
+                    <p id="store-address-display" class="text-gray-600">Cargando dirección...</p>
+                </div>
+                <!-- Si es a domicilio -->
+                <div id="domicilio-fields" class="hidden space-y-2">
+                    <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">
+                    <label class="block text-xs font-semibold text-gray-700 mt-2">📍 Selecciona tu ubicación exacta en el mapa:</label>
+                    <div id="delivery-map"></div>
+                    <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
+                </div>
+            </div>
 
-        db.collection("menu").onSnapshot((snapshot) => {            menuItems = [];            let html = "";            let adminHtml = "";            snapshot.forEach((doc) => {                const item = { id: doc.id, ...doc.data() };                menuItems.push(item);                const isAvailable = item.available !== false;                                html += `                    <div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center">                        <img src="${item.image || 'https://via.placeholder.com/100'}" class="w-20 h-20 object-cover rounded-lg">                        <div class="flex-1">                            <h3 class="font-bold text-sm">${sanitizeText(item.name)}</h3>                            <p class="text-xs text-gray-500 mb-1">${sanitizeText(item.description) || ''}</p>                            <p class="font-semibold text-orange-600">$${item.price}</p>                        </div>                        <div>                            ${isAvailable ? `<button onclick="addToCart('${item.id}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Agregar</button>` : '<span class="text-xs text-red-500 font-bold">Agotado</span>'}                        </div>                    </div>                `;
+            <button id="confirm-order-btn" onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
+                Confirmar Pedido Inmediato
+            </button>
+        </div>
+    </div>
 
-                adminHtml += `                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">                        <div>                            <p class="font-bold">${sanitizeText(item.name)} - $${item.price}</p>                            <p class="text-xs text-gray-500">${isAvailable ? 'Disponible' : 'Agotado'}</p>                        </div>                        <div class="flex gap-1">                            <button onclick="editDish('${item.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs">Editar</button>                            <button onclick="deleteDish('${item.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Eliminar</button>                        </div>                    </div>                `;            });            document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay platillos en el menú.</p>';            document.getElementById("admin-dish-list").innerHTML = adminHtml;        });
+    <!-- Modal Agendar Pedido a Futuro (Reserva) -->
+    <div id="schedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-amber-900">📅 Agendar Pedido a Futuro (Reserva)</h3>
+                <button onclick="closeScheduleModal()" class="text-gray-500 font-bold text-lg">✕</button>
+            </div>
+            
+            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
+                Selecciona la fecha y hora de tu reserva.
+            </div>
+            <div>
+                <label class="block font-semibold text-sm mb-1">Fecha de Recepción:</label>
+                <input type="date" id="schedule-date" class="w-full p-2 border rounded-lg text-sm">
+            </div>
+            <div>
+                <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>
+                <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">
+            </div>
+            <div>
+                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
+                <select id="schedule-payment-method" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <option value="tarjeta">Tarjeta (Mercado Pago)</option>
+                    <option value="transferencia">Transferencia</option>
+                </select>
+            </div>
+            <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">
+                Enviar Solicitud de Reserva
+            </button>
+        </div>
+    </div>
 
-        db.collection("orders").onSnapshot((snapshot) => {            let ordersList = [];            snapshot.forEach((doc) => {                ordersList.push({ id: doc.id, ...doc.data() });            });
+    <!-- Modal Admin -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Panel Administrador</h3>
+                <button onclick="closeAdmin()" class="text-gray-500 font-bold text-lg">✕</button>
+            </div>
+            
+            <div id="admin-login-view">
+                <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
+                <button onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold">Ingresar</button>
+            </div>
+            <div id="admin-panel-view" class="hidden space-y-6">
+                <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo</h4>
+                        <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold">🗑️ Borrar Todo</button>
+                    </div>
+                    <div id="admin-orders-list" class="space-y-3 text-sm"></div>
+                </div>
+                <div class="border-b pb-4">
+                    <h4 class="font-bold mb-2">Configuración General</h4>
+                    <label class="text-xs text-gray-600">CLABE de la empresa:</label>
+                    <input type="text" id="admin-company-bank" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <label class="text-xs text-gray-600">Dirección física del local:</label>
+                    <input type="text" id="admin-store-address" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <button onclick="saveConfig()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Guardar</button>
+                </div>
+                <div class="border-b pb-4">
+                    <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
+                    <input type="hidden" id="edit-dish-id">
+                    <input type="text" id="dish-name" placeholder="Nombre" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="number" id="dish-price" placeholder="Precio" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="text" id="dish-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="text" id="dish-img" placeholder="URL imagen" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <select id="dish-available" class="w-full p-2 border rounded-lg text-sm mb-2">
+                        <option value="true">Disponible</option>
+                        <option value="false">Agotado</option>
+                    </select>
+                    <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2">Menú Actual</h4>
+                    <div id="admin-dish-list" class="space-y-2 text-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            ordersList.sort((a, b) => {                const timeA = a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0;                const timeB = b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0;                return timeB - timeA;            });
+    <!-- Script Principal -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
+            authDomain: "primox-65642.firebaseapp.com",
+            projectId: "primox-65642",
+            storageBucket: "primox-65642.firebasestorage.app",
+            messagingSenderId: "312208205497",
+            appId: "1:312208205497:web:29382bb18c2facc4fb1d68",
+            measurementId: "G-37491Y8MRL"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-            let ordersHtml = "";            ordersList.forEach((order) => {                const dateStr = order.timestamp && order.timestamp.toDate ? new Date(order.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Reciente';                                let itemsList = "";                if (order.items && Array.isArray(order.items)) {                    order.items.forEach(i => {                        itemsList += `<li>• ${sanitizeText(i.name)} (x${i.qty}) - $${i.price * i.qty}</li>`;                    });                }
+        let menuItems = [];
+        let cart = [];
+        let storeConfig = { bank: "No configurada", address: "Local principal" };
+        let deliveryMap = null, deliveryMarker = null, selectedLat = null, selectedLng = null;
 
-                let statusBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold ${order.status === 'Aceptado' ? 'bg-green-100 text-green-800' : order.status === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${order.status || 'Pendiente'}</span>`;
-                ordersHtml += `                    <div class="bg-white p-3 rounded-lg border shadow-sm space-y-2">                        <div class="flex justify-between font-bold text-xs text-gray-500">                            <span>🕒 ${dateStr} (${order.orderType || 'Inmediato'})</span>                            ${statusBadge}                        </div>                        <p class="font-bold text-gray-900">${sanitizeText(order.clientName)} 📞 ${sanitizeText(order.clientPhone)}</p>                        <div class="bg-gray-50 p-2 rounded text-xs my-1"><p class="font-semibold">Platillos:</p><ul class="pl-2">${itemsList}</ul></div>                        <div class="text-xs font-semibold text-gray-700">Método: ${sanitizeText(order.paymentMethod).toUpperCase()} | Total: <span class="text-orange-600 font-bold">$${order.total ? order.total.toFixed(2) : '0.00'}</span></div>                        <div class="flex gap-2 pt-1 border-t">                            <button onclick="updateOrderStatus('${order.id}', 'Aceptado')" class="flex-1 bg-green-600 text-white py-1 rounded text-xs font-bold hover:bg-green-700">✔ Aceptar</button>                            <button onclick="updateOrderStatus('${order.id}', 'Rechazado')" class="flex-1 bg-red-600 text-white py-1 rounded text-xs font-bold hover:bg-red-700">❌ Rechazar</button>                        </div>                    </div>                `;
+        function sanitizeText(str) {
+            if (!str) return '';
+            return str.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedName = localStorage.getItem('primo_user_name');
+            const savedPhone = localStorage.getItem('primo_user_phone');
+            if (savedName && savedPhone) {
+                document.getElementById('client-name').value = sanitizeText(savedName);
+                document.getElementById('client-phone').value = sanitizeText(savedPhone);
+                document.getElementById('user-registered-badge').classList.remove('hidden');
+                loadClientOrders(savedPhone);
+            }
+        });
+
+        function saveClientIdentity() {
+            const name = sanitizeText(document.getElementById('client-name').value);
+            const phone = sanitizeText(document.getElementById('client-phone').value);
+            if (name && phone) {
+                localStorage.setItem('primo_user_name', name);
+                localStorage.setItem('primo_user_phone', phone);
+                document.getElementById('user-registered-badge').classList.remove('hidden');
+                loadClientOrders(phone);
+            }
+        }
+
+        function loadClientOrders(phone) {
+            if (!phone) return;
+            db.collection("orders").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
+                let myOrdersHtml = "";
+                let hasOrders = false;
+                snapshot.forEach((doc) => {
+                    hasOrders = true;
+                    const order = doc.data();
+                    const status = order.status || 'Pendiente';
+                    myOrdersHtml += `<div class="p-2.5 rounded-lg border bg-yellow-50"><b>Total: $${order.total.toFixed(2)}</b> - ${status}</div>`;
+                });
+                const section = document.getElementById("client-orders-status-section");
+                if (hasOrders) {
+                    section.classList.remove("hidden");
+                    document.getElementById("client-my-orders-list").innerHTML = myOrdersHtml;
+                } else {
+                    section.classList.add("hidden");
+                }
             });
-            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>';
+        }
+
+        db.collection("menu").onSnapshot((snapshot) => {
+            menuItems = [];
+            let html = "";
+            let adminHtml = "";
+            snapshot.forEach((doc) => {
+                const item = { id: doc.id, ...doc.data() };
+                menuItems.push(item);
+                html += `
+                    <div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center">
+                        <img src="${item.image || 'https://via.placeholder.com/100'}" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm">${sanitizeText(item.name)}</h3>
+                            <p class="text-xs text-gray-500 mb-1">${sanitizeText(item.description) || ''}</p>
+                            <p class="font-semibold text-orange-600">$${item.price}</p>
+                        </div>
+                        <div>
+                            <button onclick="addToCart('${item.id}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Agregar</button>
+                        </div>
+                    </div>
+                `;
+                adminHtml += `
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
+                        <div><p class="font-bold">${sanitizeText(item.name)} - $${item.price}</p></div>
+                        <div class="flex gap-1">
+                            <button onclick="editDish('${item.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs">Editar</button>
+                            <button onclick="deleteDish('${item.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay platillos.</p>';
+            document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
         function addToCart(id) {
             const item = menuItems.find(i => i.id === id);
             if (!item) return;
             const existing = cart.find(i => i.id === id);
-            if (existing) { existing.qty++; } else { cart.push({ ...item, qty: 1 }); }
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
             updateCartUI();
         }
 
@@ -108,12 +374,20 @@
             const item = cart.find(i => i.id === id);
             if (!item) return;
             item.qty += delta;
-            if (item.qty <= 0) { cart = cart.filter(i => i.id !== id); }
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
             updateCartUI();
         }
 
-        function openCart() { document.getElementById("cart-modal").classList.remove("hidden"); updateCartUI(); }
-        function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
+        function openCart() {
+            document.getElementById("cart-modal").classList.remove("hidden");
+            updateCartUI();
+        }
+
+        function closeCart() {
+            document.getElementById("cart-modal").classList.add("hidden");
+        }
 
         function togglePaymentFields() {
             const method = document.getElementById("payment-method").value;
@@ -150,7 +424,8 @@
 
         function initConektaCheckout() {
             const container = document.getElementById("conekta-checkout-container");
-            container.innerHTML = "";
+            container.innerHTML = ""; // Limpiar contenedor
+            
             const options = {
                 backgroundMode: 'lightMode',
                 colorPrimary: '#f97316',
@@ -175,7 +450,7 @@
                 if (window.ConektaCheckoutComponents) {
                     window.ConektaCheckoutComponents.Integration({ config, callbacks, options });
                 } else {
-                    container.innerHTML = '<p class="text-xs text-blue-600 p-2">Módulo Conekta listo con llave key_QCw2NHzIzNCsHwNZ9y5Bxyv.</p>';
+                    container.innerHTML = '<p class="text-xs text-blue-600 p-2">Módulo Conekta listo con llave key_QCw2NHzIzNCsHwNZ9y5Bxyv. Asegure que la orden esté generada en servidor.</p>';
                 }
             } catch (e) {
                 console.error(e);
@@ -185,8 +460,14 @@
         function checkoutOrder(type) {
             const name = document.getElementById('client-name').value;
             const phone = document.getElementById('client-phone').value;
-            if (!name || !phone) { alert('Por favor ingresa tu nombre y teléfono.'); return; }
-            if (cart.length === 0) { alert('El carrito está vacío.'); return; }
+            if (!name || !phone) {
+                alert('Por favor ingresa tu nombre y teléfono.');
+                return;
+            }
+            if (cart.length === 0) {
+                alert('El carrito está vacío.');
+                return;
+            }
             const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
             db.collection("orders").add({
                 clientName: sanitizeText(name),
@@ -205,75 +486,15 @@
             });
         }
 
-        function updateOrderStatus(orderId, newStatus) {
-            db.collection("orders").doc(orderId).update({ status: newStatus }).then(() => {
-                alert(`Pedido actualizado a: ${newStatus}`);
-            });
-        }
-
-        function clearAllOrders() {
-            if (confirm("¿Estás seguro de borrar todos los pedidos y reservas?")) {
-                db.collection("orders").get().then((snapshot) => {
-                    snapshot.forEach((doc) => { doc.ref.delete(); });
-                });
-            }
-        }
-
-        function saveConfig() {
-            const bank = document.getElementById('admin-company-bank').value;
-            const address = document.getElementById('admin-store-address').value;
-            db.collection("config").doc("main").set({ bank, address }, { merge: true }).then(() => {
-                alert("Configuración guardada correctamente.");
-            });
-        }
-
-        function saveDish() {
-            const id = document.getElementById('edit-dish-id').value;
-            const name = document.getElementById('dish-name').value;
-            const price = parseFloat(document.getElementById('dish-price').value);
-            const description = document.getElementById('dish-desc').value;
-            const image = document.getElementById('dish-img').value;
-            const available = document.getElementById('dish-available').value === 'true';
-
-            if (!name || isNaN(price)) { alert("Nombre y precio son obligatorios."); return; }
-
-            const dishData = { name, price, description, image, available };
-            const action = id ? db.collection("menu").doc(id).update(dishData) : db.collection("menu").add(dishData);
-
-            action.then(() => {
-                alert("Platillo guardado con éxito.");
-                document.getElementById('edit-dish-id').value = '';
-                document.getElementById('dish-name').value = '';
-                document.getElementById('dish-price').value = '';
-                document.getElementById('dish-desc').value = '';
-                document.getElementById('dish-img').value = '';
-            });
-        }
-
-        function editDish(id) {
-            const dish = menuItems.find(i => i.id === id);
-            if (!dish) return;
-            document.getElementById('edit-dish-id').value = dish.id;
-            document.getElementById('dish-name').value = dish.name;
-            document.getElementById('dish-price').value = dish.price;
-            document.getElementById('dish-desc').value = dish.description || '';
-            document.getElementById('dish-img').value = dish.image || '';
-            document.getElementById('dish-available').value = dish.available !== false ? 'true' : 'false';
-        }
-
-        function deleteDish(id) {
-            if (confirm("¿Eliminar este platillo?")) {
-                db.collection("menu").doc(id).delete().then(() => { alert("Platillo eliminado."); });
-            }
-        }
-
         function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
         function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
         function verifyAdmin() {
             if (document.getElementById("admin-pass").value === "admin123") {
                 document.getElementById("admin-login-view").classList.add("hidden");
                 document.getElementById("admin-panel-view").classList.remove("hidden");
-            } else { alert("Contraseña incorrecta"); }
+            } else {
+                alert("Contraseña incorrecta");
+            }
         }
         function openScheduleModal() { document.getElementById("schedule-modal").classList.remove("hidden"); }
         function closeScheduleModal() { document.getElementById("schedule-modal").classList.add("hidden"); }
