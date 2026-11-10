@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- This site is hosted on Netlify -->
+    <!-- This site is hosted on Netlify. Anyone can build and deploy a site     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=294c71c4-7245-474f-bdd4-3401775a535f     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primo - Comida a Domicilio y Para Llevar</title>
     <!-- Tailwind CSS CDN -->
@@ -77,7 +77,7 @@
                 <!-- Si es tarjeta -->
                 <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200">
                     <p class="font-semibold text-blue-900">Pago con Tarjeta:</p>
-                    <p class="text-blue-700 text-xs mt-1">Al confirmar el pedido, serás dirigido de forma segura a la pasarela de pago.</p>
+                    <p class="text-blue-700 text-xs mt-1">Al confirmar el pedido, serás dirigido de forma segura a tu pasarela de Stripe.</p>
                 </div>
 
                 <!-- Si es transferencia -->
@@ -189,7 +189,7 @@
         let cart = [];
         let storeConfig = { bank: "No configurada", address: "Local principal" };
 
-        // Detección automática al regresar de Stripe con éxito
+        // Detección automática de retorno exitoso desde Stripe (?payment=success)
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('payment') === 'success') {
@@ -250,8 +250,7 @@
                         <img src="${item.image || 'https://via.placeholder.com/100'}" class="w-20 h-20 object-cover rounded-lg">
                         <div class="flex-1">
                             <h3 class="font-bold text-sm">${item.name}</h3>
-                            <p class="text-xs text-gray-500 mb-1">${item.description || ''}</p>
-                            <p class="font-semibold text-orange-600">$${item.price}</p>
+                            <p class="text-xs text-gray-500 mb-1">${item.description \vert{}\vert{} ''}</p> <p class="font-semibold text-orange-600">$${item.price}</p>
                         </div>
                         <div>
                             ${isAvailable ? `<button onclick="addToCart('${item.id}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Agregar</button>` : '<span class="text-xs text-red-500 font-bold">Agotado</span>'}
@@ -262,7 +261,7 @@
                 adminHtml += `
                     <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
                         <div>
-                            <p class="font-bold">${item.name} - $${item.price}</p>
+                            <p class="font-bold">${item.name} -$${item.price}</p>
                             <p class="text-xs text-gray-500">${isAvailable ? 'Disponible' : 'Agotado'}</p>
                         </div>
                         <div class="flex gap-1">
@@ -285,7 +284,7 @@
                 
                 let itemsList = "";
                 order.items.forEach(i => {
-                    itemsList += `<li>• ${i.name} (x${i.qty}) - $${i.price * i.qty}</li>`;
+                    itemsList += `<li>• ${i.name} (x${i.qty}) -$${i.price * i.qty}</li>`;
                 });
 
                 ordersHtml += `
@@ -294,9 +293,8 @@
                             <span>🕒 ${dateStr}</span>
                             <span class="text-orange-600">${order.deliveryType === 'domicilio' ? '🏠 A Domicilio' : '🛍️ Pasa al Local'}</span>
                         </div>
-                        <p class="font-bold text-gray-900">${order.clientName} ${order.clientBank ? `(Cuenta: ${order.clientBank})` : ''}</p>
-                        <p class="text-xs text-gray-700">📞 Tel: <b>${order.phone || 'No proporcionado'}</b></p>
-                        ${order.deliveryType === 'domicilio' ? `<p class="text-xs text-gray-700">📍 Dir: <b>${order.address}</b></p>` : ''}
+                        <p class="font-bold text-gray-900">${order.clientName}${order.clientBank ? `(Cuenta: ${order.clientBank})` : ''}</p>
+                        <p class="text-xs text-gray-700">📞 Tel: <b>${order.phone \vert{}\vert{} 'No proporcionado'}</b></p>${order.deliveryType === 'domicilio' ? `<p class="text-xs text-gray-700">📍 Dir: <b>${order.address}</b></p>` : ''}
                         
                         <div class="bg-gray-50 p-2 rounded text-xs my-1">
                             <p class="font-semibold">Platillos:</p>
@@ -304,8 +302,7 @@
                         </div>
 
                         <div class="flex justify-between items-center text-xs font-bold pt-1 border-t">
-                            <span>Pago: ${order.paymentMethod.toUpperCase()} ${order.cashAmount ? `(Paga con $${order.cashAmount} - Cambio: $${order.change.toFixed(2)})` : ''}</span>
-                            <span class="text-orange-600 text-sm">Total: $${order.total.toFixed(2)}</span>
+                            <span>Pago: ${order.paymentMethod.toUpperCase()} ${order.cashAmount ? `(Paga con $${order.cashAmount} - Cambio: $${order.change.toFixed(2)})` : ''}</span> <span class="text-orange-600 text-sm">Total: $${order.total.toFixed(2)}</span>
                         </div>
                         <button onclick="deleteOrder('${doc.id}')" class="w-full mt-2 bg-red-600 text-white py-1 rounded text-xs font-bold">Marcar como Entregado / Borrar</button>
                     </div>
@@ -331,196 +328,6 @@
                 html += `
                     <div class="flex justify-between items-center py-2 text-sm">
                         <div>
-                            <p class="font-bold">${item.name}</p>
-                            <p class="text-xs text-gray-500">$${item.price} x ${item.qty}</p>
+                            <p class="font-bold">${item.name}</p> <p class="text-xs text-gray-500">$${item.price} x${item.qty}</p>
                         </div>
-                        <button onclick="removeFromCart(${index})" class="text-red-500 text-xs font-bold">Quitar</button>
-                    </div>
-                `;
-            });
-            document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Tu carrito está vacío</p>';
-            document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
-            calculateChange();
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartUI();
-        }
-
-        function openCart() { document.getElementById("cart-modal").classList.remove("hidden"); }
-        function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
-
-        function togglePaymentFields() {
-            const method = document.getElementById("payment-method").value;
-            document.getElementById("cash-fields").classList.toggle("hidden", method !== "efectivo");
-            document.getElementById("tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
-            document.getElementById("transfer-fields").classList.toggle("hidden", method !== "transferencia");
-        }
-
-        function toggleDeliveryFields() {
-            const type = document.getElementById("delivery-type").value;
-            document.getElementById("local-delivery-info").classList.toggle("hidden", type !== "local");
-            document.getElementById("domicilio-fields").classList.toggle("hidden", type !== "domicilio");
-        }
-
-        function calculateChange() {
-            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            const cash = parseFloat(document.getElementById("cash-amount").value) || 0;
-            const changeText = document.getElementById("change-text");
-            
-            if (document.getElementById("payment-method").value === "efectivo" && cash > 0) {
-                if (cash < total) {
-                    changeText.innerText = "⚠️ El monto es menor al total a pagar";
-                    changeText.className = "text-sm font-semibold text-red-600 mt-1";
-                } else {
-                    const change = cash - total;
-                    changeText.innerText = `Su cambio exacto es: $${change.toFixed(2)}`;
-                    changeText.className = "text-sm font-semibold text-green-600 mt-1";
-                }
-            } else {
-                changeText.innerText = "";
-            }
-        }
-
-        function checkoutOrder() {
-            const name = document.getElementById("client-name").value.trim();
-            const clientBank = document.getElementById("client-bank").value.trim();
-            const deliveryType = document.getElementById("delivery-type").value;
-            const paymentMethod = document.getElementById("payment-method").value;
-            
-            if (!name) { alert("Por favor ingresa tu nombre antes de confirmar el pedido."); return; }
-            if (cart.length === 0) { alert("Tu carrito está vacío."); return; }
-
-            let address = "";
-            let phone = "";
-            if (deliveryType === "domicilio") {
-                address = document.getElementById("delivery-address").value.trim();
-                phone = document.getElementById("delivery-phone").value.trim();
-                if (!address || !phone) {
-                    alert("Por favor ingresa tu dirección y número telefónico para la entrega a domicilio.");
-                    return;
-                }
-            }
-
-            // Si es tarjeta, guardamos temporalmente en localStorage y redirigimos a Stripe
-            if (paymentMethod === "tarjeta") {
-                localStorage.setItem('temp_client_name', name);
-                localStorage.setItem('temp_client_bank', clientBank);
-                localStorage.setItem('temp_delivery_type', deliveryType);
-                localStorage.setItem('temp_address', address);
-                localStorage.setItem('temp_phone', phone);
-                localStorage.setItem('temp_cart', JSON.stringify(cart));
-
-                alert("Redirigiendo a la pasarela segura de pago con tarjeta...");
-                // REEMPLAZA ESTE ENLACE CON TU ENLACE REAL DE STRIPE:
-                window.location.href = "https://buy.stripe.com/tu_enlace_de_pago";
-                return;
-            }
-
-            let cashAmount = 0;
-            let change = 0;
-            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-
-            if (paymentMethod === "efectivo") {
-                cashAmount = parseFloat(document.getElementById("cash-amount").value) || 0;
-                if (cashAmount > 0 && cashAmount >= total) {
-                    change = cashAmount - total;
-                }
-            }
-
-            // Guardar pedido en Firestore para efectivo o transferencia
-            db.collection("orders").add({
-                clientName: name,
-                clientBank: clientBank || "",
-                items: cart,
-                total: total,
-                deliveryType: deliveryType,
-                address: address,
-                phone: phone,
-                paymentMethod: paymentMethod,
-                cashAmount: cashAmount,
-                change: change,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert("¡Pedido realizado con éxito! Ya fue enviado al administrador.");
-                cart = [];
-                updateCartUI();
-                closeCart();
-            }).catch((error) => {
-                alert("Error al enviar el pedido: " + error.message);
-            });
-        }
-
-        function deleteOrder(orderId) {
-            if (confirm("¿Deseas marcar este pedido como entregado y eliminarlo de la lista?")) {
-                db.collection("orders").doc(orderId).delete();
-            }
-        }
-
-        function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
-        function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
-
-        function verifyAdmin() {
-            const pass = document.getElementById("admin-pass").value;
-            if (pass === "PocilloInc") {
-                document.getElementById("admin-login-view").classList.add("hidden");
-                document.getElementById("admin-panel-view").classList.remove("hidden");
-            } else {
-                alert("Contraseña incorrecta");
-            }
-        }
-
-        function saveConfig() {
-            const bank = document.getElementById("admin-company-bank").value;
-            const address = document.getElementById("admin-store-address").value;
-            db.collection("config").doc("main").set({ bank, address })
-                .then(() => alert("Configuración guardada correctamente"));
-        }
-
-        function saveDish() {
-            const id = document.getElementById("edit-dish-id").value;
-            const name = document.getElementById("dish-name").value;
-            const price = parseFloat(document.getElementById("dish-price").value);
-            const description = document.getElementById("dish-desc").value;
-            const image = document.getElementById("dish-img").value;
-            const available = document.getElementById("dish-available").value === "true";
-
-            if (!name || !price) { alert("El nombre y el precio son obligatorios."); return; }
-
-            const dishData = { name, price, description, image, available };
-            if (id) {
-                db.collection("menu").doc(id).update(dishData).then(() => resetDishForm());
-            } else {
-                db.collection("menu").add(dishData).then(() => resetDishForm());
-            }
-        }
-
-        function editDish(id) {
-            const item = menuItems.find(i => i.id === id);
-            document.getElementById("edit-dish-id").value = item.id;
-            document.getElementById("dish-name").value = item.name;
-            document.getElementById("dish-price").value = item.price;
-            document.getElementById("dish-desc").value = item.description || '';
-            document.getElementById("dish-img").value = item.image || '';
-            document.getElementById("dish-available").value = item.available !== false ? "true" : "false";
-        }
-
-        function deleteDish(id) {
-            if (confirm("¿Estás seguro de eliminar este platillo?")) {
-                db.collection("menu").doc(id).delete();
-            }
-        }
-
-        function resetDishForm() {
-            document.getElementById("edit-dish-id").value = "";
-            document.getElementById("dish-name").value = "";
-            document.getElementById("dish-price").value = "";
-            document.getElementById("dish-desc").value = "";
-            document.getElementById("dish-img").value = "";
-            alert("Platillo guardado correctamente.");
-        }
-    </script>
-</body>
-</html>
-<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="294c71c4-7245-474f-bdd4-3401775a535f" data-app-host="app.netlify.com" data-account-tier="free"></script>
+                        <button onclick="removeFrom
