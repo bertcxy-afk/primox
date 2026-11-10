@@ -9,7 +9,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <!-- Stripe SDK oficial para formularios incrustados -->
+    <!-- Stripe SDK oficial para formularios incrustados (Dahlia) -->
     <script src="https://js.stripe.com/dahlia/stripe.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f97316">
@@ -76,11 +76,11 @@
                     <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
                 </div>
 
-                <!-- Si es tarjeta (Stripe Embedded Form) -->
+                <!-- Si es tarjeta (Stripe Embedded Form con pmc_1UaEwTCjbj3L0uV7mdaymzur) -->
                 <div id="stripe-fields" class="hidden space-y-3 bg-blue-50 p-3 rounded-xl border border-blue-200">
-                    <p class="font-semibold text-blue-900 text-xs">Pago seguro con tarjeta (Impuestos incluidos iva):</p>
+                    <p class="font-semibold text-blue-900 text-xs">Pago seguro con tarjeta (Impuestos automáticos incluidos):</p>
                     <div id="checkout-form" class="bg-white p-2 rounded-lg min-h-[150px]">
-                        <!-- El formulario incrustado de Stripe se montará aquí -->
+                        <!-- El formulario incrustado de Stripe se montará aquí correctamente -->
                     </div>
                 </div>
 
@@ -183,13 +183,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Inicializar Stripe con tu llave pública (reemplaza con tu pk_test_... o pk_live_...)
+        // Inicializar Stripe con tu llave pública
         const stripe = Stripe('pk_test_TU_CLAVE_PUBLICA');
 
         let menuItems = [];
         let cart = [];
         let storeConfig = { bank: "No configurada", address: "Local principal" };
-        let stripeInitialized = false;
 
         db.collection("config").doc("main").onSnapshot((doc) => {
             if (doc.exists) {
@@ -347,16 +346,22 @@
         async function initStripeEmbeddedForm() {
             if (cart.length === 0) return;
             try {
-                // Petición al servidor para crear la sesión con los parámetros de formulario y automatic_tax
+                // Envía también el ID de configuración pmc_1UaEwTCjbj3L0uV7mdaymzur al backend
                 const response = await fetch('/api/create-checkout-session', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ items: cart })
+                    body: JSON.stringify({ 
+                        items: cart,
+                        payment_method_configuration: 'pmc_1UaEwTCjbj3L0uV7mdaymzur'
+                    })
                 });
                 const json = await response.json();
                 const clientSecret = json.client_secret;
 
-                if (!clientSecret) return;
+                if (!clientSecret) {
+                    console.log("Esperando client_secret del servidor backend...");
+                    return;
+                }
 
                 const appearance = {
                     "theme": "stripe",
@@ -373,7 +378,7 @@
 
                 const checkout = stripe.initCheckoutFormSdk({ clientSecret, appearance });
                 const form = checkout.createForm({ layout: 'expanded' });
-                document.getElementById("checkout-form").innerHTML = ""; // Limpiar previo
+                document.getElementById("checkout-form").innerHTML = ""; 
                 form.mount('#checkout-form');
 
                 const loadActionsResult = await checkout.loadActions();
@@ -387,7 +392,7 @@
                     });
                 }
             } catch (err) {
-                console.log("Stripe backend endpoint pendiente de iniciar en servidor local", err);
+                console.log("Endpoint backend pendiente de configurar en Netlify", err);
             }
         }
 
@@ -443,8 +448,7 @@
             }
 
             if (paymentMethod === "tarjeta") {
-                // El procesamiento del pago con tarjeta se realiza mediante el SDK incrustado de Stripe montado en #checkout-form
-                return;
+                return; // Gestionado por Stripe Form SDK
             }
 
             // Guardar pedido en Firebase si es efectivo o transferencia
