@@ -26,6 +26,9 @@
             <button onclick="openCart()" class="bg-orange-600 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1">
                 🛒 Carrito (<span id="cart-count">0</span>)
             </button>
+            <button onclick="openScheduleModal()" class="bg-amber-600 px-3 py-1.5 rounded-lg text-sm font-semibold hidden sm:inline-block">
+                📅 Agendar
+            </button>
             <button onclick="openAdminLogin()" class="bg-gray-800 px-3 py-1.5 rounded-lg text-sm font-semibold">
                 Admin
             </button>
@@ -34,11 +37,21 @@
 
     <!-- Main Container -->
     <main class="max-w-md mx-auto p-4">
-        <!-- Registro Cliente -->
-        <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm mb-4">
-            <h2 class="font-bold text-lg mb-2">Tus Datos</h2>
-            <input type="text" id="client-name" placeholder="Tu Nombre *" class="w-full p-2 border rounded-lg mb-2 text-sm">
+        <!-- Registro Cliente (Obligatorio por Teléfono y Nombre únicos) -->
+        <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm mb-4 border border-orange-100">
+            <h2 class="font-bold text-lg mb-2 text-orange-900">Tus Datos de Usuario</h2>
+            <input type="text" id="client-name" placeholder="Tu Nombre Completo *" class="w-full p-2 border rounded-lg mb-2 text-sm">
+            <input type="tel" id="client-phone" placeholder="Número Telefónico (Único ID) *" class="w-full p-2 border rounded-lg mb-2 text-sm">
             <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional)" class="w-full p-2 border rounded-lg text-sm">
+            <p class="text-xs text-gray-500 mt-1">ℹ️ Tu teléfono nos ayuda a reconocerte y asegurar tus pedidos.</p>
+        </section>
+
+        <!-- Banner / Botón de Agendar a Futuro -->
+        <section class="mb-4">
+            <button onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
+                <span>📅 ¿Quieres reservar para otro día u hora?</span>
+                <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs">Agendar Pedido</span>
+            </button>
         </section>
 
         <!-- Menú de Comida -->
@@ -50,11 +63,11 @@
         </section>
     </main>
 
-    <!-- Modal Carrito / Checkout -->
+    <!-- Modal Carrito / Checkout Inmediato -->
     <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">Tu Pedido</h3>
+                <h3 class="text-lg font-bold">Tu Pedido Inmediato</h3>
                 <button onclick="closeCart()" class="text-gray-500 font-bold text-lg">✕</button>
             </div>
             <div id="cart-items" class="space-y-3 mb-4 divide-y"></div>
@@ -122,16 +135,47 @@
                 <!-- Si es a domicilio -->
                 <div id="domicilio-fields" class="hidden space-y-2">
                     <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">
-                    <input type="tel" id="delivery-phone" placeholder="Número telefónico de contacto" class="w-full p-2 border rounded-lg text-sm">
-                    
                     <label class="block text-xs font-semibold text-gray-700 mt-2">📍 Selecciona tu ubicación exacta en el mapa:</label>
                     <div id="delivery-map"></div>
                     <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
                 </div>
             </div>
 
-            <button onclick="checkoutOrder()" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
-                Confirmar Pedido
+            <button onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
+                Confirmar Pedido Inmediato
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Agendar Pedido a Futuro (Reserva tu Antojo) -->
+    <div id="schedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-amber-900">📅 Agendar Pedido a Futuro (Reserva)</h3>
+                <button onclick="closeScheduleModal()" class="text-gray-500 font-bold text-lg">✕</button>
+            </div>
+            
+            <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
+                Selecciona la fecha y hora en que deseas recibir tu comida. El administrador revisará la disponibilidad y te confirmará.
+            </div>
+
+            <div>
+                <label class="block font-semibold text-sm mb-1">Fecha de Recepción:</label>
+                <input type="date" id="schedule-date" class="w-full p-2 border rounded-lg text-sm">
+            </div>
+
+            <div>
+                <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>
+                <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">
+            </div>
+
+            <div>
+                <label class="block font-semibold text-sm mb-1">Ubicación / Referencia de Entrega:</label>
+                <input type="text" id="schedule-address" placeholder="Dirección o referencias para la reserva" class="w-full p-2 border rounded-lg text-sm mb-2">
+            </div>
+
+            <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">
+                Enviar Solicitud de Reserva
             </button>
         </div>
     </div>
@@ -150,21 +194,31 @@
             </div>
 
             <div id="admin-panel-view" class="hidden space-y-6">
-                <!-- Pedidos Entrantes -->
+                <!-- Pedidos Entrantes y Reservas -->
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="font-bold text-orange-900">📦 Pedidos Entrantes en Vivo</h4>
-                        <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Pedidos</button>
+                        <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo</h4>
+                        <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Todo</button>
                     </div>
                     <div id="admin-orders-list" class="space-y-3 text-sm">
                         <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
                     </div>
                 </div>
 
+                <!-- Configuración de Días Especiales / Descuentos y Horarios -->
+                <div class="border-b pb-4 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                    <h4 class="font-bold mb-2 text-amber-900">🌟 Configurar Día Especial / Promoción</h4>
+                    <label class="text-xs text-gray-700">Fecha del evento o día festivo:</label>
+                    <input type="date" id="admin-special-date" class="w-full p-2 border rounded-lg text-sm mb-2 bg-white">
+                    <label class="text-xs text-gray-700">Descripción (Ej. 20% Descuento / Festivo):</label>
+                    <input type="text" id="admin-special-desc" placeholder="Ej. Festivo nacional - Descuentos" class="w-full p-2 border rounded-lg text-sm mb-2 bg-white">
+                    <button onclick="saveSpecialDay()" class="bg-amber-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold w-full">Guardar Día Especial</button>
+                </div>
+
                 <!-- Configuración General -->
                 <div class="border-b pb-4">
                     <h4 class="font-bold mb-2">Configuración General</h4>
-                    <label class="text-xs text-gray-600">Cuenta bancaria de la empresa:</label>
+                    <label class="text-xs text-gray-600">Cuenta bancaria / Nu de la empresa:</label>
                     <input type="text" id="admin-company-bank" class="w-full p-2 border rounded-lg text-sm mb-2">
                     <label class="text-xs text-gray-600">Dirección física del local:</label>
                     <input type="text" id="admin-store-address" class="w-full p-2 border rounded-lg text-sm mb-2">
@@ -218,15 +272,23 @@
         let selectedLat = null;
         let selectedLng = null;
 
-        // Detección automática al regresar de Mercado Pago con éxito (?payment=success)
+        // Establecer fecha mínima en el calendario de agendamiento como hoy
         window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('schedule-date');
+            if (dateInput) {
+                dateInput.min = today;
+                dateInput.value = today;
+            }
+
+            // Detección automática al regresar de Mercado Pago con éxito (?payment=success)
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('payment') === 'success') {
                 const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
+                const clientPhone = localStorage.getItem('temp_client_phone') || '';
                 const clientBank = localStorage.getItem('temp_client_bank') || '';
                 const deliveryType = localStorage.getItem('temp_delivery_type') || 'local';
                 const address = localStorage.getItem('temp_address') || '';
-                const phone = localStorage.getItem('temp_phone') || '';
                 const savedLat = localStorage.getItem('temp_lat');
                 const savedLng = localStorage.getItem('temp_lng');
                 let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
@@ -238,6 +300,7 @@
 
                     db.collection("orders").add({
                         clientName: clientName,
+                        clientPhone: clientPhone,
                         clientBank: clientBank,
                         items: pendingCart,
                         total: total,
@@ -245,18 +308,15 @@
                         netReceived: netReceived,
                         deliveryType: deliveryType,
                         address: address,
-                        phone: phone,
                         lat: savedLat ? parseFloat(savedLat) : null,
                         lng: savedLng ? parseFloat(savedLng) : null,
                         paymentMethod: 'tarjeta (Mercado Pago)',
-                        cashAmount: 0,
-                        change: 0,
+                        status: 'Pendiente',
+                        orderType: 'Inmediato',
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     }).then(() => {
                         alert("¡Pago con tarjeta completado y pedido registrado con éxito!");
-                        localStorage.removeItem('temp_cart');
-                        localStorage.removeItem('temp_lat');
-                        localStorage.removeItem('temp_lng');
+                        localStorage.clear();
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }).catch((error) => {
                         console.error("Error al registrar orden pagada:", error);
@@ -315,7 +375,7 @@
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
-        // Escuchar pedidos en tiempo real
+        // Escuchar pedidos y reservas en tiempo real
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             let ordersHtml = "";
             snapshot.forEach((doc) => {
@@ -332,39 +392,16 @@
                     mapLink = `<a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" class="text-blue-600 underline font-semibold">📍 Ver ubicación exacta en Google Maps</a>`;
                 }
 
-                let paymentDetails = "";
-                if (order.paymentMethod.includes('tarjeta')) {
-                    paymentDetails = `
-                        <div class="bg-blue-50 p-2 rounded text-xs my-1 text-blue-900 border border-blue-100">
-                            <p class="font-semibold">💳 Detalle de Cobro (Mercado Pago):</p>
-                            <p>• Total cobrado al cliente: <b>$${order.total.toFixed(2)}</b></p>
-                            <p>• Comisión retenida (3.49%): <b>-$${(order.commission || (order.total * 0.0349)).toFixed(2)}</b></p>
-                            <p>• Neto recibido en cuenta: <b class="text-green-700">$${(order.netReceived || (order.total * (1 - 0.0349))).toFixed(2)}</b></p>
-                        </div>
-                    `;
-                } else if (order.paymentMethod === 'efectivo') {
-                    paymentDetails = `
-                        <p class="text-xs font-bold pt-1">Pago: EFECTIVO (Paga con $${order.cashAmount} - Cambio a entregar: <span class="text-green-600">$${order.change.toFixed(2)}</span>)</p>
-                    `;
-                } else {
-                    paymentDetails = `
-                        <div class="bg-orange-50 p-2 rounded text-xs my-1 text-orange-900 border border-orange-200">
-                            <p class="font-semibold">🏦 Pago por TRANSFERENCIA:</p>
-                            <p>• Monto transferido: <b>$${(order.transferAmount || 0).toFixed(2)}</b></p>
-                            <p>• CLABE / Folio MP: <b>${order.transferClabe || 'No proporcionada'}</b></p>
-                            ${order.transferChange > 0 ? `<p class="text-green-700 font-bold">• Le sobró / Cambio a favor: $${order.transferChange.toFixed(2)}</p>` : ''}
-                        </div>
-                    `;
-                }
+                let statusBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold ${order.status === 'Aceptado' ? 'bg-green-100 text-green-800' : order.status === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${order.status || 'Pendiente'}</span>`;
 
                 ordersHtml += `
-                    <div class="bg-white p-3 rounded-lg border shadow-sm space-y-1">
+                    <div class="bg-white p-3 rounded-lg border shadow-sm space-y-2">
                         <div class="flex justify-between font-bold text-xs text-gray-500">
-                            <span>🕒 ${dateStr}</span>
-                            <span class="text-orange-600">${order.deliveryType === 'domicilio' ? '🏠 A Domicilio' : '🛍️ Pasa al Local'}</span>
+                            <span>🕒 ${dateStr} (${order.orderType || 'Inmediato'})</span>
+                            ${statusBadge}
                         </div>
-                        <p class="font-bold text-gray-900">${order.clientName} ${order.clientBank ? `(Cuenta: ${order.clientBank})` : ''}</p>
-                        <p class="text-xs text-gray-700">📞 Tel: <b>${order.phone || 'No proporcionado'}</b></p>
+                        <p class="font-bold text-gray-900">${order.clientName} 📞 ${order.clientPhone}</p>
+                        ${order.orderType === 'Futuro' ? `<p class="text-xs font-semibold text-amber-800">📅 Reserva para: ${order.scheduleDate} a las ${order.scheduleTime}</p>` : ''}
                         ${order.deliveryType === 'domicilio' ? `<p class="text-xs text-gray-700">📍 Dir: <b>${order.address}</b></p>` : ''}
                         ${mapLink ? `<div class="mt-1">${mapLink}</div>` : ''}
                         
@@ -373,17 +410,19 @@
                             <ul class="pl-2">${itemsList}</ul>
                         </div>
 
-                        ${paymentDetails}
-
-                        <div class="flex justify-between items-center text-xs font-bold pt-1 border-t">
-                            <span>Método: ${order.paymentMethod.toUpperCase()}</span>
-                            <span class="text-orange-600 text-sm">Total: $${order.total.toFixed(2)}</span>
+                        <div class="text-xs font-semibold text-gray-700">
+                            Método: ${order.paymentMethod.toUpperCase()} | Total: <span class="text-orange-600 font-bold">$${order.total.toFixed(2)}</span>
                         </div>
-                        <button onclick="deleteOrder('${doc.id}')" class="w-full mt-2 bg-red-600 text-white py-1 rounded text-xs font-bold">Marcar como Entregado / Borrar</button>
+
+                        <div class="flex gap-2 pt-1 border-t">
+                            <button onclick="updateOrderStatus('${doc.id}', 'Aceptado')" class="flex-1 bg-green-600 text-white py-1 rounded text-xs font-bold hover:bg-green-700">✔ Aceptar</button>
+                            <button onclick="updateOrderStatus('${doc.id}', 'Rechazado')" class="flex-1 bg-amber-600 text-white py-1 rounded text-xs font-bold hover:bg-amber-700">❌ Rechazar</button>
+                            <button onclick="deleteOrder('${doc.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold hover:bg-red-700">🗑️ Borrar</button>
+                        </div>
                     </div>
                 `;
             });
-            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos nuevos en este momento.</p>';
+            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos o reservas nuevas en este momento.</p>';
         });
 
         function addToCart(id) {
@@ -415,7 +454,6 @@
             
             const net = total * (1 - 0.0349);
             document.getElementById("mp-net-amount").innerText = `$${net.toFixed(2)}`;
-
             calculateChange();
             calculateTransferChange();
         }
@@ -426,6 +464,13 @@
         }
 
         function openCart() { 
+            const name = document.getElementById("client-name").value.trim();
+            const phone = document.getElementById("client-phone").value.trim();
+            if (!name || !phone) {
+                alert("Por favor ingresa tu Nombre y Número Telefónico único antes de continuar.");
+                document.getElementById("client-name").focus();
+                return;
+            }
             document.getElementById("cart-modal").classList.remove("hidden"); 
             setTimeout(() => {
                 if (document.getElementById("delivery-type").value === "domicilio") {
@@ -435,6 +480,25 @@
         }
 
         function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
+
+        function openScheduleModal() {
+            const name = document.getElementById("client-name").value.trim();
+            const phone = document.getElementById("client-phone").value.trim();
+            if (!name || !phone) {
+                alert("Por favor ingresa tu Nombre y Número Telefónico antes de agendar una reserva.");
+                document.getElementById("client-name").focus();
+                return;
+            }
+            if (cart.length === 0) {
+                alert("Tu carrito está vacío. Agrega platillos antes de agendar.");
+                return;
+            }
+            document.getElementById("schedule-modal").classList.remove("hidden");
+        }
+
+        function closeScheduleModal() {
+            document.getElementById("schedule-modal").classList.add("hidden");
+        }
 
         function togglePaymentFields() {
             const method = document.getElementById("payment-method").value;
@@ -482,10 +546,8 @@
                         const position = marker.getLatLng();
                         selectedLat = position.lat;
                         selectedLng = position.lng;
-                        document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
                     });
                 }
-                document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
             });
         }
 
@@ -530,43 +592,51 @@
             }
         }
 
-        function checkoutOrder() {
+        function checkoutOrder(type) {
             const name = document.getElementById("client-name").value.trim();
+            const phone = document.getElementById("client-phone").value.trim();
             const clientBank = document.getElementById("client-bank").value.trim();
-            const deliveryType = document.getElementById("delivery-type").value;
-            const paymentMethod = document.getElementById("payment-method").value;
             
-            if (!name) { alert("Por favor ingresa tu nombre antes de confirmar el pedido."); return; }
+            if (!name || !phone) { alert("Por favor ingresa tu Nombre y Teléfono único."); return; }
             if (cart.length === 0) { alert("Tu carrito está vacío."); return; }
 
+            let deliveryType = "local";
             let address = "";
-            let phone = "";
-            if (deliveryType === "domicilio") {
-                address = document.getElementById("delivery-address").value.trim();
-                phone = document.getElementById("delivery-phone").value.trim();
-                if (!address || !phone) {
-                    alert("Por favor ingresa tus referencias y número telefónico para la entrega a domicilio.");
-                    return;
+            let scheduleDate = "";
+            let scheduleTime = "";
+
+            if (type === 'inmediato') {
+                deliveryType = document.getElementById("delivery-type").value;
+                if (deliveryType === "domicilio") {
+                    address = document.getElementById("delivery-address").value.trim();
+                    if (!address) { alert("Por favor ingresa tu dirección de entrega."); return; }
                 }
-                if (!selectedLat || !selectedLng) {
-                    alert("Por favor selecciona tu ubicación exacta en el mapa.");
+            } else {
+                scheduleDate = document.getElementById("schedule-date").value;
+                scheduleTime = document.getElementById("schedule-time").value;
+                address = document.getElementById("schedule-address").value.trim();
+                deliveryType = "domicilio";
+                if (!scheduleDate || !scheduleTime || !address) {
+                    alert("Por favor completa la fecha, hora y dirección para tu reserva.");
                     return;
                 }
             }
 
-            if (paymentMethod === "tarjeta") {
+            const paymentMethod = document.getElementById("payment-method").value;
+
+            if (paymentMethod === "tarjeta" && type === 'inmediato') {
                 localStorage.setItem('temp_client_name', name);
+                localStorage.setItem('temp_client_phone', phone);
                 localStorage.setItem('temp_client_bank', clientBank);
                 localStorage.setItem('temp_delivery_type', deliveryType);
                 localStorage.setItem('temp_address', address);
-                localStorage.setItem('temp_phone', phone);
                 if (selectedLat && selectedLng) {
                     localStorage.setItem('temp_lat', selectedLat);
                     localStorage.setItem('temp_lng', selectedLng);
                 }
                 localStorage.setItem('temp_cart', JSON.stringify(cart));
 
-                alert("Redirigiendo a Mercado Pago para completar tu pago de forma segura...");
+                alert("Redirigiendo a Mercado Pago para completar tu pago seguro...");
                 window.location.href = "https://link.mercadopago.com.mx/primox";
                 return;
             }
@@ -575,32 +645,24 @@
             let change = 0;
             let transferAmount = 0;
             let transferClabe = "";
-            let transferChange = 0;
             const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
 
             if (paymentMethod === "efectivo") {
                 cashAmount = parseFloat(document.getElementById("cash-amount").value) || 0;
-                if (cashAmount > 0 && cashAmount >= total) {
-                    change = cashAmount - total;
-                }
-            }
-
-            if (paymentMethod === "transferencia") {
+                if (cashAmount >= total) change = cashAmount - total;
+            } else if (paymentMethod === "transferencia") {
                 transferAmount = parseFloat(document.getElementById("transfer-amount").value) || 0;
                 transferClabe = document.getElementById("transfer-clabe").value.trim();
-                if (transferAmount > total) {
-                    transferChange = transferAmount - total;
-                }
             }
 
             db.collection("orders").add({
                 clientName: name,
+                clientPhone: phone,
                 clientBank: clientBank || "",
                 items: cart,
                 total: total,
                 deliveryType: deliveryType,
                 address: address,
-                phone: phone,
                 lat: selectedLat || null,
                 lng: selectedLng || null,
                 paymentMethod: paymentMethod,
@@ -608,33 +670,40 @@
                 change: change,
                 transferAmount: transferAmount,
                 transferClabe: transferClabe,
-                transferChange: transferChange,
+                orderType: type === 'futuro' ? 'Futuro' : 'Inmediato',
+                scheduleDate: scheduleDate || null,
+                scheduleTime: scheduleTime || null,
+                status: 'Pendiente',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert("¡Pedido realizado con éxito! Ya fue enviado al administrador.");
+                alert(type === 'futuro' ? "¡Reserva enviada con éxito! Espera confirmación del administrador." : "¡Pedido realizado con éxito!");
                 cart = [];
                 updateCartUI();
                 closeCart();
+                closeScheduleModal();
             }).catch((error) => {
                 alert("Error al enviar el pedido: " + error.message);
             });
         }
 
+        function updateOrderStatus(orderId, status) {
+            db.collection("orders").doc(orderId).update({ status: status })
+                .then(() => alert(`Pedido marcado como: ${status}`));
+        }
+
         function deleteOrder(orderId) {
-            if (confirm("¿Deseas marcar este pedido como entregado y eliminarlo de la lista?")) {
+            if (confirm("¿Deseas eliminar este pedido?")) {
                 db.collection("orders").doc(orderId).delete();
             }
         }
 
         async function clearAllOrders() {
-            if (confirm("¿Estás seguro de borrar TODOS los pedidos de prueba actuales?")) {
+            if (confirm("¿Estás seguro de borrar TODOS los pedidos?")) {
                 const snapshot = await db.collection("orders").get();
                 const batch = db.batch();
-                snapshot.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
+                snapshot.forEach((doc) => batch.delete(doc.ref));
                 await batch.commit();
-                alert("Todos los pedidos han sido eliminados.");
+                alert("Pedidos eliminados.");
             }
         }
 
@@ -656,6 +725,14 @@
             const address = document.getElementById("admin-store-address").value;
             db.collection("config").doc("main").set({ bank, address })
                 .then(() => alert("Configuración guardada correctamente"));
+        }
+
+        function saveSpecialDay() {
+            const date = document.getElementById("admin-special-date").value;
+            const desc = document.getElementById("admin-special-desc").value;
+            if (!date || !desc) { alert("Completa la fecha y descripción del día especial."); return; }
+            db.collection("config").doc("special_days").set({ [date]: desc }, { merge: true })
+                .then(() => alert("Día especial guardado con éxito."));
         }
 
         function saveDish() {
