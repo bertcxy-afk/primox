@@ -207,7 +207,7 @@
                 <!-- Pedidos Entrantes y Reservas -->
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo</h4>
+                        <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo (Acumulados)</h4>
                         <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Todo</button>
                     </div>
                     <div id="admin-orders-list" class="space-y-3 text-sm">
@@ -271,7 +271,6 @@
         let deliveryMap = null, deliveryMarker = null, selectedLat = null, selectedLng = null;
         let scheduleMap = null, scheduleMarker = null, scheduleLat = null, scheduleLng = null;
 
-        // Función auxiliar para desinfectar entradas de texto (Seguridad Anti-XSS)
         function sanitizeText(str) {
             if (!str) return '';
             return str.replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
@@ -293,7 +292,6 @@
                 dateInput.value = today;
             }
 
-            // Detección automática al regresar de Mercado Pago (?payment=success)
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('payment') === 'success') {
                 const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
@@ -328,7 +326,6 @@
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     }).then(() => {
                         alert("¡Pago con tarjeta completado y pedido registrado con éxito!");
-                        // Limpieza de seguridad de temporales
                         localStorage.removeItem('temp_cart');
                         localStorage.removeItem('temp_lat');
                         localStorage.removeItem('temp_lng');
@@ -400,11 +397,23 @@
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
-        db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-            let ordersHtml = "";
+        // Escuchar TODOS los pedidos y reservas en tiempo real de forma acumulativa y segura
+        db.collection("orders").onSnapshot((snapshot) => {
+            let ordersList = [];
             snapshot.forEach((doc) => {
-                const order = doc.data();
-                const dateStr = order.timestamp ? new Date(order.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                ordersList.push({ id: doc.id, ...doc.data() });
+            });
+
+            // Ordenar en memoria por timestamp (descendente) de manera segura
+            ordersList.sort((a, b) => {
+                const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
+                const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
+                return timeB - timeA;
+            });
+
+            let ordersHtml = "";
+            ordersList.forEach((order) => {
+                const dateStr = order.timestamp && order.timestamp.toDate ? new Date(order.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Reciente';
                 
                 let itemsList = "";
                 if (order.items && Array.isArray(order.items)) {
@@ -441,9 +450,9 @@
                         </div>
 
                         <div class="flex gap-2 pt-1 border-t">
-                            <button onclick="updateOrderStatus('${doc.id}', 'Aceptado')" class="flex-1 bg-green-600 text-white py-1 rounded text-xs font-bold hover:bg-green-700">✔ Aceptar</button>
-                            <button onclick="updateOrderStatus('${doc.id}', 'Rechazado')" class="flex-1 bg-amber-600 text-white py-1 rounded text-xs font-bold hover:bg-amber-700">❌ Rechazar</button>
-                            <button onclick="deleteOrder('${doc.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold hover:bg-red-700">🗑️ Borrar</button>
+                            <button onclick="updateOrderStatus('${order.id}', 'Aceptado')" class="flex-1 bg-green-600 text-white py-1 rounded text-xs font-bold hover:bg-green-700">✔ Aceptar</button>
+                            <button onclick="updateOrderStatus('${order.id}', 'Rechazado')" class="flex-1 bg-amber-600 text-white py-1 rounded text-xs font-bold hover:bg-amber-700">❌ Rechazar</button>
+                            <button onclick="deleteOrder('${order.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold hover:bg-red-700">🗑️ Borrar</button>
                         </div>
                     </div>
                 `;
