@@ -46,4 +46,219 @@
     </main>
 
     <!-- Modal Carrito / Checkout -->
-    <div id="cart
+    <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Tu Pedido</h3>
+                <button onclick="closeCart()" class="text-gray-500 font-bold text-lg">✕</button>
+            </div>
+            <div id="cart-items" class="space-y-3 mb-4 divide-y"></div>
+            <div class="border-t pt-3 font-bold text-lg flex justify-between mb-4">
+                <span>Total:</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+
+            <!-- Método de Pago -->
+            <div class="mb-4">
+                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
+                <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <option value="efectivo">Efectivo</option>
+                    <option value="tarjeta">Tarjeta (Pago seguro con Stripe)</option>
+                    <option value="transferencia">Transferencia (Cuenta de la Empresa)</option>
+                </select>
+
+                <!-- Si es efectivo -->
+                <div id="cash-fields">
+                    <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>
+                    <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
+                    <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
+                </div>
+
+                <!-- Si es tarjeta -->
+                <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200">
+                    <p class="font-semibold text-blue-900">Pago con Tarjeta:</p>
+                    <p class="text-blue-700 text-xs mt-1">Al confirmar el pedido, serás dirigido de forma segura a la pasarela de pago.</p>
+                </div>
+
+                <!-- Si es transferencia -->
+                <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm">
+                    <p class="font-semibold text-orange-800">Datos para transferencia:</p>
+                    <p id="company-bank-info" class="text-orange-700 mt-1">Cargando cuenta de la empresa...</p>
+                </div>
+            </div>
+
+            <!-- Tipo de Entrega -->
+            <div class="mb-4">
+                <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
+                <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <option value="local">Asistir al local por mi comida</option>
+                    <option value="domicilio">Recibir en domicilio</option>
+                </select>
+
+                <!-- Si asiste al local -->
+                <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm">
+                    <p class="font-semibold">Dirección del local:</p>
+                    <p id="store-address-display" class="text-gray-600">Cargando dirección...</p>
+                </div>
+
+                <!-- Si es a domicilio -->
+                <div id="domicilio-fields" class="hidden space-y-2">
+                    <input type="text" id="delivery-address" placeholder="Ubicación exacta / Referencias de tu casa" class="w-full p-2 border rounded-lg text-sm">
+                    <input type="tel" id="delivery-phone" placeholder="Número telefónico de contacto" class="w-full p-2 border rounded-lg text-sm">
+                </div>
+            </div>
+
+            <button onclick="checkoutOrder()" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
+                Confirmar Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Admin -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Panel Administrador</h3>
+                <button onclick="closeAdmin()" class="text-gray-500 font-bold text-lg">✕</button>
+            </div>
+            
+            <div id="admin-login-view">
+                <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
+                <button onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold">Ingresar</button>
+            </div>
+
+            <div id="admin-panel-view" class="hidden space-y-6">
+                <!-- Pedidos Entrantes -->
+                <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                    <h4 class="font-bold text-orange-900 mb-2">📦 Pedidos Entrantes en Vivo</h4>
+                    <div id="admin-orders-list" class="space-y-3 text-sm">
+                        <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
+                    </div>
+                </div>
+
+                <!-- Configuración General -->
+                <div class="border-b pb-4">
+                    <h4 class="font-bold mb-2">Configuración General</h4>
+                    <label class="text-xs text-gray-600">Cuenta bancaria de la empresa:</label>
+                    <input type="text" id="admin-company-bank" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <label class="text-xs text-gray-600">Dirección física del local:</label>
+                    <input type="text" id="admin-store-address" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <button onclick="saveConfig()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Guardar Configuración</button>
+                </div>
+
+                <!-- Agregar / Editar Platillo -->
+                <div class="border-b pb-4">
+                    <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
+                    <input type="hidden" id="edit-dish-id">
+                    <input type="text" id="dish-name" placeholder="Nombre del platillo" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="text" id="dish-desc" placeholder="Descripción corta" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="text" id="dish-img" placeholder="URL de la imagen" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <select id="dish-available" class="w-full p-2 border rounded-lg text-sm mb-2">
+                        <option value="true">Disponible</option>
+                        <option value="false">Agotado</option>
+                    </select>
+                    <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
+                </div>
+
+                <!-- Lista de Platillos -->
+                <div>
+                    <h4 class="font-bold mb-2">Menú Actual</h4>
+                    <div id="admin-dish-list" class="space-y-2 text-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Firebase y Lógica -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
+            authDomain: "primox-65642.firebaseapp.com",
+            projectId: "primox-65642",
+            storageBucket: "primox-65642.firebasestorage.app",
+            messagingSenderId: "312208205497",
+            appId: "1:312208205497:web:29382bb18c2facc4fb1d68",
+            measurementId: "G-37491Y8MRL"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let menuItems = [];
+        let cart = [];
+        let storeConfig = { bank: "No configurada", address: "Local principal" };
+
+        // Detección automática al regresar de Stripe con éxito
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment') === 'success') {
+                const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
+                const clientBank = localStorage.getItem('temp_client_bank') || '';
+                const deliveryType = localStorage.getItem('temp_delivery_type') || 'local';
+                const address = localStorage.getItem('temp_address') || '';
+                const phone = localStorage.getItem('temp_phone') || '';
+                let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
+
+                if (pendingCart.length > 0) {
+                    const total = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+
+                    db.collection("orders").add({
+                        clientName: clientName,
+                        clientBank: clientBank,
+                        items: pendingCart,
+                        total: total,
+                        deliveryType: deliveryType,
+                        address: address,
+                        phone: phone,
+                        paymentMethod: 'tarjeta (Stripe)',
+                        cashAmount: 0,
+                        change: 0,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        alert("¡Pago con tarjeta completado y pedido registrado con éxito!");
+                        localStorage.removeItem('temp_cart');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }).catch((error) => {
+                        console.error("Error al registrar orden pagada:", error);
+                    });
+                }
+            }
+        });
+
+        db.collection("config").doc("main").onSnapshot((doc) => {
+            if (doc.exists) {
+                storeConfig = doc.data();
+                document.getElementById("company-bank-info").innerText = storeConfig.bank || "No registrada";
+                document.getElementById("store-address-display").innerText = storeConfig.address || "No especificada";
+                document.getElementById("admin-company-bank").value = storeConfig.bank || "";
+                document.getElementById("admin-store-address").value = storeConfig.address || "";
+            }
+        });
+
+        db.collection("menu").onSnapshot((snapshot) => {
+            menuItems = [];
+            let html = "";
+            let adminHtml = "";
+            snapshot.forEach((doc) => {
+                const item = { id: doc.id, ...doc.data() };
+                menuItems.push(item);
+                const isAvailable = item.available !== false;
+                
+                html += `
+                    <div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center">
+                        <img src="${item.image || 'https://via.placeholder.com/100'}" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-sm">${item.name}</h3>
+                            <p class="text-xs text-gray-500 mb-1">${item.description \vert{}\vert{} ''}</p> <p class="font-semibold text-orange-600">$${item.price}</p>
+                        </div>
+                        <div>
+                            ${isAvailable ? `<button onclick="addToCart('${item.id}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Agregar</button>` : '<span class="text-xs text-red-500 font-bold">Agotado</span>'}
+                        </div>
+                    </div>
+                `;
+
+                adminHtml += `
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
+                        <div>
+                            <p class="font-bold">${item.name}
