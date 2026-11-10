@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Primo - Comida a Domicilio</title>
   
-  <!-- Firebase SDK (Asegúrate de tener tus scripts de Firebase configurados arriba o aquí) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
@@ -75,14 +75,18 @@
   </div>
 
   <script>
-    // Inicialización de Firebase (Asegúrate de usar tus credenciales reales)
+    // Configuración real de Firebase (Primox)
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "tu-proyecto.firebaseapp.com",
-      projectId: "tu-proyecto",
+      apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
+      authDomain: "primox-65642.firebaseapp.com",
+      projectId: "primox-65642",
+      storageBucket: "primox-65642.firebasestorage.app",
+      messagingSenderId: "312208205497",
+      appId: "1:312208205497:web:29382bb18c2facc4fb1d68",
+      measurementId: "G-37491Y8MRL"
     };
     
-    // Evita inicializar doble si ya está activo
+    // Inicializar Firebase
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
@@ -182,7 +186,7 @@
       }
     }
 
-    // Iniciar la escucha de pedidos automáticamente al cargar la página del admin
+    // Iniciar la escucha de pedidos automáticamente al cargar la página
     window.onload = function() {
       iniciarEscuchaDePedidos();
     };
