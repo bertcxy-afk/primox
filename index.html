@@ -6,6 +6,8 @@
     <title>Primo - Comida a Domicilio y Para Llevar</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts para toque elegante tipo manuscrita -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -16,20 +18,23 @@
     <meta name="theme-color" content="#f97316">
     <style>
         #delivery-map, #schedule-map { height: 200px; width: 100%; border-radius: 0.5rem; z-index: 10; }
+        .font-handwriting { font-family: 'Caveat', cursive; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans pb-20">
     <!-- Header -->
     <header class="bg-orange-500 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
-        <h1 class="text-xl font-bold">🍔 Primo</h1>
+        <h1 class="text-2xl sm:text-3xl font-handwriting tracking-wide flex items-center gap-2">
+            <span>🍽️</span> PRIMO
+        </h1>
         <div class="flex gap-2">
-            <button onclick="openCart()" class="bg-orange-600 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1">
+            <button onclick="openCart()" class="bg-orange-600 px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 hover:bg-orange-700 transition">
                 🛒 Carrito (<span id="cart-count">0</span>)
             </button>
-            <button onclick="openScheduleModal()" class="bg-amber-600 px-3 py-1.5 rounded-lg text-sm font-semibold hidden sm:inline-block">
+            <button onclick="openScheduleModal()" class="bg-amber-600 px-3 py-1.5 rounded-lg text-sm font-semibold hidden sm:inline-block hover:bg-amber-700 transition">
                 📅 Agendar
             </button>
-            <button onclick="openAdminLogin()" class="bg-gray-800 px-3 py-1.5 rounded-lg text-sm font-semibold">
+            <button onclick="openAdminLogin()" class="bg-gray-800 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-900 transition">
                 Admin
             </button>
         </div>
@@ -264,7 +269,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Forzar red activa para tiempo real inmediato sin retrasos
         db.enableNetwork().catch(err => console.log(err));
 
         let menuItems = [];
@@ -400,7 +404,6 @@
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
-        // Escucha en tiempo real de pedidos y reservas (Acumulativo y sin retrasos)
         db.collection("orders").onSnapshot((snapshot) => {
             let ordersList = [];
             snapshot.forEach((doc) => {
