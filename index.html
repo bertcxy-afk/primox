@@ -54,9 +54,10 @@
             </div>
         </section>
 
-        <!-- Sección de Estatus de Mis Pedidos en Vivo para el Cliente -->
+        <!-- Sección de Estatus de Mis Pedidos y Reservas en Tiempo Real -->
         <section id="client-orders-status-section" class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 hidden">
-            <h3 class="font-bold text-md text-orange-900 mb-2">🔔 Estatus de tus Pedidos Recientes</h3>
+            <h3 class="font-bold text-md text-orange-900 mb-1">🔔 Estatus de tus Pedidos y Reservas</h3>
+            <p class="text-[11px] text-gray-500 mb-3">Se actualiza en tiempo real cuando el local acepta o rechaza.</p>
             <div id="client-my-orders-list" class="space-y-2 text-xs"></div>
         </section>
 
@@ -386,6 +387,7 @@
             }
         }
 
+        // Escucha en tiempo real para el cliente (muestra estatus inmediato)
         function loadClientOrders(phone) {
             if (!phone) return;
             db.collection("orders").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
@@ -814,11 +816,6 @@
                 alert("Redirigiendo a Mercado Pago para completar tu pago seguro...");
                 window.location.href = "https://link.mercadopago.com.mx/primox";
                 return;
-            }
-
-            // Si eligen pago con tarjeta en reserva (futuro)
-            if (paymentMethod === "tarjeta" && type === 'futuro') {
-                alert("Para reservas con tarjeta, comunícate o realiza tu pago en el enlace de Mercado Pago. Registraremos tu solicitud.");
             }
 
             let cashAmount = 0;
