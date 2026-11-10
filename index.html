@@ -434,13 +434,14 @@
             };
             const config = {
                 locale: 'es',
-                publicKey: 'key_QCw2NHzIzNCsHwNZ9y5Bxyv',
+                publicKey: 'key_6dPn049SxhSSgcgpXxhBljw',
                 targetIFrame: '#conekta-checkout-container',
                 checkoutRequestId: 'demo-checkout-id'
             };
             const callbacks = {
                 onFinalizePayment: function (order) {
                     alert('¡Pago completado con éxito a través de Conekta!');
+                    checkoutOrder('inmediato');
                 },
                 onErrorPayment: function (error) {
                     console.error('Error en pago Conekta:', error);
@@ -450,10 +451,19 @@
                 if (window.ConektaCheckoutComponents) {
                     window.ConektaCheckoutComponents.Integration({ config, callbacks, options });
                 } else {
-                    container.innerHTML = '<p class="text-xs text-blue-600 p-2">Módulo Conekta listo con llave key_QCw2NHzIzNCsHwNZ9y5Bxyv. Asegure que la orden esté generada en servidor.</p>';
+                    throw "SDK no cargado";
                 }
             } catch (e) {
-                console.error(e);
+                // Respaldo visual interactivo para GitHub Pages
+                container.innerHTML = `
+                    <div class="bg-orange-50 border border-orange-200 p-4 rounded-xl text-center space-y-3">
+                        <p class="text-xs text-orange-900 font-semibold">💳 Pasarela Conekta Lista (Modo Pruebas)</p>
+                        <p class="text-[11px] text-gray-600">Llave activa: <b>key_6dPn049SxhSSgcgpXxhBljw</b>. Haz clic abajo para simular tu pago y registrar el pedido de inmediato:</p>
+                        <button onclick="alert('Simulación de pago Conekta exitosa. Registrando pedido...'); checkoutOrder('inmediato');" class="w-full bg-orange-600 text-white py-2.5 rounded-lg text-xs font-bold hover:bg-orange-700 transition">
+                            Simular Pago Exitoso con Conekta
+                        </button>
+                    </div>
+                `;
             }
         }
 
