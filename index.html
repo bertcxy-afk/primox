@@ -107,13 +107,14 @@
                     <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
                 </div>
 
-                <!-- Si es tarjeta (Mercado Pago) con aviso de comisión actualizado -->
+                <!-- Si es tarjeta (Mercado Pago) -->
                 <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se aplica la comisión por cobro (3.49%) + $4.64.</p>
-                    <div class="bg-white p-2 rounded border border-blue-100 flex justify-between text-xs font-bold text-gray-700">
-                        <span>Monto neto que recibe el negocio:</span>
-                        <span id="mp-net-amount" class="text-blue-600">$0.00</span>
+                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago - Link Seguro):</p>
+                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. <b>Comisión por cobro: (3.49%) + $4.64</b>.</p>
+                    <div class="bg-white p-2 rounded border border-blue-100 space-y-1 text-xs text-gray-700">
+                        <div class="flex justify-between"><span>Costo de alimentos:</span> <span id="mp-food-total">$0.00</span></div>
+                        <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="mp-commission-val">$0.00</span></div>
+                        <div class="flex justify-between font-bold border-t pt-1 text-blue-900"><span>Monto neto que recibe el negocio:</span> <span id="mp-net-amount">$0.00</span></div>
                     </div>
                 </div>
 
@@ -121,13 +122,19 @@
                 <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
                     <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>
                     <p id="company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando CLABE Mercado Pago...</p>
-                    <p class="text-xs text-orange-700">Por favor realiza tu transferencia SPEI a esta CLABE oficial de Mercado Pago asignada al negocio.</p>
+                    <p class="text-xs text-orange-700">Por favor realiza tu transferencia SPEI a esta CLABE oficial de Mercado Pago. Se aplican comisiones por cobro (3.49%) + $4.64.</p>
                     
+                    <div class="bg-white p-2 rounded border border-orange-100 space-y-1 text-xs text-gray-700 my-1">
+                        <div class="flex justify-between"><span>Costo de alimentos:</span> <span id="tr-food-total">$0.00</span></div>
+                        <div class="flex justify-between"><span>Comisión estimada (3.49% + $4.64):</span> <span id="tr-commission-val">$0.00</span></div>
+                        <div class="flex justify-between font-bold border-t pt-1 text-orange-900"><span>Total con comisión / A transferir:</span> <span id="tr-net-amount">$0.00</span></div>
+                    </div>
+
                     <div class="border-t border-orange-200 pt-2 mt-2">
                         <label class="block text-xs font-semibold text-orange-900 mb-1">Confirma el monto transferido:</label>
                         <input type="number" id="transfer-amount" placeholder="Ej. 150" oninput="calculateTransferChange()" class="w-full p-2 bg-white border rounded-lg text-sm mb-2">
                         <p id="transfer-change-text" class="text-xs font-semibold text-green-700"></p>
-                        
+
                         <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>
                         <input type="text" id="transfer-clabe" placeholder="Ej. Folio o CLABE desde donde transferiste" class="w-full p-2 bg-white border rounded-lg text-sm">
                     </div>
@@ -141,11 +148,13 @@
                     <option value="local">Asistir al local por mi comida</option>
                     <option value="domicilio">Recibir en domicilio</option>
                 </select>
+
                 <!-- Si asiste al local -->
                 <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm">
                     <p class="font-semibold">Dirección del local:</p>
                     <p id="store-address-display" class="text-gray-600">Cargando dirección...</p>
                 </div>
+
                 <!-- Si es a domicilio -->
                 <div id="domicilio-fields" class="hidden space-y-2">
                     <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">
@@ -172,15 +181,23 @@
             <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
                 Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para pedidos a futuro solo está disponible el pago por transferencia o tarjeta.
             </div>
+
+            <div>
+                <label class="block font-semibold text-sm mb-1">Tu Número Telefónico para la Reserva *:</label>
+                <input type="tel" id="schedule-phone" placeholder="Número de contacto" class="w-full p-2 border rounded-lg text-sm">
+            </div>
+
             <div>
                 <label class="block font-semibold text-sm mb-1">Fecha de Recepción:</label>
                 <input type="date" id="schedule-date" class="w-full p-2 border rounded-lg text-sm">
             </div>
+
             <div>
                 <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>
                 <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">
             </div>
-            <!-- Método de Pago exclusivo para Reservas -->
+
+            <!-- Método de Pago exclusivo para Reservas (Sin efectivo) -->
             <div>
                 <label class="block font-semibold text-sm mb-1">Método de Pago para la Reserva:</label>
                 <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
@@ -188,29 +205,33 @@
                     <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>
                 </select>
 
-                <!-- Si es tarjeta en reserva con aviso de comisión actualizado -->
+                <!-- Si es tarjeta en reserva -->
                 <div id="schedule-tarjeta-fields" class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
                     <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se aplica la comisión por cobro (3.49%) + $4.64.</p>
+                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se aplica la <b>comisión por cobro (3.49%) + $4.64</b>.</p>
                 </div>
 
                 <!-- Si es transferencia en reserva -->
                 <div id="schedule-transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
                     <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>
                     <p id="schedule-company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando...</p>
+                    <p class="text-xs text-orange-700">Se aplican comisiones (3.49% + $4.64).</p>
                     <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>
                     <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o CLABE de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
                 </div>
             </div>
+
             <div>
-                <label class="block font-semibold text-sm mb-1">Referencias de Entrega:</label>
+                <label class="block font-semibold text-sm mb-1">Descripción de Domicilio / Referencias:</label>
                 <input type="text" id="schedule-address" placeholder="Calle, número, fachada o detalles de tu casa" class="w-full p-2 border rounded-lg text-sm mb-2">
             </div>
+
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">📍 Selecciona tu ubicación exacta de entrega en el mapa:</label>
                 <div id="schedule-map"></div>
-                <p id="schedule-map-coords-text" class="text-xs text-gray-500 mt-1">Haz clic en el mapa para fijar tu ubicación.</p>
+                <p id="schedule-map-coords-text" class="text-xs text-gray-500 mt-1">Haz clic en el mapa para fijar tu ubicación de reserva.</p>
             </div>
+
             <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">
                 Enviar Solicitud de Reserva
             </button>
@@ -229,7 +250,9 @@
                 <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
                 <button onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold">Ingresar</button>
             </div>
+
             <div id="admin-panel-view" class="hidden space-y-6">
+                <!-- Pedidos Entrantes y Reservas -->
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
                     <div class="flex justify-between items-center mb-2">
                         <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo (Acumulados)</h4>
@@ -239,6 +262,8 @@
                         <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
                     </div>
                 </div>
+
+                <!-- Configuración General -->
                 <div class="border-b pb-4">
                     <h4 class="font-bold mb-2">Configuración General</h4>
                     <label class="text-xs text-gray-600">CLABE / Cuenta Mercado Pago de la empresa:</label>
@@ -247,6 +272,8 @@
                     <input type="text" id="admin-store-address" class="w-full p-2 border rounded-lg text-sm mb-2">
                     <button onclick="saveConfig()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Guardar Configuración</button>
                 </div>
+
+                <!-- Agregar / Editar Platillo -->
                 <div class="border-b pb-4">
                     <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
                     <input type="hidden" id="edit-dish-id">
@@ -260,6 +287,8 @@
                     </select>
                     <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
                 </div>
+
+                <!-- Lista de Platillos -->
                 <div>
                     <h4 class="font-bold mb-2">Menú Actual</h4>
                     <div id="admin-dish-list" class="space-y-2 text-sm"></div>
@@ -268,7 +297,7 @@
         </div>
     </div>
 
-    <!-- Script de Firebase y Lógica -->
+    <!-- Script de Firebase y Lógica Actualizada -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
@@ -279,13 +308,16 @@
             appId: "1:312208205497:web:29382bb18c2facc4fb1d68",
             measurementId: "G-37491Y8MRL"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
         db.enableNetwork().catch(err => console.log(err));
 
         let menuItems = [];
         let cart = [];
         let storeConfig = { bank: "No configurada", address: "Local principal" };
+        
         let deliveryMap = null, deliveryMarker = null, selectedLat = null, selectedLng = null;
         let scheduleMap = null, scheduleMarker = null, scheduleLat = null, scheduleLng = null;
 
@@ -492,6 +524,7 @@
                 }
 
                 let statusBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold ${order.status === 'Aceptado' ? 'bg-green-100 text-green-800' : order.status === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${order.status || 'Pendiente'}</span>`;
+
                 ordersHtml += `
                     <div class="bg-white p-3 rounded-lg border shadow-sm space-y-2">
                         <div class="flex justify-between font-bold text-xs text-gray-500">
@@ -514,99 +547,94 @@
 
                         <div class="flex gap-2 pt-1 border-t">
                             <button onclick="updateOrderStatus('${order.id}', 'Aceptado')" class="flex-1 bg-green-600 text-white py-1 rounded text-xs font-bold hover:bg-green-700">✔ Aceptar</button>
-                            <button onclick="updateOrderStatus('${order.id}', 'Rechazado')" class="flex-1 bg-red-600 text-white py-1 rounded text-xs font-bold hover:bg-red-700">❌ Rechazar</button>
+                            <button onclick="updateOrderStatus('${order.id}', 'Rechazado')" class="flex-1 bg-amber-600 text-white py-1 rounded text-xs font-bold hover:bg-amber-700">❌ Rechazar</button>
+                            <button onclick="deleteOrder('${order.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold hover:bg-red-700">🗑️ Borrar</button>
                         </div>
                     </div>
                 `;
             });
-            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>';
+            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos o reservas nuevas en este momento.</p>';
         });
 
         function addToCart(id) {
             const item = menuItems.find(i => i.id === id);
-            if (!item) return;
             const existing = cart.find(i => i.id === id);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...item, qty: 1 });
-            }
+            if (existing) { existing.qty++; } else { cart.push({ ...item, qty: 1 }); }
             updateCartUI();
         }
 
         function updateCartUI() {
-            document.getElementById("cart-count").innerText = cart.reduce((sum, i) => sum + i.qty, 0);
+            const count = cart.reduce((sum, i) => sum + i.qty, 0);
+            document.getElementById("cart-count").innerText = count;
             let html = "";
             let total = 0;
-            cart.forEach(item => {
+            cart.forEach((item, index) => {
                 total += item.price * item.qty;
                 html += `
                     <div class="flex justify-between items-center py-2 text-sm">
-                        <span>${sanitizeText(item.name)} (x${item.qty})</span>
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold">$${item.price * item.qty}</span>
-                            <button onclick="changeQty('${item.id}', -1)" class="bg-gray-200 px-2 py-0.5 rounded font-bold">-</button>
-                            <button onclick="changeQty('${item.id}', 1)" class="bg-gray-200 px-2 py-0.5 rounded font-bold">+</button>
+                        <div>
+                            <p class="font-bold">${sanitizeText(item.name)}</p>
+                            <p class="text-xs text-gray-500">$${item.price} x ${item.qty}</p>
                         </div>
+                        <button onclick="removeFromCart(${index})" class="text-red-500 text-xs font-bold">Quitar</button>
                     </div>
                 `;
             });
-            document.getElementById("cart-items").innerHTML = html || '<p class="text-gray-500 text-sm">El carrito está vacío.</p>';
+            document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Tu carrito está vacío</p>';
             document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
-            calculateChange();
+            
             calculateNetEarnings();
+            calculateTransferDetails();
+            calculateChange();
+            calculateTransferChange();
         }
 
-        function changeQty(id, delta) {
-            const item = cart.find(i => i.id === id);
-            if (!item) return;
-            item.qty += delta;
-            if (item.qty <= 0) {
-                cart = cart.filter(i => i.id !== id);
-            }
+        function removeFromCart(index) {
+            cart.splice(index, 1);
             updateCartUI();
         }
 
-        function calculateChange() {
-            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            const cashInput = parseFloat(document.getElementById('cash-amount').value) || 0;
-            const changeText = document.getElementById('change-text');
-            if (cashInput >= total && total > 0) {
-                const change = cashInput - total;
-                changeText.innerText = `Cambio a devolver: $${change.toFixed(2)}`;
-            } else {
-                changeText.innerText = "";
+        function openCart() { 
+            const name = document.getElementById("client-name").value.trim();
+            const phone = document.getElementById("client-phone").value.trim();
+            if (!name || !phone) {
+                alert("Por favor ingresa tu Nombre y Número Telefónico único antes de continuar.");
+                document.getElementById("client-name").focus();
+                return;
             }
+            saveClientIdentity();
+            document.getElementById("cart-modal").classList.remove("hidden"); 
+            setTimeout(() => {
+                if (document.getElementById("delivery-type").value === "domicilio") {
+                    initDeliveryMap();
+                }
+            }, 200);
         }
 
-        function calculateNetEarnings() {
-            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            const commission = (total * 0.0349) + 4.64;
-            const net = total - commission;
-            const netEl = document.getElementById('mp-net-amount');
-            if (netEl) {
-                netEl.innerText = `$${net > 0 ? net.toFixed(2) : '0.00'}`;
+        function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
+
+        function openScheduleModal() {
+            const name = document.getElementById("client-name").value.trim();
+            const phone = document.getElementById("client-phone").value.trim();
+            if (!name || !phone) {
+                alert("Por favor ingresa tu Nombre y Número Telefónico antes de agendar una reserva.");
+                document.getElementById("client-name").focus();
+                return;
             }
-        }
-
-        function calculateTransferChange() {
-            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            const transferInput = parseFloat(document.getElementById('transfer-amount').value) || 0;
-            const textEl = document.getElementById('transfer-change-text');
-            if (transferInput >= total) {
-                textEl.innerText = "✅ Monto cubre el total del pedido.";
-            } else {
-                textEl.innerText = "⚠️ El monto es menor al total del pedido.";
+            if (cart.length === 0) {
+                alert("Tu carrito está vacío. Agrega platillos antes de agendar.");
+                return;
             }
+            saveClientIdentity();
+            document.getElementById("schedule-phone").value = phone;
+            document.getElementById("schedule-modal").classList.remove("hidden");
+            setTimeout(() => {
+                initScheduleMap();
+            }, 200);
         }
 
-        function openCart() {
-            document.getElementById("cart-modal").classList.remove("hidden");
-            updateCartUI();
-        }
-
-        function closeCart() {
-            document.getElementById("cart-modal").classList.add("hidden");
+        function closeScheduleModal() {
+            document.getElementById("schedule-modal").classList.add("hidden");
         }
 
         function togglePaymentFields() {
@@ -626,174 +654,338 @@
             const type = document.getElementById("delivery-type").value;
             document.getElementById("local-delivery-info").classList.toggle("hidden", type !== "local");
             document.getElementById("domicilio-fields").classList.toggle("hidden", type !== "domicilio");
-            if (type === "domicilio" && !deliveryMap) {
-                setTimeout(initDeliveryMap, 300);
+            
+            if (type === "domicilio") {
+                setTimeout(() => {
+                    initDeliveryMap();
+                }, 200);
             }
         }
 
         function initDeliveryMap() {
-            deliveryMap = L.map('delivery-map').setView([20.15, -102.25], 14);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(deliveryMap);
-            deliveryMap.on('click', (e) => {
+            if (deliveryMap) {
+                deliveryMap.invalidateSize();
+                return;
+            }
+            const defaultLat = 20.3333;
+            const defaultLng = -102.2333;
+
+            deliveryMap = L.map('delivery-map').setView([defaultLat, defaultLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(deliveryMap);
+
+            deliveryMap.on('click', function(e) {
                 selectedLat = e.latlng.lat;
                 selectedLng = e.latlng.lng;
-                if (deliveryMarker) deliveryMap.removeLayer(deliveryMarker);
-                deliveryMarker = L.marker([selectedLat, selectedLng]).addTo(deliveryMap);
-                document.getElementById('map-coords-text').innerText = `Ubicación fija: ${selectedLat.toFixed(4)}, ${selectedLng.toFixed(4)}`;
+
+                if (deliveryMarker) {
+                    deliveryMarker.setLatLng([selectedLat, selectedLng]);
+                } else {
+                    deliveryMarker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(deliveryMap);
+                    deliveryMarker.on('dragend', function(event) {
+                        const marker = event.target;
+                        const position = marker.getLatLng();
+                        selectedLat = position.lat;
+                        selectedLng = position.lng;
+                    });
+                }
+                document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
             });
         }
 
-        function checkoutOrder(type) {
-            const name = sanitizeText(document.getElementById('client-name').value);
-            const phone = sanitizeText(document.getElementById('client-phone').value);
-            const clientBank = sanitizeText(document.getElementById('client-bank').value);
-            const deliveryType = document.getElementById('delivery-type').value;
-            const address = sanitizeText(document.getElementById('delivery-address').value);
-
-            if (!name || !phone) {
-                alert('Por favor ingresa tu nombre y teléfono de contacto.');
+        function initScheduleMap() {
+            if (scheduleMap) {
+                scheduleMap.invalidateSize();
                 return;
             }
-            if (cart.length === 0) {
-                alert('El carrito está vacío.');
-                return;
-            }
+            const defaultLat = 20.3333;
+            const defaultLng = -102.2333;
 
+            scheduleMap = L.map('schedule-map').setView([defaultLat, defaultLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(scheduleMap);
+
+            scheduleMap.on('click', function(e) {
+                scheduleLat = e.latlng.lat;
+                scheduleLng = e.latlng.lng;
+
+                if (scheduleMarker) {
+                    scheduleMarker.setLatLng([scheduleLat, scheduleLng]);
+                } else {
+                    scheduleMarker = L.marker([scheduleLat, scheduleLng], {draggable: true}).addTo(scheduleMap);
+                    scheduleMarker.on('dragend', function(event) {
+                        const marker = event.target;
+                        const position = marker.getLatLng();
+                        scheduleLat = position.lat;
+                        scheduleLng = position.lng;
+                        document.getElementById("schedule-map-coords-text").innerText = `Ubicación fijada: ${scheduleLat.toFixed(5)}, ${scheduleLng.toFixed(5)}`;
+                    });
+                }
+                document.getElementById("schedule-map-coords-text").innerText = `Ubicación fijada: ${scheduleLat.toFixed(5)}, ${scheduleLng.toFixed(5)}`;
+            });
+        }
+
+        function calculateNetEarnings() {
             const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            let paymentMethod = type === 'inmediato' ? document.getElementById('payment-method').value : document.getElementById('schedule-payment-method').value;
+            const commission = (total * 0.0349) + 4.64;
+            const net = total - commission;
+            const foodEl = document.getElementById('mp-food-total');
+            const commEl = document.getElementById('mp-commission-val');
+            const netEl = document.getElementById('mp-net-amount');
+            if (foodEl) foodEl.innerText = `$${total.toFixed(2)}`;
+            if (commEl) commEl.innerText = `$${commission.toFixed(2)}`;
+            if (netEl) netEl.innerText = `$${net > 0 ? net.toFixed(2) : '0.00'}`;
+        }
 
-            if (paymentMethod === 'tarjeta') {
-                const commission = (total * 0.0349) + 4.64;
-                const netReceived = total - commission;
+        function calculateTransferDetails() {
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const commission = (total * 0.0349) + 4.64;
+            const totalWithComm = total + commission;
+            const foodEl = document.getElementById('tr-food-total');
+            const commEl = document.getElementById('tr-commission-val');
+            const netEl = document.getElementById('tr-net-amount');
+            if (foodEl) foodEl.innerText = `$${total.toFixed(2)}`;
+            if (commEl) commEl.innerText = `$${commission.toFixed(2)}`;
+            if (netEl) netEl.innerText = `$${totalWithComm.toFixed(2)}`;
+        }
+
+        function calculateChange() {
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const cash = parseFloat(document.getElementById("cash-amount").value) || 0;
+            const changeText = document.getElementById("change-text");
+            
+            if (document.getElementById("payment-method").value === "efectivo" && cash > 0) {
+                if (cash < total) {
+                    changeText.innerText = "⚠️ El monto es menor al total a pagar";
+                    changeText.className = "text-sm font-semibold text-red-600 mt-1";
+                } else {
+                    const change = cash - total;
+                    changeText.innerText = `Su cambio exacto es: $${change.toFixed(2)}`;
+                    changeText.className = "text-sm font-semibold text-green-600 mt-1";
+                }
+            } else {
+                changeText.innerText = "";
+            }
+        }
+
+        function calculateTransferChange() {
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const transfer = parseFloat(document.getElementById("transfer-amount").value) || 0;
+            const textElem = document.getElementById("transfer-change-text");
+
+            if (document.getElementById("payment-method").value === "transferencia" && transfer > 0) {
+                if (transfer < total) {
+                    textElem.innerText = "⚠️ El monto transferido es menor al total";
+                    textElem.className = "text-xs font-semibold text-red-600";
+                } else if (transfer > total) {
+                    const surplus = transfer - total;
+                    textElem.innerText = `Sobrante / Cambio a favor: $${surplus.toFixed(2)}`;
+                    textElem.className = "text-xs font-semibold text-green-700";
+                } else {
+                    textElem.innerText = "✅ ¡Monto exacto!";
+                    textElem.className = "text-xs font-semibold text-green-700";
+                }
+            } else {
+                textElem.innerText = "";
+            }
+        }
+
+        function checkoutOrder(type) {
+            const name = sanitizeText(document.getElementById("client-name").value);
+            let phone = sanitizeText(document.getElementById("client-phone").value);
+            const clientBank = sanitizeText(document.getElementById("client-bank").value);
+            
+            if (type === 'futuro') {
+                const schedPhone = sanitizeText(document.getElementById("schedule-phone").value);
+                if (schedPhone) phone = schedPhone;
+            }
+
+            if (!name || !phone) { alert("Por favor ingresa tu Nombre y Teléfono único."); return; }
+            if (cart.length === 0) { alert("Tu carrito está vacío."); return; }
+
+            let deliveryType = "local";
+            let address = "";
+            let scheduleDate = "";
+            let scheduleTime = "";
+            let orderLat = null;
+            let orderLng = null;
+            let paymentMethod = "";
+
+            if (type === 'inmediato') {
+                deliveryType = document.getElementById("delivery-type").value;
+                paymentMethod = document.getElementById("payment-method").value;
+                if (deliveryType === "domicilio") {
+                    address = sanitizeText(document.getElementById("delivery-address").value);
+                    orderLat = selectedLat;
+                    orderLng = selectedLng;
+                    if (!address) { alert("Por favor ingresa tu dirección de entrega."); return; }
+                }
+            } else {
+                scheduleDate = sanitizeText(document.getElementById("schedule-date").value);
+                scheduleTime = sanitizeText(document.getElementById("schedule-time").value);
+                address = sanitizeText(document.getElementById("schedule-address").value);
+                orderLat = scheduleLat;
+                orderLng = scheduleLng;
+                deliveryType = "domicilio";
+                paymentMethod = document.getElementById("schedule-payment-method").value;
+
+                if (!scheduleDate || !scheduleTime || !address) {
+                    alert("Por favor completa la fecha, hora y referencias para tu reserva.");
+                    return;
+                }
+                if (!scheduleLat || !scheduleLng) {
+                    alert("Por favor selecciona tu ubicación exacta en el mapa de reserva.");
+                    return;
+                }
+            }
+
+            if (paymentMethod === "tarjeta" && type === 'inmediato') {
                 localStorage.setItem('temp_client_name', name);
                 localStorage.setItem('temp_client_phone', phone);
                 localStorage.setItem('temp_client_bank', clientBank);
                 localStorage.setItem('temp_delivery_type', deliveryType);
                 localStorage.setItem('temp_address', address);
-                if (selectedLat) localStorage.setItem('temp_lat', selectedLat);
-                if (selectedLng) localStorage.setItem('temp_lng', selectedLng);
+                if (orderLat && orderLng) {
+                    localStorage.setItem('temp_lat', orderLat);
+                    localStorage.setItem('temp_lng', orderLng);
+                }
                 localStorage.setItem('temp_cart', JSON.stringify(cart));
 
-                alert("Redirigiendo a Mercado Pago para completar tu pago seguro con tarjeta...");
-                window.location.href = window.location.pathname + "?payment=success";
+                alert("Redirigiendo a Mercado Pago para completar tu pago seguro...");
+                window.location.href = "https://link.mercadopago.com.mx/primox";
                 return;
             }
 
-            let orderData = {
+            let cashAmount = 0;
+            let change = 0;
+            let transferClabe = "";
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+
+            if (paymentMethod === "efectivo") {
+                cashAmount = parseFloat(document.getElementById("cash-amount").value) || 0;
+                if (cashAmount >= total) change = cashAmount - total;
+            } else if (paymentMethod === "transferencia") {
+                const transferInputId = type === 'futuro' ? "schedule-transfer-clabe" : "transfer-clabe";
+                transferClabe = sanitizeText(document.getElementById(transferInputId).value);
+            }
+
+            db.collection("orders").add({
                 clientName: name,
                 clientPhone: phone,
-                clientBank: clientBank,
+                clientBank: clientBank || "",
                 items: cart,
                 total: total,
                 deliveryType: deliveryType,
                 address: address,
-                lat: selectedLat,
-                lng: selectedLng,
+                lat: orderLat || null,
+                lng: orderLng || null,
                 paymentMethod: paymentMethod,
+                cashAmount: cashAmount,
+                change: change,
+                transferClabe: transferClabe,
+                orderType: type === 'futuro' ? 'Futuro' : 'Inmediato',
+                scheduleDate: scheduleDate || null,
+                scheduleTime: scheduleTime || null,
                 status: 'Pendiente',
-                orderType: type === 'inmediato' ? 'Inmediato' : 'Futuro',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            if (type === 'futuro') {
-                orderData.scheduleDate = document.getElementById('schedule-date').value;
-                orderData.scheduleTime = document.getElementById('schedule-time').value;
-                orderData.transferClabe = sanitizeText(document.getElementById('schedule-transfer-clabe').value);
-            } else if (paymentMethod === 'transferencia') {
-                orderData.transferAmount = parseFloat(document.getElementById('transfer-amount').value) || 0;
-                orderData.transferClabe = sanitizeText(document.getElementById('transfer-clabe').value);
-            }
-
-            db.collection("orders").add(orderData).then(() => {
-                alert("¡Pedido o reserva enviada con éxito!");
+            }).then(() => {
+                alert(type === 'futuro' ? "¡Reserva enviada con éxito! Espera la confirmación del administrador." : "¡Pedido realizado con éxito!");
                 cart = [];
+                updateCartUI();
                 closeCart();
                 closeScheduleModal();
                 loadClientOrders(phone);
-            }).catch(err => {
-                console.error("Error al enviar orden:", err);
-                alert("Hubo un error al registrar tu pedido.");
+            }).catch((error) => {
+                alert("Error al enviar el pedido: " + error.message);
             });
         }
 
-        function updateOrderStatus(id, status) {
-            db.collection("orders").doc(id).update({ status }).then(() => {
-                console.log("Estatus actualizado");
-            });
+        function updateOrderStatus(orderId, status) {
+            db.collection("orders").doc(orderId).update({ status: status })
+                .then(() => alert(`Pedido marcado como: ${status}`));
         }
 
-        function clearAllOrders() {
-            if (confirm("¿Estás seguro de borrar todas las órdenes y reservas del historial?")) {
-                db.collection("orders").get().then(snapshot => {
-                    snapshot.forEach(doc => doc.ref.delete());
-                });
+        function deleteOrder(orderId) {
+            if (confirm("¿Deseas eliminar este pedido?")) {
+                db.collection("orders").doc(orderId).delete();
             }
         }
 
-        function saveConfig() {
-            const bank = sanitizeText(document.getElementById('admin-company-bank').value);
-            const address = sanitizeText(document.getElementById('admin-store-address').value);
-            db.collection("config").doc("main").set({ bank, address }, { merge: true }).then(() => {
-                alert("Configuración general guardada.");
-            });
-        }
-
-        function saveDish() {
-            const id = document.getElementById('edit-dish-id').value;
-            const name = sanitizeText(document.getElementById('dish-name').value);
-            const price = parseFloat(document.getElementById('dish-price').value);
-            const description = sanitizeText(document.getElementById('dish-desc').value);
-            const image = sanitizeText(document.getElementById('dish-img').value);
-            const available = document.getElementById('dish-available').value === 'true';
-
-            if (!name || isNaN(price)) {
-                alert("El nombre y el precio son obligatorios.");
-                return;
-            }
-
-            const dishData = { name, price, description, image, available };
-            const promise = id ? db.collection("menu").doc(id).update(dishData) : db.collection("menu").add(dishData);
-
-            promise.then(() => {
-                alert("Platillo guardado correctamente.");
-                document.getElementById('edit-dish-id').value = '';
-                document.getElementById('dish-name').value = '';
-                document.getElementById('dish-price').value = '';
-                document.getElementById('dish-desc').value = '';
-                document.getElementById('dish-img').value = '';
-            });
-        }
-
-        function editDish(id) {
-            const item = menuItems.find(i => i.id === id);
-            if (!item) return;
-            document.getElementById('edit-dish-id').value = item.id;
-            document.getElementById('dish-name').value = item.name;
-            document.getElementById('dish-price').value = item.price;
-            document.getElementById('dish-desc').value = item.description || '';
-            document.getElementById('dish-img').value = item.image || '';
-            document.getElementById('dish-available').value = item.available !== false ? 'true' : 'false';
-            openAdminLogin();
-        }
-
-        function deleteDish(id) {
-            if (confirm("¿Seguro que deseas eliminar este platillo?")) {
-                db.collection("menu").doc(id).delete();
+        async function clearAllOrders() {
+            if (confirm("¿Estás seguro de borrar TODOS los pedidos?")) {
+                const snapshot = await db.collection("orders").get();
+                const batch = db.batch();
+                snapshot.forEach((doc) => batch.delete(doc.ref));
+                await batch.commit();
+                alert("Pedidos eliminados.");
             }
         }
 
         function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
         function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
+
         function verifyAdmin() {
-            if (document.getElementById("admin-pass").value === "admin123") {
+            const pass = document.getElementById("admin-pass").value;
+            if (pass === "PocilloInc") {
                 document.getElementById("admin-login-view").classList.add("hidden");
                 document.getElementById("admin-panel-view").classList.remove("hidden");
             } else {
                 alert("Contraseña incorrecta");
             }
         }
-        function openScheduleModal() { document.getElementById("schedule-modal").classList.remove("hidden"); }
-        function closeScheduleModal() { document.getElementById("schedule-modal").classList.add("hidden"); }
+
+        function saveConfig() {
+            const bank = sanitizeText(document.getElementById("admin-company-bank").value);
+            const address = sanitizeText(document.getElementById("admin-store-address").value);
+            db.collection("config").doc("main").set({ bank, address })
+                .then(() => alert("Configuración guardada correctamente"));
+        }
+
+        function saveDish() {
+            const id = document.getElementById("edit-dish-id").value;
+            const name = sanitizeText(document.getElementById("dish-name").value);
+            const price = parseFloat(document.getElementById("dish-price").value);
+            const description = sanitizeText(document.getElementById("dish-desc").value);
+            const image = sanitizeText(document.getElementById("dish-img").value);
+            const available = document.getElementById("dish-available").value === "true";
+
+            if (!name || !price) { alert("El nombre y el precio son obligatorios."); return; }
+            const dishData = { name, price, description, image, available };
+            if (id) {
+                db.collection("menu").doc(id).update(dishData).then(() => resetDishForm());
+            } else {
+                db.collection("menu").add(dishData).then(() => resetDishForm());
+            }
+        }
+
+        function editDish(id) {
+            const item = menuItems.find(i => i.id === id);
+            document.getElementById("edit-dish-id").value = item.id;
+            document.getElementById("dish-name").value = item.name;
+            document.getElementById("dish-price").value = item.price;
+            document.getElementById("dish-desc").value = item.description || '';
+            document.getElementById("dish-img").value = item.image || '';
+            document.getElementById("dish-available").value = item.available !== false ? "true" : "false";
+        }
+
+        function deleteDish(id) {
+            if (confirm("¿Estás seguro de eliminar este platillo?")) {
+                db.collection("menu").doc(id).delete();
+            }
+        }
+
+        function resetDishForm() {
+            document.getElementById("edit-dish-id").value = "";
+            document.getElementById("dish-name").value = "";
+            document.getElementById("dish-price").value = "";
+            document.getElementById("dish-desc").value = "";
+            document.getElementById("dish-img").value = "";
+            alert("Platillo guardado correctamente.");
+        }
     </script>
 </body>
 </html>
