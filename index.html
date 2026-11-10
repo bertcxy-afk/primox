@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- This site is hosted on Netlify. Anyone can build and deploy a site     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=294c71c4-7245-474f-bdd4-3401775a535f     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primo - Comida a Domicilio y Para Llevar</title>
     <!-- Tailwind CSS CDN -->
@@ -39,7 +38,7 @@
         <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm mb-4">
             <h2 class="font-bold text-lg mb-2">Tus Datos</h2>
             <input type="text" id="client-name" placeholder="Tu Nombre *" class="w-full p-2 border rounded-lg mb-2 text-sm">
-            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional para efectivo)" class="w-full p-2 border rounded-lg text-sm">
+            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional)" class="w-full p-2 border rounded-lg text-sm">
         </section>
 
         <!-- Menú de Comida -->
@@ -69,6 +68,7 @@
                 <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
                 <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                     <option value="efectivo">Efectivo</option>
+                    <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
                     <option value="transferencia">Transferencia (Cuenta de la Empresa)</option>
                 </select>
 
@@ -77,6 +77,16 @@
                     <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>
                     <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
                     <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
+                </div>
+
+                <!-- Si es tarjeta (Mercado Pago) -->
+                <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
+                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se descontará una comisión del 3.49% correspondiente al servicio de cobro.</p>
+                    <div class="bg-white p-2 rounded border border-blue-100 flex justify-between text-xs font-bold text-gray-700">
+                        <span>Monto neto que recibe el negocio:</span>
+                        <span id="mp-net-amount" class="text-blue-600">$0.00</span>
+                    </div>
                 </div>
 
                 <!-- Si es transferencia -->
@@ -199,6 +209,53 @@
         let selectedLat = null;
         let selectedLng = null;
 
+        // Detección automática al regresar de Mercado Pago con éxito (?payment=success)
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment') === 'success') {
+                const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
+                const clientBank = localStorage.getItem('temp_client_bank') || '';
+                const deliveryType = localStorage.getItem('temp_delivery_type') || 'local';
+                const address = localStorage.getItem('temp_address') || '';
+                const phone = localStorage.getItem('temp_phone') || '';
+                const savedLat = localStorage.getItem('temp_lat');
+                const savedLng = localStorage.getItem('temp_lng');
+                let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
+
+                if (pendingCart.length > 0) {
+                    const total = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+                    const commission = total * 0.0349;
+                    const netReceived = total - commission;
+
+                    db.collection("orders").add({
+                        clientName: clientName,
+                        clientBank: clientBank,
+                        items: pendingCart,
+                        total: total,
+                        commission: commission,
+                        netReceived: netReceived,
+                        deliveryType: deliveryType,
+                        address: address,
+                        phone: phone,
+                        lat: savedLat ? parseFloat(savedLat) : null,
+                        lng: savedLng ? parseFloat(savedLng) : null,
+                        paymentMethod: 'tarjeta (Mercado Pago)',
+                        cashAmount: 0,
+                        change: 0,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        alert("¡Pago con tarjeta completado y pedido registrado con éxito!");
+                        localStorage.removeItem('temp_cart');
+                        localStorage.removeItem('temp_lat');
+                        localStorage.removeItem('temp_lng');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }).catch((error) => {
+                        console.error("Error al registrar orden pagada:", error);
+                    });
+                }
+            }
+        });
+
         db.collection("config").doc("main").onSnapshot((doc) => {
             if (doc.exists) {
                 storeConfig = doc.data();
@@ -266,6 +323,26 @@
                     mapLink = `<a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" class="text-blue-600 underline font-semibold">📍 Ver ubicación exacta en Google Maps</a>`;
                 }
 
+                let paymentDetails = "";
+                if (order.paymentMethod.includes('tarjeta')) {
+                    paymentDetails = `
+                        <div class="bg-blue-50 p-2 rounded text-xs my-1 text-blue-900 border border-blue-100">
+                            <p class="font-semibold">💳 Detalle de Cobro (Mercado Pago):</p>
+                            <p>• Total cobrado al cliente: <b>$${order.total.toFixed(2)}</b></p>
+                            <p>• Comisión retenida (3.49%): <b>-$${(order.commission || (order.total * 0.0349)).toFixed(2)}</b></p>
+                            <p>• Neto recibido en cuenta: <b class="text-green-700">$${(order.netReceived || (order.total * (1 - 0.0349))).toFixed(2)}</b></p>
+                        </div>
+                    `;
+                } else if (order.paymentMethod === 'efectivo') {
+                    paymentDetails = `
+                        <p class="text-xs font-bold pt-1">Pago: EFECTIVO (Paga con $${order.cashAmount} - Cambio a entregar: <span class="text-green-600">$${order.change.toFixed(2)}</span>)</p>
+                    `;
+                } else {
+                    paymentDetails = `
+                        <p class="text-xs font-bold pt-1">Pago: TRANSFERENCIA</p>
+                    `;
+                }
+
                 ordersHtml += `
                     <div class="bg-white p-3 rounded-lg border shadow-sm space-y-1">
                         <div class="flex justify-between font-bold text-xs text-gray-500">
@@ -282,8 +359,10 @@
                             <ul class="pl-2">${itemsList}</ul>
                         </div>
 
+                        ${paymentDetails}
+
                         <div class="flex justify-between items-center text-xs font-bold pt-1 border-t">
-                            <span>Pago: ${order.paymentMethod.toUpperCase()} ${order.cashAmount ? `(Paga con $${order.cashAmount} - Cambio: $${order.change.toFixed(2)})` : ''}</span>
+                            <span>Método: ${order.paymentMethod.toUpperCase()}</span>
                             <span class="text-orange-600 text-sm">Total: $${order.total.toFixed(2)}</span>
                         </div>
                         <button onclick="deleteOrder('${doc.id}')" class="w-full mt-2 bg-red-600 text-white py-1 rounded text-xs font-bold">Marcar como Entregado / Borrar</button>
@@ -319,6 +398,11 @@
             });
             document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Tu carrito está vacío</p>';
             document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
+            
+            // Actualizar cálculo neto de Mercado Pago (3.49%)
+            const net = total * (1 - 0.0349);
+            document.getElementById("mp-net-amount").innerText = `$${net.toFixed(2)}`;
+
             calculateChange();
         }
 
@@ -329,7 +413,6 @@
 
         function openCart() { 
             document.getElementById("cart-modal").classList.remove("hidden"); 
-            // Si está abierto el domicilio, inicializar el mapa Leaflet
             setTimeout(() => {
                 if (document.getElementById("delivery-type").value === "domicilio") {
                     initDeliveryMap();
@@ -342,6 +425,7 @@
         function togglePaymentFields() {
             const method = document.getElementById("payment-method").value;
             document.getElementById("cash-fields").classList.toggle("hidden", method !== "efectivo");
+            document.getElementById("tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
             document.getElementById("transfer-fields").classList.toggle("hidden", method !== "transferencia");
         }
 
@@ -362,7 +446,7 @@
                 deliveryMap.invalidateSize();
                 return;
             }
-            // Coordenadas predeterminadas (Yurécuaro, Michoacán aprox)
+            // Coordenadas predeterminadas (Yurécuaro, Michoacán)
             const defaultLat = 20.3333;
             const defaultLng = -102.2333;
 
@@ -435,6 +519,24 @@
                 }
             }
 
+            // Si es tarjeta, guardamos temporalmente en localStorage y redirigimos a Mercado Pago
+            if (paymentMethod === "tarjeta") {
+                localStorage.setItem('temp_client_name', name);
+                localStorage.setItem('temp_client_bank', clientBank);
+                localStorage.setItem('temp_delivery_type', deliveryType);
+                localStorage.setItem('temp_address', address);
+                localStorage.setItem('temp_phone', phone);
+                if (selectedLat && selectedLng) {
+                    localStorage.setItem('temp_lat', selectedLat);
+                    localStorage.setItem('temp_lng', selectedLng);
+                }
+                localStorage.setItem('temp_cart', JSON.stringify(cart));
+
+                alert("Redirigiendo a Mercado Pago para completar tu pago de forma segura...");
+                window.location.href = "https://link.mercadopago.com.mx/primox";
+                return;
+            }
+
             let cashAmount = 0;
             let change = 0;
             const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
@@ -477,7 +579,6 @@
             }
         }
 
-        // Función para borrar todos los pedidos de prueba de Firestore
         async function clearAllOrders() {
             if (confirm("¿Estás seguro de borrar TODOS los pedidos de prueba actuales?")) {
                 const snapshot = await db.collection("orders").get();
