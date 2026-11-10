@@ -264,6 +264,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Forzar red activa para tiempo real inmediato sin retrasos
+        db.enableNetwork().catch(err => console.log(err));
+
         let menuItems = [];
         let cart = [];
         let storeConfig = { bank: "No configurada", address: "Local principal" };
@@ -397,17 +400,16 @@
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
-        // Escuchar TODOS los pedidos y reservas en tiempo real de forma acumulativa y segura
+        // Escucha en tiempo real de pedidos y reservas (Acumulativo y sin retrasos)
         db.collection("orders").onSnapshot((snapshot) => {
             let ordersList = [];
             snapshot.forEach((doc) => {
                 ordersList.push({ id: doc.id, ...doc.data() });
             });
 
-            // Ordenar en memoria por timestamp (descendente) de manera segura
             ordersList.sort((a, b) => {
-                const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
-                const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
+                const timeA = a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0;
+                const timeB = b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0;
                 return timeB - timeA;
             });
 
