@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- This site is hosted on Netlify. Anyone can build and deploy a site     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=294c71c4-7245-474f-bdd4-3401775a535f     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primo - Comida a Domicilio y Para Llevar</title>
     <!-- Tailwind CSS CDN -->
@@ -9,8 +10,14 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- Leaflet CSS & JS para el Mapa Interactivo -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f97316">
+    <style>
+        #delivery-map { height: 200px; width: 100%; border-radius: 0.5rem; z-index: 10; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans pb-20">
     <!-- Header -->
@@ -32,7 +39,7 @@
         <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm mb-4">
             <h2 class="font-bold text-lg mb-2">Tus Datos</h2>
             <input type="text" id="client-name" placeholder="Tu Nombre *" class="w-full p-2 border rounded-lg mb-2 text-sm">
-            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional)" class="w-full p-2 border rounded-lg text-sm">
+            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional para efectivo)" class="w-full p-2 border rounded-lg text-sm">
         </section>
 
         <!-- Menú de Comida -->
@@ -62,7 +69,6 @@
                 <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
                 <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                     <option value="efectivo">Efectivo</option>
-                    <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
                     <option value="transferencia">Transferencia (Cuenta de la Empresa)</option>
                 </select>
 
@@ -71,16 +77,6 @@
                     <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>
                     <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
                     <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
-                </div>
-
-                <!-- Si es tarjeta (Mercado Pago) -->
-                <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se descontará una comisión del 3.49% correspondiente al servicio de cobro.</p>
-                    <div class="bg-white p-2 rounded border border-blue-100 flex justify-between text-xs font-bold text-gray-700">
-                        <span>Monto neto que recibe el negocio:</span>
-                        <span id="mp-net-amount" class="text-blue-600">$0.00</span>
-                    </div>
                 </div>
 
                 <!-- Si es transferencia -->
@@ -106,8 +102,12 @@
 
                 <!-- Si es a domicilio -->
                 <div id="domicilio-fields" class="hidden space-y-2">
-                    <input type="text" id="delivery-address" placeholder="Ubicación exacta / Referencias de tu casa" class="w-full p-2 border rounded-lg text-sm">
+                    <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">
                     <input type="tel" id="delivery-phone" placeholder="Número telefónico de contacto" class="w-full p-2 border rounded-lg text-sm">
+                    
+                    <label class="block text-xs font-semibold text-gray-700 mt-2">📍 Selecciona tu ubicación exacta en el mapa:</label>
+                    <div id="delivery-map"></div>
+                    <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
                 </div>
             </div>
 
@@ -133,7 +133,10 @@
             <div id="admin-panel-view" class="hidden space-y-6">
                 <!-- Pedidos Entrantes -->
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
-                    <h4 class="font-bold text-orange-900 mb-2">📦 Pedidos Entrantes en Vivo</h4>
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-bold text-orange-900">📦 Pedidos Entrantes en Vivo</h4>
+                        <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Pedidos</button>
+                    </div>
                     <div id="admin-orders-list" class="space-y-3 text-sm">
                         <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
                     </div>
@@ -191,47 +194,10 @@
         let menuItems = [];
         let cart = [];
         let storeConfig = { bank: "No configurada", address: "Local principal" };
-
-        // Detección automática al regresar de Mercado Pago con éxito (?payment=success)
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('payment') === 'success') {
-                const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
-                const clientBank = localStorage.getItem('temp_client_bank') || '';
-                const deliveryType = localStorage.getItem('temp_delivery_type') || 'local';
-                const address = localStorage.getItem('temp_address') || '';
-                const phone = localStorage.getItem('temp_phone') || '';
-                let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
-
-                if (pendingCart.length > 0) {
-                    const total = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-                    const commission = total * 0.0349;
-                    const netReceived = total - commission;
-
-                    db.collection("orders").add({
-                        clientName: clientName,
-                        clientBank: clientBank,
-                        items: pendingCart,
-                        total: total,
-                        commission: commission,
-                        netReceived: netReceived,
-                        deliveryType: deliveryType,
-                        address: address,
-                        phone: phone,
-                        paymentMethod: 'tarjeta (Mercado Pago)',
-                        cashAmount: 0,
-                        change: 0,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    }).then(() => {
-                        alert("¡Pago con tarjeta completado y pedido registrado con éxito!");
-                        localStorage.removeItem('temp_cart');
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    }).catch((error) => {
-                        console.error("Error al registrar orden pagada:", error);
-                    });
-                }
-            }
-        });
+        let deliveryMap = null;
+        let deliveryMarker = null;
+        let selectedLat = null;
+        let selectedLng = null;
 
         db.collection("config").doc("main").onSnapshot((doc) => {
             if (doc.exists) {
@@ -283,7 +249,7 @@
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
-        // Escuchar pedidos en tiempo real en el Admin con cálculo detallado de comisiones y montos
+        // Escuchar pedidos en tiempo real
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             let ordersHtml = "";
             snapshot.forEach((doc) => {
@@ -295,24 +261,9 @@
                     itemsList += `<li>• ${i.name} (x${i.qty}) - $${i.price * i.qty}</li>`;
                 });
 
-                let paymentDetails = "";
-                if (order.paymentMethod.includes('tarjeta')) {
-                    paymentDetails = `
-                        <div class="bg-blue-50 p-2 rounded text-xs my-1 text-blue-900 border border-blue-100">
-                            <p class="font-semibold">💳 Detalle de Cobro (Mercado Pago):</p>
-                            <p>• Total cobrado al cliente: <b>$${order.total.toFixed(2)}</b></p>
-                            <p>• Comisión retenida (3.49%): <b>-$${(order.commission || (order.total * 0.0349)).toFixed(2)}</b></p>
-                            <p>• Neto recibido en cuenta: <b class="text-green-700">$${(order.netReceived || (order.total * (1 - 0.0349))).toFixed(2)}</b></p>
-                        </div>
-                    `;
-                } else if (order.paymentMethod === 'efectivo') {
-                    paymentDetails = `
-                        <p class="text-xs font-bold pt-1">Pago: EFECTIVO (Paga con $${order.cashAmount} - Cambio a entregar: <span class="text-green-600">$${order.change.toFixed(2)}</span>)</p>
-                    `;
-                } else {
-                    paymentDetails = `
-                        <p class="text-xs font-bold pt-1">Pago: TRANSFERENCIA</p>
-                    `;
+                let mapLink = "";
+                if (order.lat && order.lng) {
+                    mapLink = `<a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" class="text-blue-600 underline font-semibold">📍 Ver ubicación exacta en Google Maps</a>`;
                 }
 
                 ordersHtml += `
@@ -324,16 +275,15 @@
                         <p class="font-bold text-gray-900">${order.clientName} ${order.clientBank ? `(Cuenta: ${order.clientBank})` : ''}</p>
                         <p class="text-xs text-gray-700">📞 Tel: <b>${order.phone || 'No proporcionado'}</b></p>
                         ${order.deliveryType === 'domicilio' ? `<p class="text-xs text-gray-700">📍 Dir: <b>${order.address}</b></p>` : ''}
+                        ${mapLink ? `<div class="mt-1">${mapLink}</div>` : ''}
                         
                         <div class="bg-gray-50 p-2 rounded text-xs my-1">
                             <p class="font-semibold">Platillos:</p>
                             <ul class="pl-2">${itemsList}</ul>
                         </div>
 
-                        ${paymentDetails}
-
                         <div class="flex justify-between items-center text-xs font-bold pt-1 border-t">
-                            <span>Método: ${order.paymentMethod.toUpperCase()}</span>
+                            <span>Pago: ${order.paymentMethod.toUpperCase()} ${order.cashAmount ? `(Paga con $${order.cashAmount} - Cambio: $${order.change.toFixed(2)})` : ''}</span>
                             <span class="text-orange-600 text-sm">Total: $${order.total.toFixed(2)}</span>
                         </div>
                         <button onclick="deleteOrder('${doc.id}')" class="w-full mt-2 bg-red-600 text-white py-1 rounded text-xs font-bold">Marcar como Entregado / Borrar</button>
@@ -369,11 +319,6 @@
             });
             document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Tu carrito está vacío</p>';
             document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
-            
-            // Actualizar cálculo neto de Mercado Pago (3.49%)
-            const net = total * (1 - 0.0349);
-            document.getElementById("mp-net-amount").innerText = `$${net.toFixed(2)}`;
-
             calculateChange();
         }
 
@@ -382,13 +327,21 @@
             updateCartUI();
         }
 
-        function openCart() { document.getElementById("cart-modal").classList.remove("hidden"); }
+        function openCart() { 
+            document.getElementById("cart-modal").classList.remove("hidden"); 
+            // Si está abierto el domicilio, inicializar el mapa Leaflet
+            setTimeout(() => {
+                if (document.getElementById("delivery-type").value === "domicilio") {
+                    initDeliveryMap();
+                }
+            }, 200);
+        }
+
         function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
 
         function togglePaymentFields() {
             const method = document.getElementById("payment-method").value;
             document.getElementById("cash-fields").classList.toggle("hidden", method !== "efectivo");
-            document.getElementById("tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
             document.getElementById("transfer-fields").classList.toggle("hidden", method !== "transferencia");
         }
 
@@ -396,6 +349,47 @@
             const type = document.getElementById("delivery-type").value;
             document.getElementById("local-delivery-info").classList.toggle("hidden", type !== "local");
             document.getElementById("domicilio-fields").classList.toggle("hidden", type !== "domicilio");
+            
+            if (type === "domicilio") {
+                setTimeout(() => {
+                    initDeliveryMap();
+                }, 200);
+            }
+        }
+
+        function initDeliveryMap() {
+            if (deliveryMap) {
+                deliveryMap.invalidateSize();
+                return;
+            }
+            // Coordenadas predeterminadas (Yurécuaro, Michoacán aprox)
+            const defaultLat = 20.3333;
+            const defaultLng = -102.2333;
+
+            deliveryMap = L.map('delivery-map').setView([defaultLat, defaultLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(deliveryMap);
+
+            deliveryMap.on('click', function(e) {
+                selectedLat = e.latlng.lat;
+                selectedLng = e.latlng.lng;
+
+                if (deliveryMarker) {
+                    deliveryMarker.setLatLng([selectedLat, selectedLng]);
+                } else {
+                    deliveryMarker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(deliveryMap);
+                    deliveryMarker.on('dragend', function(event) {
+                        const marker = event.target;
+                        const position = marker.getLatLng();
+                        selectedLat = position.lat;
+                        selectedLng = position.lng;
+                        document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
+                    });
+                }
+                document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
+            });
         }
 
         function calculateChange() {
@@ -432,23 +426,13 @@
                 address = document.getElementById("delivery-address").value.trim();
                 phone = document.getElementById("delivery-phone").value.trim();
                 if (!address || !phone) {
-                    alert("Por favor ingresa tu dirección y número telefónico para la entrega a domicilio.");
+                    alert("Por favor ingresa tus referencias y número telefónico para la entrega a domicilio.");
                     return;
                 }
-            }
-
-            // Si es tarjeta, guardamos temporalmente en localStorage y redirigimos al Link de Mercado Pago
-            if (paymentMethod === "tarjeta") {
-                localStorage.setItem('temp_client_name', name);
-                localStorage.setItem('temp_client_bank', clientBank);
-                localStorage.setItem('temp_delivery_type', deliveryType);
-                localStorage.setItem('temp_address', address);
-                localStorage.setItem('temp_phone', phone);
-                localStorage.setItem('temp_cart', JSON.stringify(cart));
-
-                alert("Redirigiendo a Mercado Pago para completar tu pago de forma segura...");
-                window.location.href = "https://link.mercadopago.com.mx/primox";
-                return;
+                if (!selectedLat || !selectedLng) {
+                    alert("Por favor selecciona tu ubicación exacta en el mapa.");
+                    return;
+                }
             }
 
             let cashAmount = 0;
@@ -462,7 +446,7 @@
                 }
             }
 
-            // Guardar pedido en Firestore para efectivo o transferencia
+            // Guardar pedido en Firestore
             db.collection("orders").add({
                 clientName: name,
                 clientBank: clientBank || "",
@@ -471,6 +455,8 @@
                 deliveryType: deliveryType,
                 address: address,
                 phone: phone,
+                lat: selectedLat || null,
+                lng: selectedLng || null,
                 paymentMethod: paymentMethod,
                 cashAmount: cashAmount,
                 change: change,
@@ -488,6 +474,19 @@
         function deleteOrder(orderId) {
             if (confirm("¿Deseas marcar este pedido como entregado y eliminarlo de la lista?")) {
                 db.collection("orders").doc(orderId).delete();
+            }
+        }
+
+        // Función para borrar todos los pedidos de prueba de Firestore
+        async function clearAllOrders() {
+            if (confirm("¿Estás seguro de borrar TODOS los pedidos de prueba actuales?")) {
+                const snapshot = await db.collection("orders").get();
+                const batch = db.batch();
+                snapshot.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                alert("Todos los pedidos han sido eliminados.");
             }
         }
 
@@ -520,7 +519,6 @@
             const available = document.getElementById("dish-available").value === "true";
 
             if (!name || !price) { alert("El nombre y el precio son obligatorios."); return; }
-
             const dishData = { name, price, description, image, available };
             if (id) {
                 db.collection("menu").doc(id).update(dishData).then(() => resetDishForm());
