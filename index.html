@@ -162,7 +162,7 @@
         </div>
     </div>
 
-    <!-- Modal Agendar Pedido a Futuro -->
+    <!-- Modal Agendar Pedido a Futuro (Reserva) -->
     <div id="schedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4">
             <div class="flex justify-between items-center">
@@ -171,7 +171,7 @@
             </div>
             
             <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
-                Selecciona la fecha y hora en que deseas recibir tu comida. El administrador revisará la disponibilidad y te confirmará.
+                Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para pedidos a futuro solo está disponible el pago por transferencia o tarjeta.
             </div>
 
             <div>
@@ -182,6 +182,29 @@
             <div>
                 <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>
                 <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">
+            </div>
+
+            <!-- Método de Pago exclusivo para Reservas (Sin efectivo) -->
+            <div>
+                <label class="block font-semibold text-sm mb-1">Método de Pago para la Reserva:</label>
+                <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
+                    <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>
+                </select>
+
+                <!-- Si es tarjeta en reserva -->
+                <div id="schedule-tarjeta-fields" class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
+                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago.</p>
+                </div>
+
+                <!-- Si es transferencia en reserva -->
+                <div id="schedule-transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
+                    <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>
+                    <p id="schedule-company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando...</p>
+                    <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>
+                    <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o CLABE de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
+                </div>
             </div>
 
             <div>
@@ -363,7 +386,6 @@
             }
         }
 
-        // Función para que el cliente vea el estatus de sus propios pedidos en tiempo real
         function loadClientOrders(phone) {
             if (!phone) return;
             db.collection("orders").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
@@ -410,7 +432,9 @@
         db.collection("config").doc("main").onSnapshot((doc) => {
             if (doc.exists) {
                 storeConfig = doc.data();
-                document.getElementById("company-bank-info").innerText = sanitizeText(storeConfig.bank) || "No registrada";
+                const bankText = sanitizeText(storeConfig.bank) || "No registrada";
+                document.getElementById("company-bank-info").innerText = bankText;
+                document.getElementById("schedule-company-bank-info").innerText = bankText;
                 document.getElementById("store-address-display").innerText = sanitizeText(storeConfig.address) || "No especificada";
                 document.getElementById("admin-company-bank").value = storeConfig.bank || "";
                 document.getElementById("admin-store-address").value = storeConfig.address || "";
@@ -605,6 +629,12 @@
             document.getElementById("transfer-fields").classList.toggle("hidden", method !== "transferencia");
         }
 
+        function toggleSchedulePaymentFields() {
+            const method = document.getElementById("schedule-payment-method").value;
+            document.getElementById("schedule-tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
+            document.getElementById("schedule-transfer-fields").classList.toggle("hidden", method !== "transferencia");
+        }
+
         function toggleDeliveryFields() {
             const type = document.getElementById("delivery-type").value;
             document.getElementById("local-delivery-info").classList.toggle("hidden", type !== "local");
@@ -739,9 +769,11 @@
             let scheduleTime = "";
             let orderLat = null;
             let orderLng = null;
+            let paymentMethod = "";
 
             if (type === 'inmediato') {
                 deliveryType = document.getElementById("delivery-type").value;
+                paymentMethod = document.getElementById("payment-method").value;
                 if (deliveryType === "domicilio") {
                     address = sanitizeText(document.getElementById("delivery-address").value);
                     orderLat = selectedLat;
@@ -755,6 +787,8 @@
                 orderLat = scheduleLat;
                 orderLng = scheduleLng;
                 deliveryType = "domicilio";
+                paymentMethod = document.getElementById("schedule-payment-method").value;
+
                 if (!scheduleDate || !scheduleTime || !address) {
                     alert("Por favor completa la fecha, hora y referencias para tu reserva.");
                     return;
@@ -764,8 +798,6 @@
                     return;
                 }
             }
-
-            const paymentMethod = document.getElementById("payment-method").value;
 
             if (paymentMethod === "tarjeta" && type === 'inmediato') {
                 localStorage.setItem('temp_client_name', name);
@@ -784,6 +816,11 @@
                 return;
             }
 
+            // Si eligen pago con tarjeta en reserva (futuro)
+            if (paymentMethod === "tarjeta" && type === 'futuro') {
+                alert("Para reservas con tarjeta, comunícate o realiza tu pago en el enlace de Mercado Pago. Registraremos tu solicitud.");
+            }
+
             let cashAmount = 0;
             let change = 0;
             let transferAmount = 0;
@@ -794,8 +831,8 @@
                 cashAmount = parseFloat(document.getElementById("cash-amount").value) || 0;
                 if (cashAmount >= total) change = cashAmount - total;
             } else if (paymentMethod === "transferencia") {
-                transferAmount = parseFloat(document.getElementById("transfer-amount").value) || 0;
-                transferClabe = sanitizeText(document.getElementById("transfer-clabe").value);
+                const transferInputId = type === 'futuro' ? "schedule-transfer-clabe" : "transfer-clabe";
+                transferClabe = sanitizeText(document.getElementById(transferInputId).value);
             }
 
             db.collection("orders").add({
