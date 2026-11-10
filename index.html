@@ -306,7 +306,7 @@
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
-        // Escuchar pedidos en tiempo real
+        // Escuchar pedidos en tiempo real (Soporta múltiples pedidos de forma simultánea)
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             let ordersHtml = "";
             snapshot.forEach((doc) => {
@@ -399,7 +399,6 @@
             document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Tu carrito está vacío</p>';
             document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
             
-            // Actualizar cálculo neto de Mercado Pago (3.49%)
             const net = total * (1 - 0.0349);
             document.getElementById("mp-net-amount").innerText = `$${net.toFixed(2)}`;
 
@@ -446,7 +445,6 @@
                 deliveryMap.invalidateSize();
                 return;
             }
-            // Coordenadas predeterminadas (Yurécuaro, Michoacán)
             const defaultLat = 20.3333;
             const defaultLng = -102.2333;
 
@@ -519,7 +517,6 @@
                 }
             }
 
-            // Si es tarjeta, guardamos temporalmente en localStorage y redirigimos a Mercado Pago
             if (paymentMethod === "tarjeta") {
                 localStorage.setItem('temp_client_name', name);
                 localStorage.setItem('temp_client_bank', clientBank);
@@ -548,7 +545,6 @@
                 }
             }
 
-            // Guardar pedido en Firestore
             db.collection("orders").add({
                 clientName: name,
                 clientBank: clientBank || "",
@@ -655,4 +651,3 @@
     </script>
 </body>
 </html>
-<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="294c71c4-7245-474f-bdd4-3401775a535f" data-app-host="app.netlify.com" data-account-tier="free"></script>
