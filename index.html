@@ -14,8 +14,6 @@
     <!-- Leaflet CSS & JS para los Mapas Interactivos -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Conekta Checkout Script -->
-    <script crossorigin src="https://pay.conekta.com/v1.0/js/conekta-checkout.min.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f97316">
     <style>
@@ -98,9 +96,8 @@
                 <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
                 <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                     <option value="efectivo">Efectivo</option>
-                    <option value="conekta">Conekta (Tarjeta, SPEI y OXXO)</option>
                     <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                    <option value="transferencia">Transferencia (Cuenta)</option>
+                    <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>
                 </select>
 
                 <!-- Si es efectivo -->
@@ -110,21 +107,30 @@
                     <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
                 </div>
 
-                <!-- Contenedor Conekta Checkout Componente -->
-                <div id="conekta-fields" class="hidden space-y-2">
-                    <div id="conekta-checkout-container" style="min-height: 400px;"></div>
-                </div>
-
-                <!-- Si es tarjeta (Mercado Pago) -->
+                <!-- Si es tarjeta (Mercado Pago) con aviso de comisión actualizado -->
                 <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
                     <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago.</p>
+                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se aplica la comisión por cobro (3.49%) + $4.64.</p>
+                    <div class="bg-white p-2 rounded border border-blue-100 flex justify-between text-xs font-bold text-gray-700">
+                        <span>Monto neto que recibe el negocio:</span>
+                        <span id="mp-net-amount" class="text-blue-600">$0.00</span>
+                    </div>
                 </div>
 
                 <!-- Si es transferencia -->
                 <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
-                    <p class="font-semibold text-orange-800">💳 CLABE para transferencia:</p>
-                    <p id="company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando...</p>
+                    <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>
+                    <p id="company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando CLABE Mercado Pago...</p>
+                    <p class="text-xs text-orange-700">Por favor realiza tu transferencia SPEI a esta CLABE oficial de Mercado Pago asignada al negocio.</p>
+                    
+                    <div class="border-t border-orange-200 pt-2 mt-2">
+                        <label class="block text-xs font-semibold text-orange-900 mb-1">Confirma el monto transferido:</label>
+                        <input type="number" id="transfer-amount" placeholder="Ej. 150" oninput="calculateTransferChange()" class="w-full p-2 bg-white border rounded-lg text-sm mb-2">
+                        <p id="transfer-change-text" class="text-xs font-semibold text-green-700"></p>
+                        
+                        <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>
+                        <input type="text" id="transfer-clabe" placeholder="Ej. Folio o CLABE desde donde transferiste" class="w-full p-2 bg-white border rounded-lg text-sm">
+                    </div>
                 </div>
             </div>
 
@@ -149,7 +155,7 @@
                 </div>
             </div>
 
-            <button id="confirm-order-btn" onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
+            <button onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
                 Confirmar Pedido Inmediato
             </button>
         </div>
@@ -164,7 +170,7 @@
             </div>
             
             <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
-                Selecciona la fecha y hora de tu reserva.
+                Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para pedidos a futuro solo está disponible el pago por transferencia o tarjeta.
             </div>
             <div>
                 <label class="block font-semibold text-sm mb-1">Fecha de Recepción:</label>
@@ -174,12 +180,36 @@
                 <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>
                 <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">
             </div>
+            <!-- Método de Pago exclusivo para Reservas -->
             <div>
-                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
-                <select id="schedule-payment-method" class="w-full p-2 border rounded-lg text-sm mb-2">
-                    <option value="tarjeta">Tarjeta (Mercado Pago)</option>
-                    <option value="transferencia">Transferencia</option>
+                <label class="block font-semibold text-sm mb-1">Método de Pago para la Reserva:</label>
+                <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
+                    <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>
                 </select>
+
+                <!-- Si es tarjeta en reserva con aviso de comisión actualizado -->
+                <div id="schedule-tarjeta-fields" class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+                    <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
+                    <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se aplica la comisión por cobro (3.49%) + $4.64.</p>
+                </div>
+
+                <!-- Si es transferencia en reserva -->
+                <div id="schedule-transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
+                    <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>
+                    <p id="schedule-company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando...</p>
+                    <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>
+                    <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o CLABE de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
+                </div>
+            </div>
+            <div>
+                <label class="block font-semibold text-sm mb-1">Referencias de Entrega:</label>
+                <input type="text" id="schedule-address" placeholder="Calle, número, fachada o detalles de tu casa" class="w-full p-2 border rounded-lg text-sm mb-2">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">📍 Selecciona tu ubicación exacta de entrega en el mapa:</label>
+                <div id="schedule-map"></div>
+                <p id="schedule-map-coords-text" class="text-xs text-gray-500 mt-1">Haz clic en el mapa para fijar tu ubicación.</p>
             </div>
             <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">
                 Enviar Solicitud de Reserva
@@ -202,26 +232,28 @@
             <div id="admin-panel-view" class="hidden space-y-6">
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
                     <div class="flex justify-between items-center mb-2">
-                        <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo</h4>
-                        <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold">🗑️ Borrar Todo</button>
+                        <h4 class="font-bold text-orange-900">📦 Pedidos y Reservas en Vivo (Acumulados)</h4>
+                        <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Todo</button>
                     </div>
-                    <div id="admin-orders-list" class="space-y-3 text-sm"></div>
+                    <div id="admin-orders-list" class="space-y-3 text-sm">
+                        <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
+                    </div>
                 </div>
                 <div class="border-b pb-4">
                     <h4 class="font-bold mb-2">Configuración General</h4>
-                    <label class="text-xs text-gray-600">CLABE de la empresa:</label>
-                    <input type="text" id="admin-company-bank" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <label class="text-xs text-gray-600">CLABE / Cuenta Mercado Pago de la empresa:</label>
+                    <input type="text" id="admin-company-bank" placeholder="Ej. 722969010040237064" class="w-full p-2 border rounded-lg text-sm mb-2">
                     <label class="text-xs text-gray-600">Dirección física del local:</label>
                     <input type="text" id="admin-store-address" class="w-full p-2 border rounded-lg text-sm mb-2">
-                    <button onclick="saveConfig()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Guardar</button>
+                    <button onclick="saveConfig()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Guardar Configuración</button>
                 </div>
                 <div class="border-b pb-4">
                     <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
                     <input type="hidden" id="edit-dish-id">
-                    <input type="text" id="dish-name" placeholder="Nombre" class="w-full p-2 border rounded-lg text-sm mb-2">
-                    <input type="number" id="dish-price" placeholder="Precio" class="w-full p-2 border rounded-lg text-sm mb-2">
-                    <input type="text" id="dish-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg text-sm mb-2">
-                    <input type="text" id="dish-img" placeholder="URL imagen" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="text" id="dish-name" placeholder="Nombre del platillo" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="text" id="dish-desc" placeholder="Descripción corta" class="w-full p-2 border rounded-lg text-sm mb-2">
+                    <input type="text" id="dish-img" placeholder="URL de la imagen" class="w-full p-2 border rounded-lg text-sm mb-2">
                     <select id="dish-available" class="w-full p-2 border rounded-lg text-sm mb-2">
                         <option value="true">Disponible</option>
                         <option value="false">Agotado</option>
@@ -236,7 +268,7 @@
         </div>
     </div>
 
-    <!-- Script Principal -->
+    <!-- Script de Firebase y Lógica -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
@@ -249,11 +281,13 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        db.enableNetwork().catch(err => console.log(err));
 
         let menuItems = [];
         let cart = [];
         let storeConfig = { bank: "No configurada", address: "Local principal" };
         let deliveryMap = null, deliveryMarker = null, selectedLat = null, selectedLng = null;
+        let scheduleMap = null, scheduleMarker = null, scheduleLat = null, scheduleLng = null;
 
         function sanitizeText(str) {
             if (!str) return '';
@@ -268,6 +302,58 @@
                 document.getElementById('client-phone').value = sanitizeText(savedPhone);
                 document.getElementById('user-registered-badge').classList.remove('hidden');
                 loadClientOrders(savedPhone);
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('schedule-date');
+            if (dateInput) {
+                dateInput.min = today;
+                dateInput.value = today;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment') === 'success') {
+                const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
+                const clientPhone = localStorage.getItem('temp_client_phone') || '';
+                const clientBank = localStorage.getItem('temp_client_bank') || '';
+                const deliveryType = localStorage.getItem('temp_delivery_type') || 'local';
+                const address = localStorage.getItem('temp_address') || '';
+                const savedLat = localStorage.getItem('temp_lat');
+                const savedLng = localStorage.getItem('temp_lng');
+                let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
+
+                if (pendingCart.length > 0) {
+                    const total = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+                    const commission = (total * 0.0349) + 4.64;
+                    const netReceived = total - commission;
+
+                    db.collection("orders").add({
+                        clientName: sanitizeText(clientName),
+                        clientPhone: sanitizeText(clientPhone),
+                        clientBank: sanitizeText(clientBank),
+                        items: pendingCart,
+                        total: total,
+                        commission: commission,
+                        netReceived: netReceived,
+                        deliveryType: deliveryType,
+                        address: sanitizeText(address),
+                        lat: savedLat ? parseFloat(savedLat) : null,
+                        lng: savedLng ? parseFloat(savedLng) : null,
+                        paymentMethod: 'tarjeta (Mercado Pago)',
+                        status: 'Pendiente',
+                        orderType: 'Inmediato',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(() => {
+                        alert("¡Pago con tarjeta completado y pedido registrado con éxito!");
+                        localStorage.removeItem('temp_cart');
+                        localStorage.removeItem('temp_lat');
+                        localStorage.removeItem('temp_lng');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        if (clientPhone) loadClientOrders(clientPhone);
+                    }).catch((error) => {
+                        console.error("Error al registrar orden pagada:", error);
+                    });
+                }
             }
         });
 
@@ -291,17 +377,51 @@
                     hasOrders = true;
                     const order = doc.data();
                     const status = order.status || 'Pendiente';
-                    myOrdersHtml += `<div class="p-2.5 rounded-lg border bg-yellow-50"><b>Total: $${order.total.toFixed(2)}</b> - ${status}</div>`;
+                    let statusColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                    let statusText = '⏳ Pedido Pendiente de Revisión';
+
+                    if (status === 'Aceptado') {
+                        statusColor = 'bg-green-100 text-green-900 border-green-300';
+                        statusText = '🎉 ¡Pedido Aceptado / En Preparación!';
+                    } else if (status === 'Rechazado') {
+                        statusColor = 'bg-red-100 text-red-900 border-red-300';
+                        statusText = '❌ Pedido Rechazado por el Local';
+                    }
+
+                    myOrdersHtml += `
+                        <div class="p-2.5 rounded-lg border ${statusColor} space-y-1">
+                            <div class="flex justify-between font-bold">
+                                <span>${order.orderType || 'Inmediato'} - Total: $${order.total.toFixed(2)}</span>
+                                <span>${status}</span>
+                            </div>
+                            <p class="font-semibold">${statusText}</p>
+                            ${order.orderType === 'Futuro' ? `<p class="text-xs">📅 Reserva: ${order.scheduleDate} a las ${order.scheduleTime}</p>` : ''}
+                        </div>
+                    `;
                 });
+
                 const section = document.getElementById("client-orders-status-section");
+                const list = document.getElementById("client-my-orders-list");
                 if (hasOrders) {
                     section.classList.remove("hidden");
-                    document.getElementById("client-my-orders-list").innerHTML = myOrdersHtml;
+                    list.innerHTML = myOrdersHtml;
                 } else {
                     section.classList.add("hidden");
                 }
             });
         }
+
+        db.collection("config").doc("main").onSnapshot((doc) => {
+            if (doc.exists) {
+                storeConfig = doc.data();
+                const bankText = sanitizeText(storeConfig.bank) || "No registrada";
+                document.getElementById("company-bank-info").innerText = bankText;
+                document.getElementById("schedule-company-bank-info").innerText = bankText;
+                document.getElementById("store-address-display").innerText = sanitizeText(storeConfig.address) || "No especificada";
+                document.getElementById("admin-company-bank").value = storeConfig.bank || "";
+                document.getElementById("admin-store-address").value = storeConfig.address || "";
+            }
+        });
 
         db.collection("menu").onSnapshot((snapshot) => {
             menuItems = [];
@@ -310,6 +430,8 @@
             snapshot.forEach((doc) => {
                 const item = { id: doc.id, ...doc.data() };
                 menuItems.push(item);
+                const isAvailable = item.available !== false;
+                
                 html += `
                     <div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center">
                         <img src="${item.image || 'https://via.placeholder.com/100'}" class="w-20 h-20 object-cover rounded-lg">
@@ -319,13 +441,17 @@
                             <p class="font-semibold text-orange-600">$${item.price}</p>
                         </div>
                         <div>
-                            <button onclick="addToCart('${item.id}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Agregar</button>
+                            ${isAvailable ? `<button onclick="addToCart('${item.id}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold">+ Agregar</button>` : '<span class="text-xs text-red-500 font-bold">Agotado</span>'}
                         </div>
                     </div>
                 `;
+
                 adminHtml += `
                     <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
-                        <div><p class="font-bold">${sanitizeText(item.name)} - $${item.price}</p></div>
+                        <div>
+                            <p class="font-bold">${sanitizeText(item.name)} - $${item.price}</p>
+                            <p class="text-xs text-gray-500">${isAvailable ? 'Disponible' : 'Agotado'}</p>
+                        </div>
                         <div class="flex gap-1">
                             <button onclick="editDish('${item.id}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs">Editar</button>
                             <button onclick="deleteDish('${item.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Eliminar</button>
@@ -333,8 +459,67 @@
                     </div>
                 `;
             });
-            document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay platillos.</p>';
+            document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay platillos en el menú.</p>';
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
+        });
+
+        db.collection("orders").onSnapshot((snapshot) => {
+            let ordersList = [];
+            snapshot.forEach((doc) => {
+                ordersList.push({ id: doc.id, ...doc.data() });
+            });
+
+            ordersList.sort((a, b) => {
+                const timeA = a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0;
+                const timeB = b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0;
+                return timeB - timeA;
+            });
+
+            let ordersHtml = "";
+            ordersList.forEach((order) => {
+                const dateStr = order.timestamp && order.timestamp.toDate ? new Date(order.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Reciente';
+                
+                let itemsList = "";
+                if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach(i => {
+                        itemsList += `<li>• ${sanitizeText(i.name)} (x${i.qty}) - $${i.price * i.qty}</li>`;
+                    });
+                }
+
+                let mapLink = "";
+                if (order.lat && order.lng) {
+                    mapLink = `<a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" class="text-blue-600 underline font-semibold">📍 Ver ubicación exacta en Google Maps</a>`;
+                }
+
+                let statusBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold ${order.status === 'Aceptado' ? 'bg-green-100 text-green-800' : order.status === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${order.status || 'Pendiente'}</span>`;
+                ordersHtml += `
+                    <div class="bg-white p-3 rounded-lg border shadow-sm space-y-2">
+                        <div class="flex justify-between font-bold text-xs text-gray-500">
+                            <span>🕒 ${dateStr} (${order.orderType || 'Inmediato'})</span>
+                            ${statusBadge}
+                        </div>
+                        <p class="font-bold text-gray-900">${sanitizeText(order.clientName)} 📞 ${sanitizeText(order.clientPhone)}</p>
+                        ${order.orderType === 'Futuro' ? `<p class="text-xs font-semibold text-amber-800">📅 Reserva para: ${sanitizeText(order.scheduleDate)} a las ${sanitizeText(order.scheduleTime)}</p>` : ''}
+                        ${order.address ? `<p class="text-xs text-gray-700">📍 Dir: <b>${sanitizeText(order.address)}</b></p>` : ''}
+                        ${mapLink ? `<div class="mt-1">${mapLink}</div>` : ''}
+                        
+                        <div class="bg-gray-50 p-2 rounded text-xs my-1">
+                            <p class="font-semibold">Platillos:</p>
+                            <ul class="pl-2">${itemsList}</ul>
+                        </div>
+
+                        <div class="text-xs font-semibold text-gray-700">
+                            Método: ${sanitizeText(order.paymentMethod).toUpperCase()} | Total: <span class="text-orange-600 font-bold">$${order.total ? order.total.toFixed(2) : '0.00'}</span>
+                        </div>
+
+                        <div class="flex gap-2 pt-1 border-t">
+                            <button onclick="updateOrderStatus('${order.id}', 'Aceptado')" class="flex-1 bg-green-600 text-white py-1 rounded text-xs font-bold hover:bg-green-700">✔ Aceptar</button>
+                            <button onclick="updateOrderStatus('${order.id}', 'Rechazado')" class="flex-1 bg-red-600 text-white py-1 rounded text-xs font-bold hover:bg-red-700">❌ Rechazar</button>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>';
         });
 
         function addToCart(id) {
@@ -368,6 +553,8 @@
             });
             document.getElementById("cart-items").innerHTML = html || '<p class="text-gray-500 text-sm">El carrito está vacío.</p>';
             document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
+            calculateChange();
+            calculateNetEarnings();
         }
 
         function changeQty(id, delta) {
@@ -378,6 +565,39 @@
                 cart = cart.filter(i => i.id !== id);
             }
             updateCartUI();
+        }
+
+        function calculateChange() {
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const cashInput = parseFloat(document.getElementById('cash-amount').value) || 0;
+            const changeText = document.getElementById('change-text');
+            if (cashInput >= total && total > 0) {
+                const change = cashInput - total;
+                changeText.innerText = `Cambio a devolver: $${change.toFixed(2)}`;
+            } else {
+                changeText.innerText = "";
+            }
+        }
+
+        function calculateNetEarnings() {
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const commission = (total * 0.0349) + 4.64;
+            const net = total - commission;
+            const netEl = document.getElementById('mp-net-amount');
+            if (netEl) {
+                netEl.innerText = `$${net > 0 ? net.toFixed(2) : '0.00'}`;
+            }
+        }
+
+        function calculateTransferChange() {
+            const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const transferInput = parseFloat(document.getElementById('transfer-amount').value) || 0;
+            const textEl = document.getElementById('transfer-change-text');
+            if (transferInput >= total) {
+                textEl.innerText = "✅ Monto cubre el total del pedido.";
+            } else {
+                textEl.innerText = "⚠️ El monto es menor al total del pedido.";
+            }
         }
 
         function openCart() {
@@ -392,13 +612,14 @@
         function togglePaymentFields() {
             const method = document.getElementById("payment-method").value;
             document.getElementById("cash-fields").classList.toggle("hidden", method !== "efectivo");
-            document.getElementById("conekta-fields").classList.toggle("hidden", method !== "conekta");
             document.getElementById("tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
             document.getElementById("transfer-fields").classList.toggle("hidden", method !== "transferencia");
+        }
 
-            if (method === "conekta") {
-                initConektaCheckout();
-            }
+        function toggleSchedulePaymentFields() {
+            const method = document.getElementById("schedule-payment-method").value;
+            document.getElementById("schedule-tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
+            document.getElementById("schedule-transfer-fields").classList.toggle("hidden", method !== "transferencia");
         }
 
         function toggleDeliveryFields() {
@@ -422,78 +643,143 @@
             });
         }
 
-        function initConektaCheckout() {
-            const container = document.getElementById("conekta-checkout-container");
-            container.innerHTML = ""; // Limpiar contenedor
-            
-            const options = {
-                backgroundMode: 'lightMode',
-                colorPrimary: '#f97316',
-                colorText: '#1f2937',
-                autoResize: true
-            };
-            const config = {
-                locale: 'es',
-                publicKey: 'key_6dPn049SxhSSgcgpXxhBljw',
-                targetIFrame: '#conekta-checkout-container',
-                checkoutRequestId: 'demo-checkout-id'
-            };
-            const callbacks = {
-                onFinalizePayment: function (order) {
-                    alert('¡Pago completado con éxito a través de Conekta!');
-                    checkoutOrder('inmediato');
-                },
-                onErrorPayment: function (error) {
-                    console.error('Error en pago Conekta:', error);
-                }
-            };
-            try {
-                if (window.ConektaCheckoutComponents) {
-                    window.ConektaCheckoutComponents.Integration({ config, callbacks, options });
-                } else {
-                    throw "SDK no cargado";
-                }
-            } catch (e) {
-                // Respaldo visual interactivo para GitHub Pages
-                container.innerHTML = `
-                    <div class="bg-orange-50 border border-orange-200 p-4 rounded-xl text-center space-y-3">
-                        <p class="text-xs text-orange-900 font-semibold">💳 Pasarela Conekta Lista (Modo Pruebas)</p>
-                        <p class="text-[11px] text-gray-600">Llave activa: <b>key_6dPn049SxhSSgcgpXxhBljw</b>. Haz clic abajo para simular tu pago y registrar el pedido de inmediato:</p>
-                        <button onclick="alert('Simulación de pago Conekta exitosa. Registrando pedido...'); checkoutOrder('inmediato');" class="w-full bg-orange-600 text-white py-2.5 rounded-lg text-xs font-bold hover:bg-orange-700 transition">
-                            Simular Pago Exitoso con Conekta
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
         function checkoutOrder(type) {
-            const name = document.getElementById('client-name').value;
-            const phone = document.getElementById('client-phone').value;
+            const name = sanitizeText(document.getElementById('client-name').value);
+            const phone = sanitizeText(document.getElementById('client-phone').value);
+            const clientBank = sanitizeText(document.getElementById('client-bank').value);
+            const deliveryType = document.getElementById('delivery-type').value;
+            const address = sanitizeText(document.getElementById('delivery-address').value);
+
             if (!name || !phone) {
-                alert('Por favor ingresa tu nombre y teléfono.');
+                alert('Por favor ingresa tu nombre y teléfono de contacto.');
                 return;
             }
             if (cart.length === 0) {
                 alert('El carrito está vacío.');
                 return;
             }
+
             const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            db.collection("orders").add({
-                clientName: sanitizeText(name),
-                clientPhone: sanitizeText(phone),
+            let paymentMethod = type === 'inmediato' ? document.getElementById('payment-method').value : document.getElementById('schedule-payment-method').value;
+
+            if (paymentMethod === 'tarjeta') {
+                const commission = (total * 0.0349) + 4.64;
+                const netReceived = total - commission;
+                localStorage.setItem('temp_client_name', name);
+                localStorage.setItem('temp_client_phone', phone);
+                localStorage.setItem('temp_client_bank', clientBank);
+                localStorage.setItem('temp_delivery_type', deliveryType);
+                localStorage.setItem('temp_address', address);
+                if (selectedLat) localStorage.setItem('temp_lat', selectedLat);
+                if (selectedLng) localStorage.setItem('temp_lng', selectedLng);
+                localStorage.setItem('temp_cart', JSON.stringify(cart));
+
+                alert("Redirigiendo a Mercado Pago para completar tu pago seguro con tarjeta...");
+                window.location.href = window.location.pathname + "?payment=success";
+                return;
+            }
+
+            let orderData = {
+                clientName: name,
+                clientPhone: phone,
+                clientBank: clientBank,
                 items: cart,
                 total: total,
-                paymentMethod: document.getElementById('payment-method').value,
+                deliveryType: deliveryType,
+                address: address,
+                lat: selectedLat,
+                lng: selectedLng,
+                paymentMethod: paymentMethod,
                 status: 'Pendiente',
                 orderType: type === 'inmediato' ? 'Inmediato' : 'Futuro',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert("¡Pedido registrado exitosamente!");
+            };
+
+            if (type === 'futuro') {
+                orderData.scheduleDate = document.getElementById('schedule-date').value;
+                orderData.scheduleTime = document.getElementById('schedule-time').value;
+                orderData.transferClabe = sanitizeText(document.getElementById('schedule-transfer-clabe').value);
+            } else if (paymentMethod === 'transferencia') {
+                orderData.transferAmount = parseFloat(document.getElementById('transfer-amount').value) || 0;
+                orderData.transferClabe = sanitizeText(document.getElementById('transfer-clabe').value);
+            }
+
+            db.collection("orders").add(orderData).then(() => {
+                alert("¡Pedido o reserva enviada con éxito!");
                 cart = [];
                 closeCart();
+                closeScheduleModal();
                 loadClientOrders(phone);
+            }).catch(err => {
+                console.error("Error al enviar orden:", err);
+                alert("Hubo un error al registrar tu pedido.");
             });
+        }
+
+        function updateOrderStatus(id, status) {
+            db.collection("orders").doc(id).update({ status }).then(() => {
+                console.log("Estatus actualizado");
+            });
+        }
+
+        function clearAllOrders() {
+            if (confirm("¿Estás seguro de borrar todas las órdenes y reservas del historial?")) {
+                db.collection("orders").get().then(snapshot => {
+                    snapshot.forEach(doc => doc.ref.delete());
+                });
+            }
+        }
+
+        function saveConfig() {
+            const bank = sanitizeText(document.getElementById('admin-company-bank').value);
+            const address = sanitizeText(document.getElementById('admin-store-address').value);
+            db.collection("config").doc("main").set({ bank, address }, { merge: true }).then(() => {
+                alert("Configuración general guardada.");
+            });
+        }
+
+        function saveDish() {
+            const id = document.getElementById('edit-dish-id').value;
+            const name = sanitizeText(document.getElementById('dish-name').value);
+            const price = parseFloat(document.getElementById('dish-price').value);
+            const description = sanitizeText(document.getElementById('dish-desc').value);
+            const image = sanitizeText(document.getElementById('dish-img').value);
+            const available = document.getElementById('dish-available').value === 'true';
+
+            if (!name || isNaN(price)) {
+                alert("El nombre y el precio son obligatorios.");
+                return;
+            }
+
+            const dishData = { name, price, description, image, available };
+            const promise = id ? db.collection("menu").doc(id).update(dishData) : db.collection("menu").add(dishData);
+
+            promise.then(() => {
+                alert("Platillo guardado correctamente.");
+                document.getElementById('edit-dish-id').value = '';
+                document.getElementById('dish-name').value = '';
+                document.getElementById('dish-price').value = '';
+                document.getElementById('dish-desc').value = '';
+                document.getElementById('dish-img').value = '';
+            });
+        }
+
+        function editDish(id) {
+            const item = menuItems.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('edit-dish-id').value = item.id;
+            document.getElementById('dish-name').value = item.name;
+            document.getElementById('dish-price').value = item.price;
+            document.getElementById('dish-desc').value = item.description || '';
+            document.getElementById('dish-img').value = item.image || '';
+            document.getElementById('dish-available').value = item.available !== false ? 'true' : 'false';
+            openAdminLogin();
+        }
+
+        function deleteDish(id) {
+            if (confirm("¿Seguro que deseas eliminar este platillo?")) {
+                db.collection("menu").doc(id).delete();
+            }
         }
 
         function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
