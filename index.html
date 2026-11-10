@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- This site is hosted on Netlify. Anyone can build and deploy a site like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=294c71c4-7245-474f-bdd4-3401775a535f -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Primo - Comida a Domicilio y Para Llevar</title>
     <!-- Tailwind CSS CDN -->
@@ -10,6 +9,8 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- Stripe SDK oficial para formularios incrustados -->
+    <script src="https://js.stripe.com/dahlia/stripe.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f97316">
 </head>
@@ -33,7 +34,7 @@
         <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm mb-4">
             <h2 class="font-bold text-lg mb-2">Tus Datos</h2>
             <input type="text" id="client-name" placeholder="Tu Nombre *" class="w-full p-2 border rounded-lg mb-2 text-sm">
-            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional para efectivo)" class="w-full p-2 border rounded-lg text-sm">
+            <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional)" class="w-full p-2 border rounded-lg text-sm">
         </section>
 
         <!-- Menú de Comida -->
@@ -58,23 +59,33 @@
                 <span id="cart-total">$0.00</span>
             </div>
 
-            <!-- Método de Pago -->
+            <!-- Método de Pago Rediseñado -->
             <div class="mb-4">
-                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
-                <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                    <option value="efectivo">Efectivo</option>
-                    <option value="transferencia">Transferencia (Cuenta de la Empresa)</option>
-                </select>
+                <label class="block font-semibold text-sm mb-2">Método de Pago:</label>
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <button type="button" onclick="selectPaymentMethod('efectivo')" id="btn-pay-efectivo" class="p-2 border rounded-lg text-xs font-bold bg-orange-500 text-white border-orange-500 transition">💵 Efectivo</button>
+                    <button type="button" onclick="selectPaymentMethod('tarjeta')" id="btn-pay-tarjeta" class="p-2 border rounded-lg text-xs font-bold bg-white text-gray-700 border-gray-300 transition">💳 Tarjeta</button>
+                    <button type="button" onclick="selectPaymentMethod('transferencia')" id="btn-pay-transferencia" class="p-2 border rounded-lg text-xs font-bold bg-white text-gray-700 border-gray-300 transition">🏦 Transferencia</button>
+                </div>
+                <input type="hidden" id="payment-method-selected" value="efectivo">
 
                 <!-- Si es efectivo -->
-                <div id="cash-fields">
+                <div id="cash-fields" class="space-y-1">
                     <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>
                     <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
                     <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
                 </div>
 
+                <!-- Si es tarjeta (Stripe Embedded Form) -->
+                <div id="stripe-fields" class="hidden space-y-3 bg-blue-50 p-3 rounded-xl border border-blue-200">
+                    <p class="font-semibold text-blue-900 text-xs">Pago seguro con tarjeta (Impuestos incluidos iva):</p>
+                    <div id="checkout-form" class="bg-white p-2 rounded-lg min-h-[150px]">
+                        <!-- El formulario incrustado de Stripe se montará aquí -->
+                    </div>
+                </div>
+
                 <!-- Si es transferencia -->
-                <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm">
+                <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm border border-orange-200">
                     <p class="font-semibold text-orange-800">Datos para transferencia:</p>
                     <p id="company-bank-info" class="text-orange-700 mt-1">Cargando cuenta de la empresa...</p>
                 </div>
@@ -88,13 +99,11 @@
                     <option value="domicilio">Recibir en domicilio</option>
                 </select>
 
-                <!-- Si asiste al local -->
                 <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm">
                     <p class="font-semibold">Dirección del local:</p>
                     <p id="store-address-display" class="text-gray-600">Cargando dirección...</p>
                 </div>
 
-                <!-- Si es a domicilio -->
                 <div id="domicilio-fields" class="hidden space-y-2">
                     <input type="text" id="delivery-address" placeholder="Ubicación exacta / Referencias de tu casa" class="w-full p-2 border rounded-lg text-sm">
                     <input type="tel" id="delivery-phone" placeholder="Número telefónico de contacto" class="w-full p-2 border rounded-lg text-sm">
@@ -121,7 +130,6 @@
             </div>
 
             <div id="admin-panel-view" class="hidden space-y-6">
-                <!-- Pedidos Entrantes -->
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
                     <h4 class="font-bold text-orange-900 mb-2">📦 Pedidos Entrantes en Vivo</h4>
                     <div id="admin-orders-list" class="space-y-3 text-sm">
@@ -129,7 +137,6 @@
                     </div>
                 </div>
 
-                <!-- Configuración General -->
                 <div class="border-b pb-4">
                     <h4 class="font-bold mb-2">Configuración General</h4>
                     <label class="text-xs text-gray-600">Cuenta bancaria de la empresa:</label>
@@ -139,7 +146,6 @@
                     <button onclick="saveConfig()" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold">Guardar Configuración</button>
                 </div>
 
-                <!-- Agregar / Editar Platillo -->
                 <div class="border-b pb-4">
                     <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
                     <input type="hidden" id="edit-dish-id">
@@ -154,7 +160,6 @@
                     <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
                 </div>
 
-                <!-- Lista de Platillos -->
                 <div>
                     <h4 class="font-bold mb-2">Menú Actual</h4>
                     <div id="admin-dish-list" class="space-y-2 text-sm"></div>
@@ -163,7 +168,7 @@
         </div>
     </div>
 
-    <!-- Script de Firebase y Lógica -->
+    <!-- Script de Firebase, Stripe y Lógica -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
@@ -178,9 +183,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // Inicializar Stripe con tu llave pública (reemplaza con tu pk_test_... o pk_live_...)
+        const stripe = Stripe('pk_test_TU_CLAVE_PUBLICA');
+
         let menuItems = [];
         let cart = [];
         let storeConfig = { bank: "No configurada", address: "Local principal" };
+        let stripeInitialized = false;
 
         db.collection("config").doc("main").onSnapshot((doc) => {
             if (doc.exists) {
@@ -235,12 +244,10 @@
         // Escuchar pedidos en tiempo real con alerta sonora
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
             let ordersHtml = "";
-            
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
-                    // Reproducir alerta sonora al detectar un nuevo pedido
                     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                    audio.play().catch(e => console.log("Audio esperando interacción del usuario", e));
+                    audio.play().catch(e => console.log("Audio esperando interacción", e));
                 }
             });
 
@@ -269,14 +276,14 @@
                         </div>
 
                         <div class="flex justify-between items-center text-xs font-bold pt-1 border-t">
-                            <span>Pago: ${order.paymentMethod.toUpperCase()} ${order.cashAmount ? `(Paga con $${order.cashAmount} - Cambio: $${order.change.toFixed(2)})` : ''}</span>
+                            <span>Pago: ${order.paymentMethod.toUpperCase()} ${order.cashAmount ? `(Cambio: $${order.change.toFixed(2)})` : ''}</span>
                             <span class="text-orange-600 text-sm">Total: $${order.total.toFixed(2)}</span>
                         </div>
                         <button onclick="deleteOrder('${doc.id}')" class="w-full mt-2 bg-red-600 text-white py-1 rounded text-xs font-bold">Marcar como Entregado / Borrar</button>
                     </div>
                 `;
             });
-            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos nuevos en este momento.</p>';
+            document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>';
         });
 
         function addToCart(id) {
@@ -313,13 +320,75 @@
             updateCartUI();
         }
 
-        function openCart() { document.getElementById("cart-modal").classList.remove("hidden"); }
+        function openCart() { 
+            document.getElementById("cart-modal").classList.remove("hidden");
+            if (cart.length > 0 && document.getElementById("payment-method-selected").value === 'tarjeta') {
+                initStripeEmbeddedForm();
+            }
+        }
         function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
 
-        function togglePaymentFields() {
-            const method = document.getElementById("payment-method").value;
+        function selectPaymentMethod(method) {
+            document.getElementById("payment-method-selected").value = method;
+            
+            document.getElementById("btn-pay-efectivo").className = "p-2 border rounded-lg text-xs font-bold transition " + (method === 'efectivo' ? "bg-orange-500 text-white border-orange-500" : "bg-white text-gray-700 border-gray-300");
+            document.getElementById("btn-pay-tarjeta").className = "p-2 border rounded-lg text-xs font-bold transition " + (method === 'tarjeta' ? "bg-orange-500 text-white border-orange-500" : "bg-white text-gray-700 border-gray-300");
+            document.getElementById("btn-pay-transferencia").className = "p-2 border rounded-lg text-xs font-bold transition " + (method === 'transferencia' ? "bg-orange-500 text-white border-orange-500" : "bg-white text-gray-700 border-gray-300");
+
             document.getElementById("cash-fields").classList.toggle("hidden", method !== "efectivo");
+            document.getElementById("stripe-fields").classList.toggle("hidden", method !== "tarjeta");
             document.getElementById("transfer-fields").classList.toggle("hidden", method !== "transferencia");
+
+            if (method === 'tarjeta') {
+                initStripeEmbeddedForm();
+            }
+        }
+
+        async function initStripeEmbeddedForm() {
+            if (cart.length === 0) return;
+            try {
+                // Petición al servidor para crear la sesión con los parámetros de formulario y automatic_tax
+                const response = await fetch('/api/create-checkout-session', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: cart })
+                });
+                const json = await response.json();
+                const clientSecret = json.client_secret;
+
+                if (!clientSecret) return;
+
+                const appearance = {
+                    "theme": "stripe",
+                    "labels": "auto",
+                    "inputs": "spaced",
+                    "variables": {
+                        "borderRadius": "4px",
+                        "colorBackground": "#ffffff",
+                        "colorPrimary": "#0570de",
+                        "colorText": "#30313d",
+                        "fontSizeBase": "16px"
+                    }
+                };
+
+                const checkout = stripe.initCheckoutFormSdk({ clientSecret, appearance });
+                const form = checkout.createForm({ layout: 'expanded' });
+                document.getElementById("checkout-form").innerHTML = ""; // Limpiar previo
+                form.mount('#checkout-form');
+
+                const loadActionsResult = await checkout.loadActions();
+                if (loadActionsResult.type === 'success') {
+                    form.on('confirm', async (event) => {
+                        try {
+                            await loadActionsResult.actions.confirm({ formConfirmEvent: event });
+                        } catch (error) {
+                            console.error('Error al confirmar pago con tarjeta:', error);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.log("Stripe backend endpoint pendiente de iniciar en servidor local", err);
+            }
         }
 
         function toggleDeliveryFields() {
@@ -333,9 +402,9 @@
             const cash = parseFloat(document.getElementById("cash-amount").value) || 0;
             const changeText = document.getElementById("change-text");
             
-            if (document.getElementById("payment-method").value === "efectivo" && cash > 0) {
+            if (cash > 0) {
                 if (cash < total) {
-                    changeText.innerText = "⚠️ El monto es menor al total a pagar";
+                    changeText.innerText = "⚠️ El monto es menor al total";
                     changeText.className = "text-sm font-semibold text-red-600 mt-1";
                 } else {
                     const change = cash - total;
@@ -351,9 +420,9 @@
             const name = document.getElementById("client-name").value.trim();
             const clientBank = document.getElementById("client-bank").value.trim();
             const deliveryType = document.getElementById("delivery-type").value;
-            const paymentMethod = document.getElementById("payment-method").value;
+            const paymentMethod = document.getElementById("payment-method-selected").value;
             
-            if (!name) { alert("Por favor ingresa tu nombre antes de confirmar el pedido."); return; }
+            if (!name) { alert("Por favor ingresa tu nombre."); return; }
             if (cart.length === 0) { alert("Tu carrito está vacío."); return; }
 
             let address = "";
@@ -361,10 +430,7 @@
             if (deliveryType === "domicilio") {
                 address = document.getElementById("delivery-address").value.trim();
                 phone = document.getElementById("delivery-phone").value.trim();
-                if (!address || !phone) {
-                    alert("Por favor ingresa tu dirección y número telefónico para la entrega a domicilio.");
-                    return;
-                }
+                if (!address || !phone) { alert("Ingresa tu dirección y teléfono para domicilio."); return; }
             }
 
             let cashAmount = 0;
@@ -373,11 +439,15 @@
 
             if (paymentMethod === "efectivo") {
                 cashAmount = parseFloat(document.getElementById("cash-amount").value) || 0;
-                if (cashAmount > 0 && cashAmount >= total) {
-                    change = cashAmount - total;
-                }
+                if (cashAmount >= total) change = cashAmount - total;
             }
 
+            if (paymentMethod === "tarjeta") {
+                // El procesamiento del pago con tarjeta se realiza mediante el SDK incrustado de Stripe montado en #checkout-form
+                return;
+            }
+
+            // Guardar pedido en Firebase si es efectivo o transferencia
             db.collection("orders").add({
                 clientName: name,
                 clientBank: clientBank || "",
@@ -391,7 +461,7 @@
                 change: change,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert("¡Pedido realizado con éxito! Ya fue enviado al administrador.");
+                alert("¡Pedido realizado con éxito!");
                 cart = [];
                 updateCartUI();
                 closeCart();
@@ -401,49 +471,38 @@
         }
 
         function deleteOrder(orderId) {
-            if (confirm("¿Deseas marcar este pedido como entregado y eliminarlo de la lista?")) {
+            if (confirm("¿Marcar como entregado y eliminar?")) {
                 db.collection("orders").doc(orderId).delete();
             }
         }
 
         function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
         function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
-
         function verifyAdmin() {
-            const pass = document.getElementById("admin-pass").value;
-            if (pass === "PocilloInc") {
+            if (document.getElementById("admin-pass").value === "PocilloInc") {
                 document.getElementById("admin-login-view").classList.add("hidden");
                 document.getElementById("admin-panel-view").classList.remove("hidden");
-            } else {
-                alert("Contraseña incorrecta");
-            }
+            } else { alert("Contraseña incorrecta"); }
         }
-
         function saveConfig() {
-            const bank = document.getElementById("admin-company-bank").value;
-            const address = document.getElementById("admin-store-address").value;
-            db.collection("config").doc("main").set({ bank, address })
-                .then(() => alert("Configuración guardada correctamente"));
+            db.collection("config").doc("main").set({
+                bank: document.getElementById("admin-company-bank").value,
+                address: document.getElementById("admin-store-address").value
+            }).then(() => alert("Guardado correctamente"));
         }
-
         function saveDish() {
             const id = document.getElementById("edit-dish-id").value;
-            const name = document.getElementById("dish-name").value;
-            const price = parseFloat(document.getElementById("dish-price").value);
-            const description = document.getElementById("dish-desc").value;
-            const image = document.getElementById("dish-img").value;
-            const available = document.getElementById("dish-available").value === "true";
-
-            if (!name || !price) { alert("El nombre y el precio son obligatorios."); return; }
-
-            const dishData = { name, price, description, image, available };
-            if (id) {
-                db.collection("menu").doc(id).update(dishData).then(() => resetDishForm());
-            } else {
-                db.collection("menu").add(dishData).then(() => resetDishForm());
-            }
+            const dishData = {
+                name: document.getElementById("dish-name").value,
+                price: parseFloat(document.getElementById("dish-price").value),
+                description: document.getElementById("dish-desc").value,
+                image: document.getElementById("dish-img").value,
+                available: document.getElementById("dish-available").value === "true"
+            };
+            if (!dishData.name || !dishData.price) { alert("Nombre y precio obligatorios"); return; }
+            if (id) { db.collection("menu").doc(id).update(dishData).then(() => resetDishForm()); }
+            else { db.collection("menu").add(dishData).then(() => resetDishForm()); }
         }
-
         function editDish(id) {
             const item = menuItems.find(i => i.id === id);
             document.getElementById("edit-dish-id").value = item.id;
@@ -453,22 +512,15 @@
             document.getElementById("dish-img").value = item.image || '';
             document.getElementById("dish-available").value = item.available !== false ? "true" : "false";
         }
-
-        function deleteDish(id) {
-            if (confirm("¿Estás seguro de eliminar este platillo?")) {
-                db.collection("menu").doc(id).delete();
-            }
-        }
-
+        function deleteDish(id) { if (confirm("¿Eliminar platillo?")) db.collection("menu").doc(id).delete(); }
         function resetDishForm() {
             document.getElementById("edit-dish-id").value = "";
             document.getElementById("dish-name").value = "";
             document.getElementById("dish-price").value = "";
             document.getElementById("dish-desc").value = "";
             document.getElementById("dish-img").value = "";
-            alert("Platillo guardado correctamente.");
+            alert("Platillo guardado.");
         }
     </script>
 </body>
 </html>
-<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="294c71c4-7245-474f-bdd4-3401775a535f" data-app-host="app.netlify.com" data-account-tier="free"></script>
