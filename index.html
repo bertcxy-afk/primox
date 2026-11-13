@@ -1233,7 +1233,7 @@
                         <span class="text-gray-500 font-bold">🕒 ${timeStr} | ${(m.distanceKm || 0).toFixed(2)} km</span>
                         <span class="px-2 py-0.5 rounded text-[11px] font-bold ${statusColor}">${status}</span>
                     </div>
-                    <p class="font-bold text-gray-900 text-sm">${sanitizeText(m.clientName)} 📞 ${sanitizeText(m.clientPhone)}</p>
+                    <p class="font-bold text-gray-900 text-sm">${sanitizeText(m.clientName)} <span class="inline-flex gap-1 ml-1 font-normal text-xs"><a href="tel:${sanitizeText(m.clientPhone)}" class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-bold hover:bg-blue-100">📞 Llamar</a> <a href="https://wa.me/52${sanitizeText(m.clientPhone)}" target="_blank" class="bg-green-50 text-green-700 px-1.5 py-0.5 rounded border border-green-200 font-bold hover:bg-green-100">💬 WhatsApp</a></span></p>
                     
                     <div class="grid grid-cols-2 gap-1.5 text-xs pt-1">
                         <a href="${storeMapUrl}" target="_blank" class="bg-emerald-50 border border-emerald-200 p-1.5 rounded text-emerald-900 font-semibold text-center hover:bg-emerald-100">
@@ -1462,7 +1462,7 @@
                         <span>🕒 ${dateStr} (${order.orderType || 'Inmediato'})</span>
                         ${statusBadge}
                     </div>
-                    <p class="font-bold text-gray-900">${sanitizeText(order.clientName)} 📞 ${sanitizeText(order.clientPhone)}</p>
+                    <p class="font-bold text-gray-900">${sanitizeText(order.clientName)} <span class="inline-flex gap-1 ml-1 font-normal text-xs"><a href="tel:${sanitizeText(order.clientPhone)}" class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-bold hover:bg-blue-100">📞 Llamar</a> <a href="https://wa.me/52${sanitizeText(order.clientPhone)}" target="_blank" class="bg-green-50 text-green-700 px-1.5 py-0.5 rounded border border-green-200 font-bold hover:bg-green-100">💬 WhatsApp</a></span></p>
                     ${order.orderType === 'Futuro' ? `<p class="text-xs font-semibold text-amber-800">📅 Reserva para: ${sanitizeText(order.scheduleDate)} a las ${sanitizeText(order.scheduleTime)}</p>` : ''}
                     ${order.address ? `<p class="text-xs text-gray-700">📍 Dir: <b>${sanitizeText(order.address)}</b></p>` : ''}
                     ${mapLink ? `<div class="mt-1">${mapLink}</div>` : ''}
