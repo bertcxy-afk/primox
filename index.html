@@ -189,7 +189,7 @@
             <select id="mandado-payment-method" onchange="toggleMandadoPaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                 <option value="efectivo">Efectivo al recibir</option>
                 <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>
+                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
             </select>
 
             <!-- Efectivo -->
@@ -210,16 +210,16 @@
                 </div>
             </div>
 
-            <!-- Transferencia -->
-            <div id="mandado-transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-xs border border-orange-200 space-y-2">
-                <p class="font-bold text-orange-900">💳 CLABE Mercado Pago para transferir:</p>
-                <p id="mandado-company-bank" class="font-mono font-bold text-sm bg-white p-2 rounded border border-orange-200 text-orange-950">Cargando...</p>
-                <div class="bg-white p-2 rounded border border-orange-100 space-y-1">
-                    <div class="flex justify-between"><span>Subtotal:</span> <span id="m-tr-sub">$0.00</span></div>
-                    <div class="flex justify-between"><span>Comisión (3.49% + $4.64):</span> <span id="m-tr-comm">$0.00</span></div>
-                    <div class="flex justify-between font-bold text-orange-900 border-t pt-1"><span>Total a transferir:</span> <span id="m-tr-total">$0.00</span></div>
+            <!-- Transferencia BBVA -->
+            <div id="mandado-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2">
+                <p class="font-bold text-blue-900">🏦 Datos para Transferencia SPEI (SIN COMISIÓN):</p>
+                <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-blue-950">
+                    <p><b>Banco:</b> BBVA</p>
+                    <p><b>Titular:</b> Roberto Carlos Martínez León</p>
+                    <p><b>CLABE:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
                 </div>
-                <input type="text" id="mandado-transfer-ref" placeholder="Folio o CLABE de tu transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
+                <p class="text-green-700 font-bold">✅ Sin comisiones extra: Transfiere exactamente el total de tu pedido (<span id="m-tr-exact-total">$0.00</span>).</p>
+                <input type="text" id="mandado-transfer-ref" placeholder="Folio o referencia de tu transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
             </div>
         </div>
 
@@ -253,7 +253,7 @@
             <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                 <option value="efectivo">Efectivo</option>
                 <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>
+                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
             </select>
 
             <!-- Si es efectivo -->
@@ -274,25 +274,23 @@
                 </div>
             </div>
 
-            <!-- Si es transferencia -->
-            <div id="transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
-                <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>
-                <p id="company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando CLABE Mercado Pago...</p>
-                <p class="text-xs text-orange-700">Por favor realiza tu transferencia SPEI a esta cuenta CLABE oficial de Mercado Pago. Se aplican las comisiones por cobro (3.49%) + $4.64.</p>
-                
-                <div class="bg-white p-2 rounded border border-orange-100 space-y-1 text-xs text-gray-700 my-1">
-                    <div class="flex justify-between"><span>Costo de alimentos:</span> <span id="tr-food-total">$0.00</span></div>
-                    <div class="flex justify-between"><span>Comisión estimada (3.49% + $4.64):</span> <span id="tr-commission-val">$0.00</span></div>
-                    <div class="flex justify-between font-bold border-t pt-1 text-orange-900"><span>Total con comisión / A transferir:</span> <span id="tr-net-amount">$0.00</span></div>
+            <!-- Si es transferencia BBVA -->
+            <div id="transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (0% Comisión):</p>
+                <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-xs text-blue-950">
+                    <p><b>Banco:</b> BBVA</p>
+                    <p><b>Propietario:</b> Roberto Carlos Martínez León</p>
+                    <p><b>CLABE Interbancaria:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
                 </div>
+                <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Transfiere el total exacto de tus alimentos: <span id="tr-exact-food-total">$0.00</span></p>
 
-                <div class="border-t border-orange-200 pt-2 mt-2">
-                    <label class="block text-xs font-semibold text-orange-900 mb-1">Confirma el monto transferido:</label>
+                <div class="border-t border-blue-200 pt-2 mt-2">
+                    <label class="block text-xs font-semibold text-blue-900 mb-1">Confirma el monto transferido:</label>
                     <input type="number" id="transfer-amount" placeholder="Ej. 150" oninput="calculateTransferChange()" class="w-full p-2 bg-white border rounded-lg text-sm mb-2">
                     <p id="transfer-change-text" class="text-xs font-semibold text-green-700"></p>
 
-                    <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>
-                    <input type="text" id="transfer-clabe" placeholder="Ej. Folio o CLABE desde donde transferiste" class="w-full p-2 bg-white border rounded-lg text-sm">
+                    <label class="block text-xs font-semibold text-blue-900 mt-2 mb-1">Folio o Referencia de tu comprobante:</label>
+                    <input type="text" id="transfer-clabe" placeholder="Ej. Folio o clave de rastreo de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
                 </div>
             </div>
         </div>
@@ -337,7 +335,7 @@
         </div>
         
         <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
-            Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para pedidos a futuro el pago se realiza mediante tarjeta o transferencia electrónica.
+            Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para apartar pedidos a futuro se realiza pago por tarjeta o transferencia bancaria directa a BBVA.
         </div>
 
         <div>
@@ -360,7 +358,7 @@
             <label class="block font-semibold text-sm mb-1">Método de Pago para la Reserva:</label>
             <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                 <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia (Cuenta Mercado Pago)</option>
+                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
             </select>
 
             <div id="schedule-tarjeta-fields" class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
@@ -373,17 +371,16 @@
                 </div>
             </div>
 
-            <div id="schedule-transfer-fields" class="hidden bg-orange-50 p-3 rounded-lg text-sm space-y-2">
-                <p class="font-semibold text-orange-800">💳 CLABE de Mercado Pago para transferencia:</p>
-                <p id="schedule-company-bank-info" class="text-orange-900 font-mono font-bold text-base bg-white p-2 rounded border border-orange-200">Cargando...</p>
-                <p class="text-xs text-orange-700">Se aplican comisiones (3.49% + $4.64).</p>
-                <div class="bg-white p-2 rounded border border-orange-100 space-y-1 text-xs text-gray-700 my-1">
-                    <div class="flex justify-between"><span>Costo de alimentos:</span> <span id="sch-tr-food-total">$0.00</span></div>
-                    <div class="flex justify-between"><span>Comisión estimada (3.49% + $4.64):</span> <span id="sch-tr-commission-val">$0.00</span></div>
-                    <div class="flex justify-between font-bold border-t pt-1 text-orange-900"><span>Total con comisión / A transferir:</span> <span id="sch-tr-net-amount">$0.00</span></div>
+            <div id="schedule-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (0% Comisión):</p>
+                <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-xs text-blue-950">
+                    <p><b>Banco:</b> BBVA</p>
+                    <p><b>Propietario:</b> Roberto Carlos Martínez León</p>
+                    <p><b>CLABE Interbancaria:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
                 </div>
-                <label class="block text-xs font-semibold text-orange-900 mt-2 mb-1">CLABE o Referencia de tu comprobante:</label>
-                <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o CLABE de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
+                <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Total exacto a transferir: <span id="sch-tr-exact-total">$0.00</span></p>
+                <label class="block text-xs font-semibold text-blue-900 mt-2 mb-1">Folio o Referencia de tu comprobante:</label>
+                <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o clave de rastreo de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
             </div>
         </div>
 
@@ -472,8 +469,11 @@
             <!-- SECCIÓN 4: CONFIGURACIÓN GENERAL DEL LOCAL -->
             <div class="border-b pb-4 space-y-2">
                 <h4 class="font-bold mb-2">Configuración General del Local</h4>
-                <label class="text-xs text-gray-600">CLABE / Cuenta Mercado Pago de la empresa:</label>
-                <input type="text" id="admin-company-bank" placeholder="Ej. 722969010040237064" class="w-full p-2 border rounded-lg text-sm">
+                <div class="bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-xs text-blue-950">
+                    <p class="font-bold">Cuenta de Transferencia Configurada (Sin Comisión):</p>
+                    <p>Banco: <b>BBVA</b> | Titular: <b>Roberto Carlos Martínez León</b></p>
+                    <p>CLABE: <b class="font-mono">012533015277749576</b></p>
+                </div>
                 
                 <label class="text-xs text-gray-600">Dirección física del local / Base Moto:</label>
                 <input type="text" id="admin-store-address" placeholder="Ej. Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
@@ -531,7 +531,9 @@
     let cart = [];
     let clientMandaditosCache = {};
     let storeConfig = { 
-        bank: "No configurada", 
+        bank: "012533015277749576",
+        bankName: "BBVA",
+        bankOwner: "Roberto Carlos Martínez León",
         address: "Local principal", 
         lat: 20.3333, 
         lng: -102.2333,
@@ -563,7 +565,7 @@
     // CÁLCULO DE DISTANCIA HAVERSINE Y COSTO MOTO ITALIKA FT150 TS
     // =========================================================================
     function calculateHaversineKm(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Radio de la Tierra en km
+        const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -576,29 +578,25 @@
     function recalculateMandaditoCost() {
         if (!mandadoStoreLat || !mandadoStoreLng || !mandadoDestLat || !mandadoDestLng) return;
 
-        // Distancia base a tienda + tienda a cliente, multiplicado por factor calles urbanas (1.3x)
         const baseLat = storeConfig.lat || 20.3333;
         const baseLng = storeConfig.lng || -102.2333;
         
         const distBaseToStore = calculateHaversineKm(baseLat, baseLng, mandadoStoreLat, mandadoStoreLng);
         const distStoreToClient = calculateHaversineKm(mandadoStoreLat, mandadoStoreLng, mandadoDestLat, mandadoDestLng);
         
-        // Consideramos traslado parcial desde base (50%) + ruta completa tienda->destino con factor calles 1.3
         const realRouteKm = ((distBaseToStore * 0.5) + distStoreToClient) * 1.3;
-        currentMandadoDistanceKm = Math.max(0.3, realRouteKm); // Mínimo 300 metros
+        currentMandadoDistanceKm = Math.max(0.3, realRouteKm);
 
         const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
         const motoKml = parseFloat(storeConfig.motoKml) || 33;
         const baseFee = parseFloat(storeConfig.baseFee) || 15;
         const perKmFee = parseFloat(storeConfig.perKmFee) || 4.5;
 
-        // Costo exacto de gasolina para ese recorrido
         const litersUsed = currentMandadoDistanceKm / motoKml;
         currentMandadoFuelCost = litersUsed * gasPrice;
 
-        // Costo total del mandado = Tarifa base + (km * tarifa por km) + gasolina
         const rawCost = baseFee + (currentMandadoDistanceKm * perKmFee) + currentMandadoFuelCost;
-        currentMandadoShippingCost = Math.ceil(rawCost); // Redondeo hacia arriba al peso entero
+        currentMandadoShippingCost = Math.ceil(rawCost);
 
         const meters = Math.round(currentMandadoDistanceKm * 1000);
         document.getElementById("mandado-distance-display").innerText = `${currentMandadoDistanceKm.toFixed(2)} km (${meters} m)`;
@@ -629,7 +627,6 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('payment') === 'success') {
-            // Verificar si venia de pago de mandadito con tarjeta
             const pendingMandadoId = localStorage.getItem('temp_mandado_pay_id');
             if (pendingMandadoId) {
                 db.collection("mandaditos").doc(pendingMandadoId).update({
@@ -644,7 +641,6 @@
                 return;
             }
 
-            // Retorno pago comida
             const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
             const clientPhone = localStorage.getItem('temp_client_phone') || '';
             const clientBank = localStorage.getItem('temp_client_bank') || '';
@@ -727,7 +723,6 @@
         const defaultLat = storeConfig.lat || 20.3333;
         const defaultLng = storeConfig.lng || -102.2333;
 
-        // Mapa 1: Tienda
         if (!mandadoStoreMap) {
             mandadoStoreMap = L.map('mandado-store-map').setView([defaultLat, defaultLng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -757,7 +752,6 @@
             mandadoStoreMap.invalidateSize();
         }
 
-        // Mapa 2: Destino Cliente
         if (!mandadoDestMap) {
             mandadoDestMap = L.map('mandado-dest-map').setView([defaultLat, defaultLng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -817,7 +811,7 @@
             shippingCost: currentMandadoShippingCost,
             productsCost: 0,
             totalCost: currentMandadoShippingCost,
-            status: 'Solicitado', // Solicitado -> Aceptado / En Tienda -> Cotizado (Esperando Cliente) -> Pagado y Confirmado -> Entregado / Rechazado
+            status: 'Solicitado',
             paymentMethod: 'Pendiente de confirmar',
             cashAmount: 0,
             change: 0,
@@ -909,7 +903,6 @@
         });
     }
 
-    // Modal de Confirmación y Pago del Mandadito por parte del Cliente
     function openMandadoConfirmModal(mandadoId) {
         const m = clientMandaditosCache[mandadoId];
         if (!m) return;
@@ -922,19 +915,14 @@
         document.getElementById("conf-prod-cost").innerText = `$${prodCost.toFixed(2)}`;
         document.getElementById("conf-ship-cost").innerText = `$${shipCost.toFixed(2)}`;
         document.getElementById("conf-grand-total").innerText = `$${grandTotal.toFixed(2)}`;
+        document.getElementById("m-tr-exact-total").innerText = `$${grandTotal.toFixed(2)}`;
 
-        // Calcular comisiones Mercado Pago
         const comm = (grandTotal * 0.0349) + 4.64;
         const totalWithComm = grandTotal + comm;
 
         document.getElementById("m-mp-sub").innerText = `$${grandTotal.toFixed(2)}`;
         document.getElementById("m-mp-comm").innerText = `$${comm.toFixed(2)}`;
         document.getElementById("m-mp-total").innerText = `$${totalWithComm.toFixed(2)}`;
-
-        document.getElementById("m-tr-sub").innerText = `$${grandTotal.toFixed(2)}`;
-        document.getElementById("m-tr-comm").innerText = `$${comm.toFixed(2)}`;
-        document.getElementById("m-tr-total").innerText = `$${totalWithComm.toFixed(2)}`;
-        document.getElementById("mandado-company-bank").innerText = sanitizeText(storeConfig.bank) || "No configurada";
 
         document.getElementById("mandado-cash-amount").value = "";
         document.getElementById("mandado-change-text").innerText = "";
@@ -1019,14 +1007,14 @@
         } else if (method === "transferencia") {
             transferRef = sanitizeText(document.getElementById("mandado-transfer-ref").value);
             if (!transferRef) {
-                alert("Por favor ingresa el folio o CLABE desde donde transferiste.");
+                alert("Por favor ingresa el folio o referencia de tu transferencia a BBVA.");
                 return;
             }
         }
 
         db.collection("mandaditos").doc(mandadoId).update({
             status: 'Pagado y Confirmado',
-            paymentMethod: method,
+            paymentMethod: method === 'transferencia' ? 'transferencia BBVA' : (method === 'tarjeta' ? 'tarjeta (Mercado Pago)' : 'efectivo'),
             cashAmount: cashAmount,
             change: change,
             transferRef: transferRef,
@@ -1072,7 +1060,6 @@
             const storeMapUrl = `https://maps.google.com/?q=${m.storeLat},${m.storeLng}`;
             const destMapUrl = `https://maps.google.com/?q=${m.destLat},${m.destLng}`;
 
-            // Controles según el estado del mandadito
             let controlsHtml = "";
             if (status === 'Solicitado') {
                 controlsHtml = `
@@ -1098,8 +1085,8 @@
                 let payDetail = `Método: <b>${sanitizeText(m.paymentMethod).toUpperCase()}</b>`;
                 if (m.paymentMethod === 'efectivo') {
                     payDetail += ` | Paga con: <b>$${(m.cashAmount || 0).toFixed(2)}</b> | <span class="text-red-700 font-bold">LLEVAR CAMBIO: $${(m.change || 0).toFixed(2)}</span>`;
-                } else if (m.paymentMethod === 'transferencia') {
-                    payDetail += ` | Ref/CLABE: <b>${sanitizeText(m.transferRef)}</b>`;
+                } else if (m.paymentMethod && m.paymentMethod.includes('transferencia')) {
+                    payDetail += ` | Ref/Folio: <b>${sanitizeText(m.transferRef)}</b>`;
                 }
                 controlsHtml = `
                     <div class="bg-green-100 p-2.5 rounded-lg border border-green-400 text-xs space-y-1.5 mt-2">
@@ -1243,12 +1230,8 @@
     db.collection("config").doc("main").onSnapshot((doc) => {
         if (doc.exists) {
             storeConfig = { ...storeConfig, ...doc.data() };
-            const bankText = sanitizeText(storeConfig.bank) || "No registrada";
-            document.getElementById("company-bank-info").innerText = bankText;
-            document.getElementById("schedule-company-bank-info").innerText = bankText;
             document.getElementById("store-address-display").innerText = sanitizeText(storeConfig.address) || "No especificada";
             
-            document.getElementById("admin-company-bank").value = storeConfig.bank || "";
             document.getElementById("admin-store-address").value = storeConfig.address || "";
             document.getElementById("admin-gas-price").value = storeConfig.gasPrice || 24.00;
             document.getElementById("admin-moto-kml").value = storeConfig.motoKml || 33;
@@ -1336,6 +1319,13 @@
 
             let statusBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold ${order.status === 'Aceptado' ? 'bg-green-100 text-green-800' : order.status === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${order.status || 'Pendiente'}</span>`;
 
+            let paymentDetail = `Método: ${sanitizeText(order.paymentMethod).toUpperCase()}`;
+            if (order.paymentMethod === 'efectivo' && order.cashAmount > 0) {
+                paymentDetail += ` (Paga con $${order.cashAmount.toFixed(2)}, Cambio: $${(order.change || 0).toFixed(2)})`;
+            } else if (order.paymentMethod && order.paymentMethod.includes('transferencia') && order.transferClabe) {
+                paymentDetail += ` (Ref: ${sanitizeText(order.transferClabe)})`;
+            }
+
             ordersHtml += `
                 <div class="bg-white p-3 rounded-lg border shadow-sm space-y-2">
                     <div class="flex justify-between font-bold text-xs text-gray-500">
@@ -1353,7 +1343,7 @@
                     </div>
 
                     <div class="text-xs font-semibold text-gray-700">
-                        Método: ${sanitizeText(order.paymentMethod).toUpperCase()} | Total: <span class="text-orange-600 font-bold">$${order.total ? order.total.toFixed(2) : '0.00'}</span>
+                        ${paymentDetail} | Total: <span class="text-orange-600 font-bold">$${order.total ? order.total.toFixed(2) : '0.00'}</span>
                     </div>
 
                     <div class="flex gap-2 pt-1 border-t">
@@ -1397,10 +1387,14 @@
         document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Tu carrito está vacío</p>';
         document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
         
+        const trFoodEl = document.getElementById('tr-exact-food-total');
+        if (trFoodEl) trFoodEl.innerText = `$${total.toFixed(2)}`;
+
+        const schTrFoodEl = document.getElementById('sch-tr-exact-total');
+        if (schTrFoodEl) schTrFoodEl.innerText = `$${total.toFixed(2)}`;
+
         calculateNetEarnings();
-        calculateTransferDetails();
         calculateScheduleNetEarnings();
-        calculateScheduleTransferDetails();
         calculateChange();
         calculateTransferChange();
     }
@@ -1545,70 +1539,70 @@
     }
 
     function initDeliveryMap() {
-        if (deliveryMap) {
-            deliveryMap.invalidateSize();
-            return;
-        }
         const defaultLat = storeConfig.lat || 20.3333;
         const defaultLng = storeConfig.lng || -102.2333;
 
-        deliveryMap = L.map('delivery-map').setView([defaultLat, defaultLng], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(deliveryMap);
+        if (!deliveryMap) {
+            deliveryMap = L.map('delivery-map').setView([defaultLat, defaultLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(deliveryMap);
 
-        deliveryMap.on('click', function(e) {
-            selectedLat = e.latlng.lat;
-            selectedLng = e.latlng.lng;
+            deliveryMap.on('click', function(e) {
+                selectedLat = e.latlng.lat;
+                selectedLng = e.latlng.lng;
 
-            if (deliveryMarker) {
-                deliveryMarker.setLatLng([selectedLat, selectedLng]);
-            } else {
-                deliveryMarker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(deliveryMap);
-                deliveryMarker.on('dragend', function(event) {
-                    const marker = event.target;
-                    const position = marker.getLatLng();
-                    selectedLat = position.lat;
-                    selectedLng = position.lng;
-                });
-            }
-            document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
-        });
+                if (deliveryMarker) {
+                    deliveryMarker.setLatLng([selectedLat, selectedLng]);
+                } else {
+                    deliveryMarker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(deliveryMap);
+                    deliveryMarker.on('dragend', function(event) {
+                        const marker = event.target;
+                        const position = marker.getLatLng();
+                        selectedLat = position.lat;
+                        selectedLng = position.lng;
+                    });
+                }
+                document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
+            });
+        } else {
+            deliveryMap.invalidateSize();
+        }
     }
 
     function initScheduleMap() {
-        if (scheduleMap) {
-            scheduleMap.invalidateSize();
-            return;
-        }
         const defaultLat = storeConfig.lat || 20.3333;
         const defaultLng = storeConfig.lng || -102.2333;
 
-        scheduleMap = L.map('schedule-map').setView([defaultLat, defaultLng], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(scheduleMap);
+        if (!scheduleMap) {
+            scheduleMap = L.map('schedule-map').setView([defaultLat, defaultLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(scheduleMap);
 
-        scheduleMap.on('click', function(e) {
-            scheduleLat = e.latlng.lat;
-            scheduleLng = e.latlng.lng;
+            scheduleMap.on('click', function(e) {
+                scheduleLat = e.latlng.lat;
+                scheduleLng = e.latlng.lng;
 
-            if (scheduleMarker) {
-                scheduleMarker.setLatLng([scheduleLat, scheduleLng]);
-            } else {
-                scheduleMarker = L.marker([scheduleLat, scheduleLng], {draggable: true}).addTo(scheduleMap);
-                scheduleMarker.on('dragend', function(event) {
-                    const marker = event.target;
-                    const position = marker.getLatLng();
-                    scheduleLat = position.lat;
-                    scheduleLng = position.lng;
-                    document.getElementById("schedule-map-coords-text").innerText = `Ubicación fijada: ${scheduleLat.toFixed(5)}, ${scheduleLng.toFixed(5)}`;
-                });
-            }
-            document.getElementById("schedule-map-coords-text").innerText = `Ubicación fijada: ${scheduleLat.toFixed(5)}, ${scheduleLng.toFixed(5)}`;
-        });
+                if (scheduleMarker) {
+                    scheduleMarker.setLatLng([scheduleLat, scheduleLng]);
+                } else {
+                    scheduleMarker = L.marker([scheduleLat, scheduleLng], {draggable: true}).addTo(scheduleMap);
+                    scheduleMarker.on('dragend', function(event) {
+                        const marker = event.target;
+                        const position = marker.getLatLng();
+                        scheduleLat = position.lat;
+                        scheduleLng = position.lng;
+                        document.getElementById("schedule-map-coords-text").innerText = `Ubicación fijada: ${scheduleLat.toFixed(5)}, ${scheduleLng.toFixed(5)}`;
+                    });
+                }
+                document.getElementById("schedule-map-coords-text").innerText = `Ubicación fijada: ${scheduleLat.toFixed(5)}, ${scheduleLng.toFixed(5)}`;
+            });
+        } else {
+            scheduleMap.invalidateSize();
+        }
     }
 
     function calculateNetEarnings() {
@@ -1623,18 +1617,6 @@
         if (netEl) netEl.innerText = `$${net > 0 ? net.toFixed(2) : '0.00'}`;
     }
 
-    function calculateTransferDetails() {
-        const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-        const commission = (total * 0.0349) + 4.64;
-        const totalWithComm = total + commission;
-        const foodEl = document.getElementById('tr-food-total');
-        const commEl = document.getElementById('tr-commission-val');
-        const netEl = document.getElementById('tr-net-amount');
-        if (foodEl) foodEl.innerText = `$${total.toFixed(2)}`;
-        if (commEl) commEl.innerText = `$${commission.toFixed(2)}`;
-        if (netEl) netEl.innerText = `$${totalWithComm.toFixed(2)}`;
-    }
-
     function calculateScheduleNetEarnings() {
         const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
         const commission = (total * 0.0349) + 4.64;
@@ -1645,18 +1627,6 @@
         if (foodEl) foodEl.innerText = `$${total.toFixed(2)}`;
         if (commEl) commEl.innerText = `$${commission.toFixed(2)}`;
         if (netEl) netEl.innerText = `$${net > 0 ? net.toFixed(2) : '0.00'}`;
-    }
-
-    function calculateScheduleTransferDetails() {
-        const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-        const commission = (total * 0.0349) + 4.64;
-        const totalWithComm = total + commission;
-        const foodEl = document.getElementById('sch-tr-food-total');
-        const commEl = document.getElementById('sch-tr-commission-val');
-        const netEl = document.getElementById('sch-tr-net-amount');
-        if (foodEl) foodEl.innerText = `$${total.toFixed(2)}`;
-        if (commEl) commEl.innerText = `$${commission.toFixed(2)}`;
-        if (netEl) netEl.innerText = `$${totalWithComm.toFixed(2)}`;
     }
 
     function calculateChange() {
@@ -1793,7 +1763,7 @@
             address: address,
             lat: orderLat || null,
             lng: orderLng || null,
-            paymentMethod: paymentMethod,
+            paymentMethod: paymentMethod === 'transferencia' ? 'transferencia BBVA' : paymentMethod,
             cashAmount: cashAmount,
             change: change,
             transferClabe: transferClabe,
@@ -1852,7 +1822,6 @@
     }
 
     function saveConfig() {
-        const bank = sanitizeText(document.getElementById("admin-company-bank").value);
         const address = sanitizeText(document.getElementById("admin-store-address").value);
         const lat = adminStoreLat || storeConfig.lat || 20.3333;
         const lng = adminStoreLng || storeConfig.lng || -102.2333;
@@ -1863,7 +1832,10 @@
         const perKmFee = parseFloat(document.getElementById("admin-per-km-fee").value) || 4.5;
 
         db.collection("config").doc("main").set({ 
-            bank, address, lat, lng, gasPrice, motoKml, baseFee, perKmFee 
+            bank: "012533015277749576",
+            bankName: "BBVA",
+            bankOwner: "Roberto Carlos Martínez León",
+            address, lat, lng, gasPrice, motoKml, baseFee, perKmFee 
         }).then(() => alert("Configuración, tarifas de moto y mapa guardados correctamente"));
     }
 
