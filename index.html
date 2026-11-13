@@ -23,6 +23,12 @@
             border-radius: 0.5rem; 
             z-index: 10; 
         }
+        .ticket-map {
+            height: 160px;
+            width: 100%;
+            border-radius: 0.5rem;
+            z-index: 5;
+        }
         .font-handwriting { font-family: 'Caveat', cursive; }
     </style>
 </head>
@@ -596,6 +602,7 @@
                 const startStrClient = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pendiente';
                 const storeArrClient = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'En camino / Pendiente';
                 const destArrClient = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'En camino / Pendiente';
+                const queueMinsLive = (m.queueMinutes || 0).toFixed(1);
 
                 if (status === 'Aceptado / En Tienda' || status === 'En Ruta') {
                     badgeClass = 'bg-blue-50 text-blue-900';
@@ -623,7 +630,7 @@
                             <div class="flex justify-between"><span>Tienda:</span> <b>${sanitizeText(m.storeName)}</b></div>
                             <div class="flex justify-between"><span>🕒 Hora de Inicio:</span> <b class="text-indigo-700">${startTime}</b></div>
                             <div class="flex justify-between"><span>📍 Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArr}</b></div>
-                            <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min (Costo: $${queueCost})</b></div>
+                            <div class="flex justify-between"><span>⏱️ Tiempo en Fila (Cronómetro):</span> <b class="text-amber-700">${queueMins} min (Costo: $${queueCost})</b></div>
                             <div class="flex justify-between"><span>🏠 Hora Llegada a Destino:</span> <b class="text-green-700">${destArr}</b></div>
                             <hr class="my-1">
                             <div class="flex justify-between"><span>Distancia Total (3 Puntos):</span> <b>${(m.distanceKm||0).toFixed(2)} km</b></div>
@@ -632,8 +639,14 @@
                             <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
                             <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL PAGADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
                             
+                            <!-- Mapa de Paradas realizadas -->
+                            <div class="mt-2 space-y-1">
+                                <p class="font-bold text-center text-gray-800">🗺️ Mapa de Ruta Realizada</p>
+                                <div id="ticket-map-${m.id}" class="ticket-map"></div>
+                            </div>
+
                             <div class="pt-2 border-t mt-2 text-center">
-                                ${m.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${m.rating} Estrellas</p>` : `
+                                ${m.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${m.rating} Estrellas ${m.feedbackComment ? `("${sanitizeText(m.feedbackComment)}")` : ''}</p>` : `
                                     <p class="font-semibold text-gray-700 mb-1">Califica (1 a 6 estrellas):</p>
                                     <div class="flex justify-center gap-1">
                                         <button type="button" onclick="rateOrder('${m.id}', 1)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">1⭐</button>
@@ -647,13 +660,15 @@
                             </div>
                         </div>
                     `;
+                    setTimeout(() => initTicketRouteMap(m), 300);
                 }
 
-                // Live status tracker for client view
+                // Live status tracker for client view including cronometro
                 let liveTrackerHtml = `
                     <div class="bg-gray-50 p-2 rounded border space-y-1 my-1 text-[11px]">
                         <div class="flex justify-between"><span>🚀 Inicio:</span> <b>${startStrClient}</b></div>
                         <div class="flex justify-between"><span>📍 Llegada Tienda:</span> <b>${storeArrClient}</b></div>
+                        <div class="flex justify-between"><span>⏱️ Fila (Cronómetro):</span> <b class="text-amber-700">${queueMinsLive} min</b></div>
                         <div class="flex justify-between"><span>🏠 Llegada Destino:</span> <b>${destArrClient}</b></div>
                     </div>
                 `;
@@ -681,10 +696,44 @@
     function rateOrder(id, stars) {
         if (stars <= 3) {
             const comment = prompt("¿Qué podríamos mejorar para merecer tu mejor calificación?");
-            db.collection("mandaditos").doc(id).update({ rating: stars, feedbackComment: comment || "Sin comentario" }).then(() => alert("Gracias por tus comentarios."));
+            db.collection("mandaditos").doc(id).update({ 
+                rating: stars, 
+                feedbackComment: comment ? sanitizeText(comment) : "Sin comentario" 
+            }).then(() => alert("Gracias por tus comentarios."));
         } else {
-            db.collection("mandaditos").doc(id).update({ rating: stars, feedbackComment: "Excelente" }).then(() => alert("¡Gracias por tus 6 estrellas!"));
+            db.collection("mandaditos").doc(id).update({ 
+                rating: stars, 
+                feedbackComment: "Excelente" 
+            }).then(() => alert("¡Gracias por tus 6 estrellas!"));
         }
+    }
+
+    function initTicketRouteMap(m) {
+        const containerId = `ticket-map-${m.id}`;
+        const el = document.getElementById(containerId);
+        if (!el || el._leaflet_id) return;
+
+        const baseLat = storeConfig.lat || 20.3333;
+        const baseLng = storeConfig.lng || -102.2333;
+        const storeLat = m.storeLat || baseLat;
+        const storeLng = m.storeLng || baseLng;
+        const destLat = m.destLat || baseLat;
+        const destLng = m.destLng || baseLng;
+
+        const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([storeLat, storeLng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        L.marker([baseLat, baseLng]).addTo(map).bindPopup('🚀 INICIO (Base)');
+        L.marker([storeLat, storeLng]).addTo(map).bindPopup('📍 TIENDA');
+        L.marker([destLat, destLng]).addTo(map).bindPopup('🏠 DESTINO');
+
+        const polyline = L.polyline([
+            [baseLat, baseLng],
+            [storeLat, storeLng],
+            [destLat, destLng]
+        ], {color: 'emerald', weight: 3}).addTo(map);
+
+        map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
     }
 
     function openMandadoConfirmModal(id) {
@@ -719,11 +768,21 @@
     function confirmMandadoPurchase() {
         const id = document.getElementById("confirm-mandado-id").value;
         const method = document.getElementById("mandado-payment-method").value;
-        db.collection("mandaditos").doc(id).update({ status: 'Pagado y Confirmado', paymentMethod: method }).then(() => { alert("¡Pago confirmado!"); closeMandadoConfirmModal(); });
+        const cashAmt = parseFloat(document.getElementById("mandado-cash-amount").value) || 0;
+        const m = clientMandaditosCache[id];
+        const total = m ? ((m.productsCost||0) + (m.shippingCost||0)) : 0;
+        const changeVal = method === 'efectivo' && cashAmt >= total ? cashAmt - total : 0;
+
+        db.collection("mandaditos").doc(id).update({ 
+            status: 'Pagado y Confirmado', 
+            paymentMethod: method, 
+            cashAmount: cashAmt, 
+            change: changeVal 
+        }).then(() => { alert("¡Pago confirmado!"); closeMandadoConfirmModal(); });
     }
 
     // =========================================================================
-    // PANEL ADMINISTRADOR MEJORADO CON TICKET DIGITAL COMPLETO EN TIEMPO REAL
+    // PANEL ADMINISTRADOR CON TICKET DIGITAL Y CAMBIO A ENTREGAR
     // =========================================================================
     db.collection("mandaditos").onSnapshot((snapshot) => {
         let mandados = [];
@@ -744,6 +803,7 @@
             const startStr = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
             const storeArrStr = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin llegar';
             const destArrStr = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
+            const queueMinsAdmin = (m.queueMinutes || 0).toFixed(1);
 
             let controls = "";
 
@@ -756,6 +816,8 @@
             } else if (status === 'Entregado') {
                 const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
                 const queueCost = ((m.queueMinutes || 0) * (39.38 / 60)).toFixed(2);
+                const paymentInfo = m.paymentMethod === 'efectivo' ? `Efectivo (Recibe: $${(m.cashAmount||0).toFixed(2)} | <b>Cambio a entregar: $${(m.change||0).toFixed(2)}</b>)` : `${m.paymentMethod || 'No especificado'}`;
+                
                 controls = `
                     <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
                         <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (ADMIN)</p>
@@ -764,25 +826,40 @@
                         <div class="flex justify-between"><span>📍 Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArrStr}</b></div>
                         <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min (Costo: $${queueCost})</b></div>
                         <div class="flex justify-between"><span>🏠 Hora Llegada a Destino:</span> <b class="text-green-700">${destArrStr}</b></div>
+                        <div class="flex justify-between"><span>💳 Método y Cambio:</span> <b>${paymentInfo}</b></div>
                         <hr class="my-1">
                         <div class="flex justify-between"><span>Distancia Total (3 Puntos):</span> <b>${(m.distanceKm||0).toFixed(2)} km</b></div>
                         <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${(m.fuelCost||0).toFixed(2)}</b></div>
                         <div class="flex justify-between"><span>Pago Conductor / Trayecto:</span> <b>$${(m.laborCost||0).toFixed(2)}</b></div>
                         <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
                         <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
-                        ${m.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación del Cliente: ${m.rating} Estrellas</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
+                        
+                        <!-- Mapa de Paradas en Admin -->
+                        <div class="mt-2 space-y-1">
+                            <p class="font-bold text-center text-gray-800">🗺️ Mapa de Ruta Realizada</p>
+                            <div id="admin-ticket-map-${m.id}" class="ticket-map"></div>
+                        </div>
+
+                        ${m.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación: ${m.rating} Estrellas ${m.feedbackComment ? `("${sanitizeText(m.feedbackComment)}")` : ''}</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
                     </div>
                 `;
+                setTimeout(() => initAdminTicketRouteMap(m), 300);
             } else {
+                const paymentInfo = m.paymentMethod === 'efectivo' ? `<span class="text-emerald-800 font-bold">💵 Efectivo (Cambio a entregar: $${(m.change||0).toFixed(2)})</span>` : `💳 Pago: ${m.paymentMethod || 'Pendiente'}`;
                 controls = `
                     <div class="space-y-2 pt-1 border-t border-emerald-200">
+                        <!-- Cambio a entregar si aplica -->
+                        <div class="bg-yellow-50 p-2 rounded border border-yellow-200 text-xs">
+                            ${paymentInfo}
+                        </div>
+
                         <!-- Botón Inicio -->
                         <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
                             <span>🚀 <b>Inicio:</b> ${startStr}</span>
                             ${!m.startTimestamp ? `<button type="button" onclick="markMandadoStart('${m.id}')" class="bg-indigo-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-indigo-700">Iniciar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
                         </div>
 
-                        <!-- Botón Llegada a Tienda (Corregido para mostrar ✔ Registrado cuando tiene storeArrivalTimestamp) -->
+                        <!-- Botón Llegada a Tienda -->
                         <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
                             <span>📍 <b>Tienda:</b> ${storeArrStr}</span>
                             ${!m.storeArrivalTimestamp ? `<button type="button" onclick="markStoreArrival('${m.id}')" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
@@ -791,7 +868,7 @@
                         <!-- Cronómetro para Filas -->
                         <div class="bg-amber-50 p-2 rounded border border-amber-300 text-xs">
                             <div class="flex justify-between font-bold text-amber-950 mb-1">
-                                <span>⏱️ Fila: ${isRunning ? '🔴 En Curso' : `${(m.queueMinutes||0).toFixed(1)} min`}</span>
+                                <span>⏱️ Fila (Cronómetro): ${isRunning ? '🔴 En Curso' : `${queueMinsAdmin} min`}</span>
                             </div>
                             <div class="flex gap-1">
                                 <button type="button" onclick="startMandadoTimer('${m.id}')" class="flex-1 bg-amber-600 text-white py-1 rounded font-bold cursor-pointer hover:bg-amber-700">▶️ Iniciar Fila</button>
@@ -840,6 +917,34 @@
         });
         document.getElementById("admin-mandaditos-list").innerHTML = html || '<p class="text-gray-500 text-xs">No hay mandaditos activos.</p>';
     });
+
+    function initAdminTicketRouteMap(m) {
+        const containerId = `admin-ticket-map-${m.id}`;
+        const el = document.getElementById(containerId);
+        if (!el || el._leaflet_id) return;
+
+        const baseLat = storeConfig.lat || 20.3333;
+        const baseLng = storeConfig.lng || -102.2333;
+        const storeLat = m.storeLat || baseLat;
+        const storeLng = m.storeLng || baseLng;
+        const destLat = m.destLat || baseLat;
+        const destLng = m.destLng || baseLng;
+
+        const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([storeLat, storeLng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        L.marker([baseLat, baseLng]).addTo(map).bindPopup('🚀 INICIO (Base)');
+        L.marker([storeLat, storeLng]).addTo(map).bindPopup('📍 TIENDA');
+        L.marker([destLat, destLng]).addTo(map).bindPopup('🏠 DESTINO');
+
+        const polyline = L.polyline([
+            [baseLat, baseLng],
+            [storeLat, storeLng],
+            [destLat, destLng]
+        ], {color: 'emerald', weight: 3}).addTo(map);
+
+        map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
+    }
 
     function updateMandadoStatus(id, newStatus) { db.collection("mandaditos").doc(id).update({ status: newStatus }); }
     
