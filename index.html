@@ -51,8 +51,7 @@
     <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
         <h2 class="font-bold text-lg mb-2 text-orange-900">Tus Datos de Usuario</h2>
         <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
-        <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
-        <input type="text" id="client-bank" placeholder="Tu Cuenta Bancaria (Opcional)" class="w-full p-2 border rounded-lg text-sm">
+        <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg text-sm">
         
         <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">
             ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Aquí verás en vivo tus pedidos de comida y tus mandaditos.
@@ -138,7 +137,7 @@
             <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
         </div>
 
-        <!-- Paso 4: Desglose Matemático Transparente (Gasolina Pura + Tiempo Salario Mínimo + Desgaste Moto) -->
+        <!-- Paso 4: Desglose Matemático Transparente -->
         <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2">
             <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
                 <span>📏 Distancia estimada:</span>
@@ -452,7 +451,7 @@
 </div>
 
 <!-- ===================================================================== -->
-<!-- MODAL PANEL ADMINISTRADOR (COMIDA + MANDADITOS + TARIFAS MOTO)        -->
+<!-- MODAL PANEL ADMINISTRADOR                                             -->
 <!-- ===================================================================== -->
 <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xl rounded-2xl p-5 max-h-[92vh] overflow-y-auto">
@@ -492,31 +491,7 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN 3: CONFIGURACIÓN TARIFAS MOTO ITALIKA FT150 TS -->
-            <div class="bg-gray-100 p-4 rounded-xl border space-y-2">
-                <h4 class="font-bold text-gray-900">⛽ Configuración Tarifa Mandaditos (Italika FT150 TS)</h4>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[11px] font-semibold text-gray-600">Precio Litro Gasolina ($):</label>
-                        <input type="number" step="0.1" id="admin-gas-price" value="24.00" class="w-full p-2 bg-white border rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-gray-600">Rendimiento Moto (km/L):</label>
-                        <input type="number" step="0.5" id="admin-moto-kml" value="33" class="w-full p-2 bg-white border rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-gray-600">Tarifa Base Arranque ($):</label>
-                        <input type="number" step="1" id="admin-base-fee" value="15" class="w-full p-2 bg-white border rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-semibold text-gray-600">Cobro Extra por Km ($):</label>
-                        <input type="number" step="0.5" id="admin-per-km-fee" value="4.5" class="w-full p-2 bg-white border rounded-lg text-sm">
-                    </div>
-                </div>
-                <p class="text-[11px] text-gray-500">Costo combustible por km actual: <b id="admin-fuel-per-km-preview">$0.73/km</b> + tarifa de servicio.</p>
-            </div>
-
-            <!-- SECCIÓN 4: CONFIGURACIÓN GENERAL DEL LOCAL -->
+            <!-- SECCIÓN 3: CONFIGURACIÓN GENERAL DEL LOCAL -->
             <div class="border-b pb-4 space-y-2">
                 <h4 class="font-bold mb-2">Configuración General del Local</h4>
                 <div class="bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-xs text-blue-950">
@@ -535,7 +510,7 @@
                 <button onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2">Guardar Toda la Configuración</button>
             </div>
 
-            <!-- SECCIÓN 5: AGREGAR / EDITAR PLATILLO -->
+            <!-- SECCIÓN 4: AGREGAR / EDITAR PLATILLO -->
             <div class="border-b pb-4">
                 <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
                 <input type="hidden" id="edit-dish-id">
@@ -550,7 +525,7 @@
                 <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
             </div>
 
-            <!-- SECCIÓN 6: LISTA DE PLATILLOS -->
+            <!-- SECCIÓN 5: LISTA DE PLATILLOS -->
             <div>
                 <h4 class="font-bold mb-2">Menú Actual</h4>
                 <div id="admin-dish-list" class="space-y-2 text-sm"></div>
@@ -636,24 +611,17 @@
         return R * c;
     }
 
-    // Motor Matemático Transparente 2026:
-    // 1. Gasolina Pura: (Km / 33 km/L) * Precio Litro (Sin ganancia)
-    // 2. Tiempo Conductor: Minutos estimados @ $0.656/min ($39.38/h - Salario Mínimo 2026)
-    // 3. Desgaste Moto: $0.0004 por metro ($0.40 por km para aceite, cadena, balatas, llantas)
     function computeTransparentShipping(distanceKm) {
         const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
         const motoKml = parseFloat(storeConfig.motoKml) || 33;
 
-        // 1. Gasolina Pura (sin ganancia)
         const litersUsed = distanceKm / motoKml;
         const fuelCost = litersUsed * gasPrice;
 
-        // 2. Tiempo del Conductor (Asumiendo velocidad promedio moto urbana ~ 30 km/h -> 2 min por km)
         const estimatedMinutes = Math.max(3, Math.round(distanceKm * 2));
-        const ratePerMinute = 39.38 / 60; // $0.656 por minuto basado en salario mínimo $315.04/8h
+        const ratePerMinute = 39.38 / 60;
         const laborCost = estimatedMinutes * ratePerMinute;
 
-        // 3. Desgaste y Mantenimiento de la Italika FT150 TS ($0.40 por km / $0.0004 por metro)
         const wearCostPerKm = 0.40;
         const wearCost = distanceKm * wearCostPerKm;
 
@@ -764,7 +732,6 @@
 
             const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
             const clientPhone = localStorage.getItem('temp_client_phone') || '';
-            const clientBank = localStorage.getItem('temp_client_bank') || '';
             const deliveryType = localStorage.getItem('temp_delivery_type') || 'local';
             const address = localStorage.getItem('temp_address') || '';
             const savedLat = localStorage.getItem('temp_lat');
@@ -781,7 +748,7 @@
                 db.collection("orders").add({
                     clientName: sanitizeText(clientName),
                     clientPhone: sanitizeText(clientPhone),
-                    clientBank: sanitizeText(clientBank),
+                    clientBank: "",
                     items: pendingCart,
                     subtotal: subtotal,
                     shippingCost: shippingCost,
@@ -824,7 +791,7 @@
     }
 
     // =========================================================================
-    // MANDADITOS: LÓGICA DEL CLIENTE (SOLICITAR, VER EN VIVO, PAGAR)
+    // MANDADITOS: LÓGICA DEL CLIENTE Y TIEMPO REAL
     // =========================================================================
     function openMandaditoModal() {
         const name = document.getElementById("client-name").value.trim();
@@ -851,10 +818,7 @@
 
         if (!mandadoStoreMap) {
             mandadoStoreMap = L.map('mandado-store-map').setView([defaultLat, defaultLng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(mandadoStoreMap);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mandadoStoreMap);
 
             mandadoStoreMap.on('click', function(e) {
                 mandadoStoreLat = e.latlng.lat;
@@ -880,10 +844,7 @@
 
         if (!mandadoDestMap) {
             mandadoDestMap = L.map('mandado-dest-map').setView([defaultLat, defaultLng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(mandadoDestMap);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mandadoDestMap);
 
             mandadoDestMap.on('click', function(e) {
                 mandadoDestLat = e.latlng.lat;
@@ -983,7 +944,7 @@
 
                 if (status === 'Aceptado / En Tienda') {
                     badgeClass = 'bg-blue-50 text-blue-900 border-blue-300';
-                    statusMsg = '🛵 ¡Mandadito Aceptado! El repartidor va hacia la tienda para verificar el costo exacto de tus productos.';
+                    statusMsg = '🛵 ¡Mandadito Aceptado! El conductor puede intentar comunicarse contigo por WhatsApp o llamada para afinar detalles.';
                 } else if (status === 'Cotizado') {
                     badgeClass = 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-2 ring-emerald-300';
                     statusMsg = `💰 ¡Productos listos en tienda! Costo productos: <b>$${(m.productsCost || 0).toFixed(2)}</b> + Envío: <b>$${(m.shippingCost || 0).toFixed(2)}</b> = <b>Total: $${(m.totalCost || 0).toFixed(2)}</b>`;
@@ -994,7 +955,7 @@
                     `;
                 } else if (status === 'Pagado y Confirmado') {
                     badgeClass = 'bg-green-100 text-green-900 border-green-400';
-                    statusMsg = `✅ ¡Compra confirmada (${sanitizeText(m.paymentMethod)})! El repartidor va en camino a tu domicilio.`;
+                    statusMsg = `✅ ¡Compra confirmada (${sanitizeText(m.paymentMethod)})! El conductor va en camino. <b>Mantente al pendiente de tu WhatsApp o llamada telefónica.</b>`;
                 } else if (status === 'Entregado') {
                     badgeClass = 'bg-gray-100 text-gray-700 border-gray-300';
                     statusMsg = '🏁 Mandadito entregado con éxito.';
@@ -1307,7 +1268,7 @@
     }
 
     // =========================================================================
-    // PEDIDOS DE COMIDA EN TIEMPO REAL
+    // PEDIDOS DE COMIDA Y TIEMPO REAL
     // =========================================================================
     function loadClientOrders(phone) {
         if (!phone) return;
@@ -1323,7 +1284,7 @@
 
                 if (status === 'Aceptado') {
                     statusColor = 'bg-green-100 text-green-900 border-green-300';
-                    statusText = '🎉 ¡Pedido Aceptado / En Preparación!';
+                    statusText = '🎉 ¡Pedido Aceptado / En Preparación! El conductor podría intentar comunicarse contigo por WhatsApp o llamada para afinar detalles.';
                 } else if (status === 'Rechazado') {
                     statusColor = 'bg-red-100 text-red-900 border-red-300';
                     statusText = '❌ Pedido Rechazado por el Local';
@@ -1353,21 +1314,13 @@
     }
 
     // =========================================================================
-    // CONFIGURACIÓN GENERAL Y TARIFAS MOTO
+    // CONFIGURACIÓN GENERAL Y MENÚ
     // =========================================================================
     db.collection("config").doc("main").onSnapshot((doc) => {
         if (doc.exists) {
             storeConfig = { ...storeConfig, ...doc.data() };
             document.getElementById("store-address-display").innerText = sanitizeText(storeConfig.address) || "No especificada";
-            
             document.getElementById("admin-store-address").value = storeConfig.address || "";
-            document.getElementById("admin-gas-price").value = storeConfig.gasPrice || 24.00;
-            document.getElementById("admin-moto-kml").value = storeConfig.motoKml || 33;
-            document.getElementById("admin-base-fee").value = storeConfig.baseFee || 15;
-            document.getElementById("admin-per-km-fee").value = storeConfig.perKmFee || 4.5;
-
-            const fuelPerKm = (parseFloat(storeConfig.gasPrice) || 24) / (parseFloat(storeConfig.motoKml) || 33);
-            document.getElementById("admin-fuel-per-km-preview").innerText = `$${fuelPerKm.toFixed(2)}/km`;
             
             if (storeConfig.lat && storeConfig.lng) {
                 adminStoreLat = storeConfig.lat;
@@ -1488,7 +1441,7 @@
     });
 
     // =========================================================================
-    // FUNCIONES CARRITO Y MAPAS DE COMIDA
+    // CARRITO Y MAPAS DE COMIDA
     // =========================================================================
     function addToCart(id) {
         const item = menuItems.find(i => i.id === id);
@@ -1639,11 +1592,7 @@
         }
 
         storeMap = L.map('store-map').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(storeMap);
-
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(storeMap);
         storeMarker = L.marker([lat, lng]).addTo(storeMap);
     }
 
@@ -1663,10 +1612,7 @@
         }
 
         adminStoreMap = L.map('admin-store-map').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(adminStoreMap);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(adminStoreMap);
 
         adminStoreMarker = L.marker([lat, lng], {draggable: true}).addTo(adminStoreMap);
         adminStoreMarker.on('dragend', function(event) {
@@ -1690,10 +1636,7 @@
 
         if (!deliveryMap) {
             deliveryMap = L.map('delivery-map').setView([defaultLat, defaultLng], 14);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(deliveryMap);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(deliveryMap);
 
             deliveryMap.on('click', function(e) {
                 selectedLat = e.latlng.lat;
@@ -1704,8 +1647,7 @@
                 } else {
                     deliveryMarker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(deliveryMap);
                     deliveryMarker.on('dragend', function(event) {
-                        const marker = event.target;
-                        const position = marker.getLatLng();
+                        const position = event.target.getLatLng();
                         selectedLat = position.lat;
                         selectedLng = position.lng;
                         recalculateDeliveryCost();
@@ -1725,10 +1667,7 @@
 
         if (!scheduleMap) {
             scheduleMap = L.map('schedule-map').setView([defaultLat, defaultLng], 14);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(scheduleMap);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(scheduleMap);
 
             scheduleMap.on('click', function(e) {
                 scheduleLat = e.latlng.lat;
@@ -1739,8 +1678,7 @@
                 } else {
                     scheduleMarker = L.marker([scheduleLat, scheduleLng], {draggable: true}).addTo(scheduleMap);
                     scheduleMarker.on('dragend', function(event) {
-                        const marker = event.target;
-                        const position = marker.getLatLng();
+                        const position = event.target.getLatLng();
                         scheduleLat = position.lat;
                         scheduleLng = position.lng;
                         document.getElementById("schedule-map-coords-text").innerText = `Ubicación fijada: ${scheduleLat.toFixed(5)}, ${scheduleLng.toFixed(5)}`;
@@ -1829,7 +1767,6 @@
     function checkoutOrder(type) {
         const name = sanitizeText(document.getElementById("client-name").value);
         let phone = sanitizeText(document.getElementById("client-phone").value);
-        const clientBank = sanitizeText(document.getElementById("client-bank").value);
         
         if (type === 'futuro') {
             const schedPhone = sanitizeText(document.getElementById("schedule-phone").value);
@@ -1890,7 +1827,6 @@
         if (paymentMethod === "tarjeta" && type === 'inmediato') {
             localStorage.setItem('temp_client_name', name);
             localStorage.setItem('temp_client_phone', phone);
-            localStorage.setItem('temp_client_bank', clientBank);
             localStorage.setItem('temp_delivery_type', deliveryType);
             localStorage.setItem('temp_address', address);
             localStorage.setItem('temp_shipping_cost', shippingCost);
@@ -1920,7 +1856,7 @@
         db.collection("orders").add({
             clientName: name,
             clientPhone: phone,
-            clientBank: clientBank || "",
+            clientBank: "",
             items: cart,
             subtotal: subtotal,
             shippingCost: shippingCost,
@@ -1991,18 +1927,17 @@
         const address = sanitizeText(document.getElementById("admin-store-address").value);
         const lat = adminStoreLat || storeConfig.lat || 20.3333;
         const lng = adminStoreLng || storeConfig.lng || -102.2333;
-        
-        const gasPrice = parseFloat(document.getElementById("admin-gas-price").value) || 24.00;
-        const motoKml = parseFloat(document.getElementById("admin-moto-kml").value) || 33;
-        const baseFee = parseFloat(document.getElementById("admin-base-fee").value) || 15;
-        const perKmFee = parseFloat(document.getElementById("admin-per-km-fee").value) || 4.5;
 
         db.collection("config").doc("main").set({ 
             bank: "012533015277749576",
             bankName: "BBVA",
             bankOwner: "Roberto Carlos Martínez León",
-            address, lat, lng, gasPrice, motoKml, baseFee, perKmFee 
-        }).then(() => alert("Configuración, tarifas de moto y mapa guardados correctamente"));
+            address, lat, lng,
+            gasPrice: storeConfig.gasPrice || 24.00,
+            motoKml: storeConfig.motoKml || 33,
+            baseFee: storeConfig.baseFee || 15,
+            perKmFee: storeConfig.perKmFee || 4.5
+        }).then(() => alert("Configuración y mapa guardados correctamente"));
     }
 
     function saveDish() {
