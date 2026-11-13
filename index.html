@@ -7,12 +7,12 @@
     <title>Primo - Comida a Domicilio y Mandaditos</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts para toque elegante tipo manuscrita -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <!-- Leaflet CSS & JS para los Mapas Interactivos -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="manifest" href="manifest.json">
@@ -34,13 +34,13 @@
             <span>🍽️</span> PRIMO
         </h1>
         <div class="flex gap-1.5 sm:gap-2">
-            <button onclick="openMandaditoModal()" class="bg-emerald-600 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1 hover:bg-emerald-700 transition shadow-sm">
+            <button type="button" onclick="openMandaditoModal()" class="bg-emerald-600 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1 hover:bg-emerald-700 transition shadow-sm cursor-pointer">
                 🛵 Mandadito
             </button>
-            <button onclick="openCart()" class="bg-orange-600 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1 hover:bg-orange-700 transition">
+            <button type="button" onclick="openCart()" class="bg-orange-600 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1 hover:bg-orange-700 transition cursor-pointer">
                 🛒 (<span id="cart-count">0</span>)
             </button>
-            <button onclick="openAdminLogin()" class="bg-gray-800 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-900 transition">
+            <button type="button" onclick="openAdminLogin()" class="bg-gray-800 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-900 transition cursor-pointer">
                 Admin
             </button>
         </div>
@@ -48,37 +48,30 @@
 
 <!-- Main Container -->
 <main class="max-w-md mx-auto p-4 space-y-4">
-    <!-- Registro Cliente (Usuario Único) -->
+    <!-- Registro Cliente -->
     <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
         <h2 class="font-bold text-lg mb-2 text-orange-900">Tus Datos de Usuario</h2>
-        <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
-        <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg text-sm">
+        <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none">
+        <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-400 outline-none">
 
         <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">
             ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Aquí verás en vivo tus pedidos y tickets digitales.
         </div>
     </section>
 
-    <!-- Sección de Estatus de Mis Mandaditos en Tiempo Real -->
+    <!-- Sección de Estatus de Mis Mandaditos -->
     <section id="client-mandaditos-status-section" class="bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-400 hidden">
         <div class="flex items-center justify-between mb-1">
             <h3 class="font-bold text-md text-emerald-900">🛵 Tus Mandaditos en Vivo</h3>
             <span class="animate-pulse inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
         </div>
-        <p class="text-[11px] text-gray-500 mb-3">Actualización automática. Seguimiento de ruta (3 ubicaciones), cronómetros, tickets y calificaciones de servicio.</p>
+        <p class="text-[11px] text-gray-500 mb-3">Actualización automática en tiempo real.</p>
         <div id="client-my-mandaditos-list" class="space-y-3 text-xs"></div>
     </section>
 
-    <!-- Sección de Estatus de Mis Pedidos y Reservas en Tiempo Real -->
-    <section id="client-orders-status-section" class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 hidden">
-        <h3 class="font-bold text-md text-orange-900 mb-1">🔔 Estatus de tus Pedidos de Comida</h3>
-        <p class="text-[11px] text-gray-500 mb-3">Se actualiza en tiempo real cuando el local acepta o rechaza.</p>
-        <div id="client-my-orders-list" class="space-y-2 text-xs"></div>
-    </section>
-
-    <!-- Accesos Rápidos: Mandaditos y Agendar -->
+    <!-- Accesos Rápidos -->
     <section class="grid grid-cols-1 gap-2.5">
-        <button onclick="openMandaditoModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3.5 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
+        <button type="button" onclick="openMandaditoModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3.5 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4 cursor-pointer">
             <div class="text-left">
                 <span class="block text-sm sm:text-base">🛵 Servicio de Mandaditos Express</span>
                 <span class="block text-[11px] font-normal text-emerald-100">Cálculo exacto: Base ➔ Tienda ➔ Cliente</span>
@@ -86,8 +79,8 @@
             <span class="bg-white text-emerald-700 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">Pedir Mandado</span>
         </button>
 
-        <button onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
-            <span class="text-sm">📅 ¿Quieres reservar comida para otro día u hora?</span>
+        <button type="button" onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4 cursor-pointer">
+            <span class="text-sm">📅 ¿Quieres reservar comida para otro día?</span>
             <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold shrink-0">Agendar</span>
         </button>
     </section>
@@ -105,95 +98,92 @@
 <!-- MODAL NUEVO MANDADITO (CLIENTE SOLICITA)                              -->
 <!-- ===================================================================== -->
 <div id="mandadito-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto space-y-4">
+    <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b pb-3">
             <div>
                 <h3 class="text-lg font-bold text-emerald-900">🛵 Solicitar Mandadito</h3>
-                <p class="text-xs text-gray-500">Ruta inteligente calculada en 3 Puntos (Base ➔ Tienda ➔ Domicilio)</p>
+                <p class="text-xs text-gray-500">Ruta inteligente calculada en 3 Puntos</p>
             </div>
-            <button onclick="closeMandaditoModal()" class="text-gray-500 font-bold text-xl px-2">✕</button>
+            <button type="button" onclick="closeMandaditoModal()" class="text-gray-500 font-bold text-xl px-2 cursor-pointer">✕</button>
         </div>
 
-        <!-- Explicación de las 3 Ubicaciones -->
         <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-xs text-emerald-950 space-y-1">
             <p class="font-bold">📍 Sistema de Ruta de 3 Ubicaciones:</p>
-            <p>Para garantizar un cobro justo y transparente, nuestro sistema calcula la distancia exacta midiendo: <b>1) Ubicación Base del local</b>, <b>2) Tienda de recolección</b> y <b>3) Tu Domicilio de entrega</b>.</p>
+            <p>1) Base del local, 2) Tienda de recolección y 3) Tu Domicilio de entrega.</p>
         </div>
 
-        <!-- Paso 1: Seleccionar Tienda en Mapa -->
+        <!-- Paso 1: Tienda -->
         <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 space-y-2">
             <label class="block font-bold text-sm text-emerald-900">1. ¿En qué tienda compraremos?</label>
-            <input type="text" id="mandado-store-name" placeholder="Nombre de la tienda (Ej. Oxxo, Farmacia, Tortillería...)" class="w-full p-2 bg-white border rounded-lg text-sm">
+            <input type="text" id="mandado-store-name" placeholder="Nombre de la tienda (Oxxo, Farmacia...)" class="w-full p-2 bg-white border rounded-lg text-sm">
             <p class="text-xs text-gray-600">📍 Toca el mapa para marcar la ubicación de la <b>Tienda (Punto 2)</b>:</p>
             <div id="mandado-store-map"></div>
             <p id="mandado-store-coords" class="text-[11px] font-semibold text-emerald-700">Ubicación tienda: Sin seleccionar</p>
         </div>
 
-        <!-- Paso 2: Lista de Productos a Comprar -->
+        <!-- Paso 2: Productos -->
         <div class="space-y-1.5">
             <label class="block font-bold text-sm text-gray-800">2. Lista de productos a comprar:</label>
             <textarea id="mandado-items" rows="3" placeholder="Escribe detalladamente lo que necesitas..." class="w-full p-2.5 border rounded-lg text-sm"></textarea>
-            <p class="text-[11px] text-gray-500">💡 *Nota de Fila: Si la tienda tiene fila, el repartidor activará un cronómetro especial remunerado en base al salario mínimo ($39.38/hr o ~$0.66/min).*</p>
+            <p class="text-[11px] text-gray-500">💡 Fila: Cronómetro especial si hay fila ($39.38/hr o ~$0.66/min).</p>
         </div>
 
-        <!-- Paso 3: Seleccionar Destino en Mapa -->
+        <!-- Paso 3: Destino -->
         <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 space-y-2">
             <label class="block font-bold text-sm text-blue-900">3. ¿A dónde te lo llevamos?</label>
-            <input type="text" id="mandado-dest-address" placeholder="Calle, número y referencias de tu domicilio" class="w-full p-2 bg-white border rounded-lg text-sm">
+            <input type="text" id="mandado-dest-address" placeholder="Calle, número y referencias" class="w-full p-2 bg-white border rounded-lg text-sm">
             <p class="text-xs text-gray-600">🏠 Toca el mapa para marcar tu <b>Domicilio de entrega (Punto 3)</b>:</p>
             <div id="mandado-dest-map"></div>
             <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
         </div>
 
-        <!-- Paso 4: Desglose Matemático Transparente de Costos -->
+        <!-- Desglose -->
         <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2">
             <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
-                <span>📏 Distancia Total Estimada (3 Puntos):</span>
+                <span>📏 Distancia Total (3 Puntos):</span>
                 <span id="mandado-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
             </div>
-            
             <div class="space-y-1 text-xs">
                 <div class="flex justify-between text-gray-300">
-                    <span>⛽ Combustible (Italika FT150 @ 33 km/L):</span>
+                    <span>⛽ Combustible:</span>
                     <span id="mandado-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
                 </div>
                 <div class="flex justify-between text-gray-300">
-                    <span>⏱️ Pago Conductor (<span id="mandado-time-display">0 min</span> @ $0.66/min - Salario Mín.):</span>
+                    <span>⏱️ Pago Conductor (<span id="mandado-time-display">0 min</span>):</span>
                     <span id="mandado-labor-display" class="text-blue-300 font-semibold">$0.00</span>
                 </div>
                 <div class="flex justify-between text-gray-300">
-                    <span>🔧 Mantenimiento / Desgaste ($0.40/km):</span>
+                    <span>🔧 Desgaste:</span>
                     <span id="mandado-wear-display" class="text-amber-300 font-semibold">$0.00</span>
                 </div>
             </div>
-
             <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
                 <span>Costo Total del Envío Base:</span>
                 <span id="mandado-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
             </div>
         </div>
 
-        <button onclick="submitMandadito()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md">
+        <button type="button" onclick="submitMandadito()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md cursor-pointer">
             Enviar Solicitud de Mandadito en Vivo
         </button>
     </div>
 </div>
 
 <!-- ===================================================================== -->
-<!-- MODAL PAGO / ACEPTACIÓN DEL CLIENTE PARA MANDADITO COTIZADO           -->
+<!-- MODAL PAGO / ACEPTACIÓN CLIENTE MANDADITO                             -->
 <!-- ===================================================================== -->
 <div id="mandado-confirm-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto space-y-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b pb-2">
             <h3 class="text-lg font-bold text-emerald-900">💳 Confirmar Compra y Pago</h3>
-            <button onclick="closeMandadoConfirmModal()" class="text-gray-500 font-bold text-lg">✕</button>
+            <button type="button" onclick="closeMandadoConfirmModal()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
         </div>
 
         <input type="hidden" id="confirm-mandado-id">
         
         <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1 text-sm">
-            <div class="flex justify-between"><span>Costo de los productos en tienda:</span> <b id="conf-prod-cost">$0.00</b></div>
-            <div class="flex justify-between"><span>Costo transparente del envío (3 Puntos + Fila):</span> <b id="conf-ship-cost">$0.00</b></div>
+            <div class="flex justify-between"><span>Costo de productos en tienda:</span> <b id="conf-prod-cost">$0.00</b></div>
+            <div class="flex justify-between"><span>Costo de envío (3 Puntos + Fila):</span> <b id="conf-ship-cost">$0.00</b></div>
             <div class="flex justify-between text-base font-bold text-emerald-950 border-t border-emerald-300 pt-1.5 mt-1">
                 <span>TOTAL A PAGAR:</span>
                 <span id="conf-grand-total">$0.00</span>
@@ -201,7 +191,7 @@
         </div>
 
         <div>
-            <label class="block font-semibold text-sm mb-1">Selecciona tu Método de Pago:</label>
+            <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
             <select id="mandado-payment-method" onchange="toggleMandadoPaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                 <option value="efectivo">Efectivo al recibir</option>
                 <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
@@ -214,43 +204,32 @@
                 <p id="mandado-change-text" class="text-xs font-bold text-green-600"></p>
             </div>
 
-            <div id="mandado-tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-1.5">
-                <p class="font-bold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                <p class="text-blue-700">Comisión por cobro: <b>(3.49%) + $4.64</b>.</p>
-                <div class="bg-white p-2 rounded border border-blue-100 space-y-1">
-                    <div class="flex justify-between"><span>Subtotal Mandadito + Productos:</span> <span id="m-mp-sub">$0.00</span></div>
-                    <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="m-mp-comm">$0.00</span></div>
-                    <div class="flex justify-between font-bold text-blue-900 border-t pt-1"><span>Total con comisión:</span> <span id="m-mp-total">$0.00</span></div>
-                </div>
-            </div>
-
             <div id="mandado-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2">
-                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (SIN COMISIÓN):</p>
-                <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-blue-950">
-                    <p><b>Banco:</b> BBVA | <b>CLABE:</b> <span class="font-mono select-all font-bold">012533015277749576</span></p>
+                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA:</p>
+                <div class="bg-white p-2.5 rounded border border-blue-200 font-mono select-all font-bold text-blue-950">
+                    012533015277749576
                 </div>
-                <p class="text-green-700 font-bold">Transfiere exactamente (<span id="m-tr-exact-total">$0.00</span>).</p>
-                <input type="text" id="mandado-transfer-ref" placeholder="Folio o referencia de tu transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
+                <input type="text" id="mandado-transfer-ref" placeholder="Folio o referencia de transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
             </div>
         </div>
 
         <div class="flex gap-2 pt-2">
-            <button onclick="rejectMandadoQuote()" class="w-1/3 bg-red-100 text-red-700 py-2.5 rounded-xl font-bold text-xs hover:bg-red-200">
+            <button type="button" onclick="rejectMandadoQuote()" class="w-1/3 bg-red-100 text-red-700 py-2.5 rounded-xl font-bold text-xs hover:bg-red-200 cursor-pointer">
                 Cancelar
             </button>
-            <button onclick="confirmMandadoPurchase()" class="w-2/3 bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow">
+            <button type="button" onclick="confirmMandadoPurchase()" class="w-2/3 bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow cursor-pointer">
                 ✔ Aceptar Costo y Pagar
             </button>
         </div>
     </div>
 </div>
 
-<!-- Modal Carrito / Checkout Inmediato -->
+<!-- Modal Carrito Comida -->
 <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-bold">Tu Pedido Inmediato</h3>
-            <button onclick="closeCart()" class="text-gray-500 font-bold text-lg">✕</button>
+            <button type="button" onclick="closeCart()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
         </div>
         <div id="cart-items" class="space-y-3 mb-4 divide-y"></div>
         <div class="border-t pt-3 space-y-1 mb-4">
@@ -272,27 +251,14 @@
             <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
             <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
                 <option value="efectivo">Efectivo</option>
-                <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
+                <option value="tarjeta">Tarjeta / Mercado Pago</option>
+                <option value="transferencia">Transferencia Bancaria BBVA</option>
             </select>
 
             <div id="cash-fields">
                 <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para cambio):</label>
                 <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
                 <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
-            </div>
-
-            <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                <p class="text-blue-700 text-xs">Comisión: <b>(3.49%) + $4.64</b>.</p>
-            </div>
-
-            <div id="transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (0% Comisión):</p>
-                <div class="bg-white p-2.5 rounded border border-blue-200 text-xs text-blue-950">
-                    <p><b>CLABE:</b> <span class="font-mono font-bold select-all">012533015277749576</span></p>
-                </div>
-                <input type="text" id="transfer-clabe" placeholder="Folio o referencia SPEI" class="w-full p-2 bg-white border rounded-lg text-sm mt-1">
             </div>
         </div>
 
@@ -310,30 +276,28 @@
             </div>
 
             <div id="domicilio-fields" class="hidden space-y-3">
-                <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número)" class="w-full p-2 border rounded-lg text-sm">
+                <input type="text" id="delivery-address" placeholder="Calle y número" class="w-full p-2 border rounded-lg text-sm">
                 <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Ubicación exacta en el mapa:</label>
                 <div id="delivery-map"></div>
-                <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
-
                 <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1 text-xs">
-                    <div class="flex justify-between"><span>Distancia estimada:</span> <span id="delivery-distance-display" class="font-bold">0.00 km</span></div>
-                    <div class="flex justify-between"><span>Costo Envío (Moto):</span> <span id="delivery-shipping-cost" class="text-emerald-400 font-bold text-base">$0.00</span></div>
+                    <div class="flex justify-between"><span>Distancia:</span> <span id="delivery-distance-display" class="font-bold">0.00 km</span></div>
+                    <div class="flex justify-between"><span>Costo Envío:</span> <span id="delivery-shipping-cost" class="text-emerald-400 font-bold text-base">$0.00</span></div>
                 </div>
             </div>
         </div>
 
-        <button onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
+        <button type="button" onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition cursor-pointer">
             Confirmar Pedido Inmediato
         </button>
     </div>
 </div>
 
-<!-- Modal Agendar Pedido a Futuro (Reserva) -->
+<!-- Modal Agendar Pedido a Futuro -->
 <div id="schedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
             <h3 class="text-lg font-bold text-amber-900">📅 Agendar Pedido a Futuro</h3>
-            <button onclick="closeScheduleModal()" class="text-gray-500 font-bold text-lg">✕</button>
+            <button type="button" onclick="closeScheduleModal()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
         </div>
         <div>
             <label class="block font-semibold text-sm mb-1">Tu Teléfono *:</label>
@@ -345,64 +309,53 @@
         </div>
         <div><label class="block font-semibold text-sm mb-1">Referencias:</label><input type="text" id="schedule-address" placeholder="Calle, número, fachada" class="w-full p-2 border rounded-lg text-sm"></div>
         <div><label class="block text-xs font-semibold text-gray-700 mb-1">📍 Ubicación en el mapa:</label><div id="schedule-map"></div></div>
-        <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">Enviar Reserva</button>
+        <button type="button" onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition cursor-pointer">Enviar Reserva</button>
     </div>
 </div>
 
 <!-- Modal Panel Administrador -->
 <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xl rounded-2xl p-5 max-h-[92vh] overflow-y-auto">
+    <div class="bg-white w-full max-w-xl rounded-2xl p-5 max-h-[92vh] overflow-y-auto shadow-2xl">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
             <h3 class="text-lg font-bold">Panel Administrador</h3>
-            <button onclick="closeAdmin()" class="text-gray-500 font-bold text-lg">✕</button>
+            <button type="button" onclick="closeAdmin()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
         </div>
 
         <div id="admin-login-view">
             <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
-            <button onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold">Ingresar</button>
+            <button type="button" onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold cursor-pointer">Ingresar</button>
         </div>
 
         <div id="admin-panel-view" class="hidden space-y-6">
-            <!-- SECCIÓN 1: MANDADITOS EN VIVO -->
+            <!-- Mandaditos en Vivo -->
             <div class="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-300">
                 <div class="flex justify-between items-center mb-2">
                     <h4 class="font-bold text-emerald-950 flex items-center gap-1.5">
                         🛵 Mandaditos en Vivo (<span id="admin-mandaditos-count">0</span>)
                     </h4>
-                    <button onclick="clearAllMandaditos()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold">🗑️ Limpiar</button>
+                    <button type="button" onclick="clearAllMandaditos()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer">🗑️ Limpiar</button>
                 </div>
-                <p class="text-[11px] text-emerald-800 mb-3">Ruta de 3 puntos, cronómetros de fila, llegada a tienda/destino, tickets completos y retroalimentación de clientes.</p>
                 <div id="admin-mandaditos-list" class="space-y-3 text-sm">
                     <p class="text-gray-500 text-xs">No hay mandaditos activos.</p>
                 </div>
             </div>
 
-            <!-- SECCIÓN 2: PEDIDOS DE COMIDA -->
-            <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
-                <h4 class="font-bold text-orange-900 mb-2">📦 Pedidos de Comida</h4>
-                <div id="admin-orders-list" class="space-y-3 text-sm">
-                    <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
-                </div>
-            </div>
-
-            <!-- SECCIÓN 3: CONFIGURACIÓN GENERAL -->
+            <!-- Configuración Local -->
             <div class="border-b pb-4 space-y-2">
                 <h4 class="font-bold mb-2">Configuración General del Local</h4>
-                <label class="text-xs text-gray-600">Dirección física local / Base Moto:</label>
                 <input type="text" id="admin-store-address" placeholder="Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
-                <label class="text-xs text-gray-600">📍 Ubicación Base (Punto 1):</label>
                 <div id="admin-store-map"></div>
-                <button onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2">Guardar Configuración</button>
+                <button type="button" onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2 cursor-pointer">Guardar Configuración</button>
             </div>
 
-            <!-- SECCIÓN 4: PLATILLOS -->
-            <div class="border-b pb-4">
+            <!-- Platillos -->
+            <div class="border-b pb-4 space-y-2">
                 <h4 class="font-bold mb-2">Agregar Platillo al Menú</h4>
-                <input type="text" id="dish-name" placeholder="Nombre" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <input type="text" id="dish-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <input type="text" id="dish-img" placeholder="URL Imagen" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
+                <input type="text" id="dish-name" placeholder="Nombre" class="w-full p-2 border rounded-lg text-sm">
+                <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm">
+                <input type="text" id="dish-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg text-sm">
+                <input type="text" id="dish-img" placeholder="URL Imagen" class="w-full p-2 border rounded-lg text-sm">
+                <button type="button" onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold cursor-pointer">Guardar Platillo</button>
             </div>
             <div>
                 <h4 class="font-bold mb-2">Menú Actual</h4>
@@ -413,7 +366,7 @@
 </div>
 
 <!-- ===================================================================== -->
-<!-- SCRIPT FIREBASE Y LÓGICA COMPLETA                                     -->
+<!-- SCRIPT DE LÓGICA Y FIREBASE                                           -->
 <!-- ===================================================================== -->
 <script>
     const firebaseConfig = {
@@ -443,7 +396,6 @@
     
     let deliveryMap = null, deliveryMarker = null, selectedLat = null, selectedLng = null;
     let scheduleMap = null, scheduleMarker = null, scheduleLat = null, scheduleLng = null;
-    let storeMap = null, storeMarker = null;
     let adminStoreMap = null, adminStoreMarker = null, adminStoreLat = null, adminStoreLng = null;
 
     let mandadoStoreMap = null, mandadoStoreMarker = null, mandadoStoreLat = null, mandadoStoreLng = null;
@@ -499,18 +451,6 @@
         document.getElementById("mandado-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
     }
 
-    function recalculateDeliveryCost() {
-        if (!selectedLat || !selectedLng) return;
-        const baseLat = storeConfig.lat || 20.3333, baseLng = storeConfig.lng || -102.2333;
-        const distStoreToClient = calculateHaversineKm(baseLat, baseLng, selectedLat, selectedLng);
-        currentDeliveryDistanceKm = Math.max(0.3, distStoreToClient * 1.3);
-        const calc = computeTransparentShipping(currentDeliveryDistanceKm);
-        currentDeliveryShippingCost = calc.totalCost;
-        document.getElementById("delivery-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km`;
-        document.getElementById("delivery-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
-        updateCartUI();
-    }
-
     window.addEventListener('DOMContentLoaded', () => {
         const savedName = localStorage.getItem('primo_user_name');
         const savedPhone = localStorage.getItem('primo_user_phone');
@@ -518,7 +458,6 @@
             document.getElementById('client-name').value = sanitizeText(savedName);
             document.getElementById('client-phone').value = sanitizeText(savedPhone);
             document.getElementById('user-registered-badge').classList.remove('hidden');
-            loadClientOrders(savedPhone);
             loadClientMandaditos(savedPhone);
         }
         const today = new Date().toISOString().split('T')[0];
@@ -532,47 +471,76 @@
             localStorage.setItem('primo_user_name', name);
             localStorage.setItem('primo_user_phone', phone);
             document.getElementById('user-registered-badge').classList.remove('hidden');
-            loadClientOrders(phone);
             loadClientMandaditos(phone);
         }
     }
 
+    // =====================================================================
+    // CORRECCIÓN APERTURA MANDADITO (Funciona sin recargar la página)
+    // =====================================================================
     function openMandaditoModal() {
-        const name = document.getElementById("client-name").value.trim();
-        const phone = document.getElementById("client-phone").value.trim();
-        if (!name || !phone) { alert("Ingresa tu Nombre y Teléfono."); document.getElementById("client-name").focus(); return; }
+        const nameInput = document.getElementById("client-name");
+        const phoneInput = document.getElementById("client-phone");
+        
+        const name = nameInput ? nameInput.value.trim() : "";
+        const phone = phoneInput ? phoneInput.value.trim() : "";
+
+        if (!name || !phone) {
+            alert("Por favor ingresa tu Nombre y Teléfono en la sección superior antes de pedir un mandadito.");
+            if (nameInput) nameInput.focus();
+            return;
+        }
+
         saveClientIdentity();
-        document.getElementById("mandadito-modal").classList.remove("hidden");
-        setTimeout(initMandadoMaps, 200);
+        
+        const modal = document.getElementById("mandadito-modal");
+        if (modal) {
+            modal.classList.remove("hidden");
+            setTimeout(initMandadoMaps, 250);
+        }
     }
 
-    function closeMandaditoModal() { document.getElementById("mandadito-modal").classList.add("hidden"); }
+    function closeMandaditoModal() {
+        const modal = document.getElementById("mandadito-modal");
+        if (modal) modal.classList.add("hidden");
+    }
 
     function initMandadoMaps() {
         const defLat = storeConfig.lat || 20.3333, defLng = storeConfig.lng || -102.2333;
+        
         if (!mandadoStoreMap) {
-            mandadoStoreMap = L.map('mandado-store-map').setView([defLat, defLng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mandadoStoreMap);
-            mandadoStoreMap.on('click', function(e) {
-                mandadoStoreLat = e.latlng.lat; mandadoStoreLng = e.latlng.lng;
-                if (mandadoStoreMarker) mandadoStoreMarker.setLatLng([mandadoStoreLat, mandadoStoreLng]);
-                else mandadoStoreMarker = L.marker([mandadoStoreLat, mandadoStoreLng], {draggable: true}).addTo(mandadoStoreMap);
-                document.getElementById("mandado-store-coords").innerText = `Tienda (Punto 2): ${mandadoStoreLat.toFixed(5)}, ${mandadoStoreLng.toFixed(5)}`;
-                recalculateMandaditoCost();
-            });
-        } else { mandadoStoreMap.invalidateSize(); }
+            const storeEl = document.getElementById('mandado-store-map');
+            if (storeEl) {
+                mandadoStoreMap = L.map('mandado-store-map').setView([defLat, defLng], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mandadoStoreMap);
+                mandadoStoreMap.on('click', function(e) {
+                    mandadoStoreLat = e.latlng.lat; mandadoStoreLng = e.latlng.lng;
+                    if (mandadoStoreMarker) mandadoStoreMarker.setLatLng([mandadoStoreLat, mandadoStoreLng]);
+                    else mandadoStoreMarker = L.marker([mandadoStoreLat, mandadoStoreLng], {draggable: true}).addTo(mandadoStoreMap);
+                    document.getElementById("mandado-store-coords").innerText = `Tienda (Punto 2): ${mandadoStoreLat.toFixed(5)}, ${mandadoStoreLng.toFixed(5)}`;
+                    recalculateMandaditoCost();
+                });
+            }
+        } else {
+            mandadoStoreMap.invalidateSize();
+        }
 
         if (!mandadoDestMap) {
-            mandadoDestMap = L.map('mandado-dest-map').setView([defLat, defLng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mandadoDestMap);
-            mandadoDestMap.on('click', function(e) {
-                mandadoDestLat = e.latlng.lat; mandadoDestLng = e.latlng.lng;
-                if (mandadoDestMarker) mandadoDestMarker.setLatLng([mandadoDestLat, mandadoDestLng]);
-                else mandadoDestMarker = L.marker([mandadoDestLat, mandadoDestLng], {draggable: true}).addTo(mandadoDestMap);
-                document.getElementById("mandado-dest-coords").innerText = `Cliente (Punto 3): ${mandadoDestLat.toFixed(5)}, ${mandadoDestLng.toFixed(5)}`;
-                recalculateMandaditoCost();
-            });
-        } else { mandadoDestMap.invalidateSize(); }
+            const destEl = document.getElementById('mandado-dest-map');
+            if (destEl) {
+                mandadoDestMap = L.map('mandado-dest-map').setView([defLat, defLng], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mandadoDestMap);
+                mandadoDestMap.on('click', function(e) {
+                    mandadoDestLat = e.latlng.lat; mandadoDestLng = e.latlng.lng;
+                    if (mandadoDestMarker) mandadoDestMarker.setLatLng([mandadoDestLat, mandadoDestLng]);
+                    else mandadoDestMarker = L.marker([mandadoDestLat, mandadoDestLng], {draggable: true}).addTo(mandadoDestMap);
+                    document.getElementById("mandado-dest-coords").innerText = `Cliente (Punto 3): ${mandadoDestLat.toFixed(5)}, ${mandadoDestLng.toFixed(5)}`;
+                    recalculateMandaditoCost();
+                });
+            }
+        } else {
+            mandadoDestMap.invalidateSize();
+        }
     }
 
     function submitMandadito() {
@@ -600,6 +568,9 @@
             alert("¡Mandadito enviado con éxito!");
             closeMandaditoModal();
             loadClientMandaditos(phone);
+        }).catch(err => {
+            console.error(err);
+            alert("Error al enviar el mandadito.");
         });
     }
 
@@ -630,7 +601,7 @@
                 } else if (status === 'Cotizado') {
                     badgeClass = 'bg-emerald-50 text-emerald-950 ring-2 ring-emerald-300';
                     statusMsg = `💰 Productos: $${(m.productsCost||0).toFixed(2)} + Envío: $${(m.shippingCost||0).toFixed(2)} = <b>Total: $${(m.totalCost||0).toFixed(2)}</b>`;
-                    actionBtn = `<button onclick="openMandadoConfirmModal('${m.id}')" class="w-full mt-2 bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs animate-bounce">👉 Aceptar Costo y Pagar</button>`;
+                    actionBtn = `<button type="button" onclick="openMandadoConfirmModal('${m.id}')" class="w-full mt-2 bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs animate-bounce cursor-pointer">👉 Aceptar Costo y Pagar</button>`;
                 } else if (status === 'Pagado y Confirmado') {
                     badgeClass = 'bg-green-100 text-green-900';
                     statusMsg = '✅ Pago confirmado. En ruta de entrega.';
@@ -645,30 +616,23 @@
 
                     ticketHtml = `
                         <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1 mt-2 shadow-inner">
-                            <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (PRIMO)</p>
+                            <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO</p>
                             <div class="flex justify-between"><span>Tienda:</span> <b>${sanitizeText(m.storeName)}</b></div>
-                            <div class="flex justify-between"><span>Hora de Inicio:</span> <b>${startTime}</b></div>
-                            <div class="flex justify-between"><span>Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArr}</b></div>
-                            <div class="flex justify-between"><span>Hora Llegada a Destino:</span> <b class="text-green-700">${destArr}</b></div>
-                            <hr class="my-1">
-                            <div class="flex justify-between"><span>Distancia Base ➔ Tienda:</span> <b>Trayecto 1</b></div>
-                            <div class="flex justify-between"><span>Distancia Tienda ➔ Destino:</span> <b>Trayecto 2 (${(m.distanceKm||0).toFixed(2)} km total)</b></div>
-                            <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${(m.fuelCost||0).toFixed(2)}</b></div>
-                            <div class="flex justify-between"><span>Pago Conductor / Trayecto:</span> <b>$${(m.laborCost||0).toFixed(2)}</b></div>
-                            <div class="flex justify-between"><span>Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min ($0.66/min)</b></div>
-                            <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
-                            <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL PAGADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
-                            
-                            <div class="pt-2 border-t mt-2">
-                                ${m.rating ? `<p class="font-bold text-green-700 text-center">⭐ Calificación otorgada: ${m.rating} de 6 Estrellas</p>` : `
-                                    <p class="font-semibold text-gray-700 mb-1 text-center">Califica nuestro servicio (1 a 6 estrellas):</p>
-                                    <div class="flex justify-center gap-1 mb-2">
-                                        <button onclick="rateOrder('${m.id}', 1)" class="px-2 py-1 bg-yellow-100 rounded font-bold">1⭐</button>
-                                        <button onclick="rateOrder('${m.id}', 2)" class="px-2 py-1 bg-yellow-100 rounded font-bold">2⭐</button>
-                                        <button onclick="rateOrder('${m.id}', 3)" class="px-2 py-1 bg-yellow-100 rounded font-bold">3⭐</button>
-                                        <button onclick="rateOrder('${m.id}', 4)" class="px-2 py-1 bg-yellow-100 rounded font-bold">4⭐</button>
-                                        <button onclick="rateOrder('${m.id}', 5)" class="px-2 py-1 bg-yellow-100 rounded font-bold">5⭐</button>
-                                        <button onclick="rateOrder('${m.id}', 6)" class="px-2 py-1 bg-yellow-200 rounded font-bold">6⭐</button>
+                            <div class="flex justify-between"><span>Hora Inicio:</span> <b>${startTime}</b></div>
+                            <div class="flex justify-between"><span>Llegada Tienda:</span> <b class="text-blue-700">${storeArr}</b></div>
+                            <div class="flex justify-between"><span>Llegada Destino:</span> <b class="text-green-700">${destArr}</b></div>
+                            <div class="flex justify-between"><span>Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min</b></div>
+                            <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
+                            <div class="pt-2 border-t mt-2 text-center">
+                                ${m.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${m.rating} Estrellas</p>` : `
+                                    <p class="font-semibold text-gray-700 mb-1">Califica (1 a 6 estrellas):</p>
+                                    <div class="flex justify-center gap-1">
+                                        <button type="button" onclick="rateOrder('${m.id}', 1)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">1⭐</button>
+                                        <button type="button" onclick="rateOrder('${m.id}', 2)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">2⭐</button>
+                                        <button type="button" onclick="rateOrder('${m.id}', 3)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">3⭐</button>
+                                        <button type="button" onclick="rateOrder('${m.id}', 4)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">4⭐</button>
+                                        <button type="button" onclick="rateOrder('${m.id}', 5)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">5⭐</button>
+                                        <button type="button" onclick="rateOrder('${m.id}', 6)" class="px-2 py-1 bg-yellow-200 rounded cursor-pointer">6⭐</button>
                                     </div>
                                 `}
                             </div>
@@ -697,10 +661,10 @@
 
     function rateOrder(id, stars) {
         if (stars <= 3) {
-            const comment = prompt("Lamentamos no haber alcanzado la puntuación perfecta (6 estrellas). ¿Qué podríamos mejorar para merecer tu mejor calificación?");
-            db.collection("mandaditos").doc(id).update({ rating: stars, feedbackComment: comment || "Sin comentario" }).then(() => alert("Gracias por tus comentarios. Han sido enviados al administrador."));
+            const comment = prompt("¿Qué podríamos mejorar para merecer tu mejor calificación?");
+            db.collection("mandaditos").doc(id).update({ rating: stars, feedbackComment: comment || "Sin comentario" }).then(() => alert("Gracias por tus comentarios."));
         } else {
-            db.collection("mandaditos").doc(id).update({ rating: stars, feedbackComment: "Calificación excelente" }).then(() => alert("¡Gracias por tu calificación de 6 estrellas!"));
+            db.collection("mandaditos").doc(id).update({ rating: stars, feedbackComment: "Excelente" }).then(() => alert("¡Gracias por tus 6 estrellas!"));
         }
     }
 
@@ -712,7 +676,6 @@
         document.getElementById("conf-ship-cost").innerText = `$${(m.shippingCost||0).toFixed(2)}`;
         const total = (m.productsCost||0) + (m.shippingCost||0);
         document.getElementById("conf-grand-total").innerText = `$${total.toFixed(2)}`;
-        document.getElementById("m-tr-exact-total").innerText = `$${total.toFixed(2)}`;
         document.getElementById("mandado-confirm-modal").classList.remove("hidden");
     }
 
@@ -720,108 +683,60 @@
     function toggleMandadoPaymentFields() {
         const method = document.getElementById("mandado-payment-method").value;
         document.getElementById("mandado-cash-fields").classList.toggle("hidden", method !== "efectivo");
-        document.getElementById("mandado-tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
         document.getElementById("mandado-transfer-fields").classList.toggle("hidden", method !== "transferencia");
     }
-
     function calculateMandadoChange() {
         const id = document.getElementById("confirm-mandado-id").value;
         const m = clientMandaditosCache[id];
         if (!m) return;
         const total = (m.productsCost||0) + (m.shippingCost||0);
         const cash = parseFloat(document.getElementById("mandado-cash-amount").value) || 0;
-        const txt = document.getElementById("mandado-change-text");
-        txt.innerText = cash >= total ? `💵 Cambio exacto: $${(cash - total).toFixed(2)}` : "⚠️ Monto menor al total";
+        document.getElementById("mandado-change-text").innerText = cash >= total ? `💵 Cambio: $${(cash - total).toFixed(2)}` : "⚠️ Monto menor";
     }
-
     function rejectMandadoQuote() {
         const id = document.getElementById("confirm-mandado-id").value;
         if (id && confirm("¿Cancelar?")) { db.collection("mandaditos").doc(id).update({ status: 'Cancelado' }); closeMandadoConfirmModal(); }
     }
-
     function confirmMandadoPurchase() {
         const id = document.getElementById("confirm-mandado-id").value;
-        const m = clientMandaditosCache[id];
-        if (!m) return;
         const method = document.getElementById("mandado-payment-method").value;
-        if (method === "tarjeta") {
-            localStorage.setItem('temp_mandado_pay_id', id);
-            window.location.href = "https://link.mercadopago.com.mx/primox";
-            return;
-        }
         db.collection("mandaditos").doc(id).update({ status: 'Pagado y Confirmado', paymentMethod: method }).then(() => { alert("¡Pago confirmado!"); closeMandadoConfirmModal(); });
     }
 
-    // =========================================================================
-    // PANEL ADMINISTRADOR
-    // =========================================================================
+    // Panel Admin y Menú
     db.collection("mandaditos").onSnapshot((snapshot) => {
         let mandados = [];
         snapshot.forEach(doc => mandados.push({ id: doc.id, ...doc.data() }));
         mandados.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
-
         document.getElementById("admin-mandaditos-count").innerText = mandados.length;
 
         let html = "";
         mandados.forEach(m => {
-            const timeStr = m.timestamp?.toDate() ? m.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Ahora';
             const status = m.status || 'Solicitado';
-            let statusColor = 'bg-yellow-100 text-yellow-800';
-            if (status === 'Aceptado / En Tienda') statusColor = 'bg-blue-100 text-blue-800';
-            if (status === 'Cotizado') statusColor = 'bg-purple-100 text-purple-800';
-            if (status === 'Pagado y Confirmado') statusColor = 'bg-green-100 text-green-900 font-bold';
-            if (status === 'Entregado') statusColor = 'bg-gray-200 text-gray-700';
-
             let controls = "";
             if (status === 'Solicitado') {
-                controls = `<button onclick="updateMandadoStatus('${m.id}', 'Aceptado / En Tienda')" class="w-full bg-emerald-600 text-white py-1 rounded text-xs font-bold mt-2">✔ Aceptar Mandadito</button>`;
+                controls = `<button type="button" onclick="updateMandadoStatus('${m.id}', 'Aceptado / En Tienda')" class="w-full bg-emerald-600 text-white py-1 rounded text-xs font-bold mt-2 cursor-pointer">✔ Aceptar Mandadito</button>`;
             } else if (status === 'Aceptado / En Tienda' || status === 'Cotizado') {
-                const isRunning = m.timerRunning;
-                const storeArrTime = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : null;
-
                 controls = `
                     <div class="mt-2 space-y-2 text-xs">
-                        <div class="flex gap-2">
-                            <button onclick="markStoreArrival('${m.id}')" class="flex-1 bg-blue-600 text-white py-1 rounded font-bold">${storeArrTime ? `📍 Llegué a Tienda (${storeArrTime})` : '📍 Marcar "Llegada a Tienda"'}</button>
-                        </div>
-                        <div class="bg-amber-50 p-2 rounded border border-amber-300">
-                            <p class="font-bold text-amber-950">⏱️ Cronómetro de Fila: ${isRunning ? '🔴 En Curso' : (m.queueMinutes ? `${m.queueMinutes.toFixed(1)} min` : 'Inactivo')}</p>
-                            <div class="flex gap-1 mt-1">
-                                <button onclick="startMandadoTimer('${m.id}')" class="flex-1 bg-amber-600 text-white py-0.5 rounded font-bold">▶️ Iniciar</button>
-                                <button onclick="stopMandadoTimer('${m.id}')" class="flex-1 bg-gray-800 text-white py-0.5 rounded font-bold">⏹️ Detener</button>
-                            </div>
-                        </div>
+                        <button type="button" onclick="markStoreArrival('${m.id}')" class="w-full bg-blue-600 text-white py-1 rounded font-bold cursor-pointer">📍 Marcar "Llegada a Tienda"</button>
                         <div class="bg-emerald-50 p-2 rounded border">
                             <input type="number" step="0.5" id="admin-prod-cost-${m.id}" value="${m.productsCost||''}" placeholder="Costo productos ($)" class="w-full p-1 bg-white border rounded font-bold mb-1">
-                            <button onclick="sendMandadoQuote('${m.id}', ${m.shippingCost||0})" class="w-full bg-emerald-700 text-white py-1 rounded font-bold">Enviar Cotización al Cliente</button>
+                            <button type="button" onclick="sendMandadoQuote('${m.id}', ${m.shippingCost||0})" class="w-full bg-emerald-700 text-white py-1 rounded font-bold cursor-pointer">Enviar Cotización</button>
                         </div>
                     </div>
                 `;
             } else if (status === 'Pagado y Confirmado') {
-                controls = `<button onclick="markDestArrivalAndDeliver('${m.id}')" class="w-full bg-gray-900 text-white py-1.5 rounded font-bold text-xs mt-2">🏁 Marcar Llegada a Destino y Entregar</button>`;
-            } else if (status === 'Entregado') {
-                const ratingStr = m.rating ? `⭐ Puntuación: ${m.rating}/6 Estrellas` : '⭐ Sin calificar';
-                const feedbackStr = m.feedbackComment && m.feedbackComment !== "Calificación excelente" ? `<p class="text-red-700 bg-red-50 p-1 rounded mt-1">💬 Comentario de mejora: "${sanitizeText(m.feedbackComment)}"</p>` : '';
-                controls = `
-                    <div class="bg-gray-100 p-2 rounded text-xs mt-2 space-y-1">
-                        <p class="font-bold">${ratingStr}</p>
-                        ${feedbackStr}
-                        <label class="flex items-center gap-2 mt-2 cursor-pointer bg-white p-1 rounded border">
-                            <input type="checkbox" ${m.deletedByAdmin ? 'checked' : ''} onchange="toggleDeleteOrder('${m.id}', this.checked)" class="w-4 h-4 text-red-600 rounded">
-                            <span class="font-bold text-red-700">🗑️ Eliminar pedido (Desaparece del panel y web)</span>
-                        </label>
-                    </div>
-                `;
+                controls = `<button type="button" onclick="markDestArrivalAndDeliver('${m.id}')" class="w-full bg-gray-900 text-white py-1.5 rounded font-bold text-xs mt-2 cursor-pointer">🏁 Entregar</button>`;
             }
 
             html += `
                 <div class="bg-white p-3 rounded-xl border shadow-sm space-y-1">
                     <div class="flex justify-between text-xs font-bold text-gray-500">
-                        <span>🕒 ${timeStr} | ${(m.distanceKm||0).toFixed(2)} km</span>
-                        <span class="px-2 py-0.5 rounded text-[11px] ${statusColor}">${status}</span>
+                        <span>${sanitizeText(m.clientName)}</span>
+                        <span>${status}</span>
                     </div>
-                    <p class="font-bold text-sm">${sanitizeText(m.clientName)} (<a href="tel:${sanitizeText(m.clientPhone)}" class="text-blue-600 underline">📞 Llamar</a>)</p>
-                    <p class="text-xs text-gray-600">🏪 Tienda: <b>${sanitizeText(m.storeName)}</b> | 🏠 Destino: <b>${sanitizeText(m.destAddress)}</b></p>
+                    <p class="text-xs text-gray-600">🏪 Tienda: <b>${sanitizeText(m.storeName)}</b> | 🏠 <b>${sanitizeText(m.destAddress)}</b></p>
                     <p class="text-xs bg-gray-50 p-1 rounded">📝 ${sanitizeText(m.itemsText)}</p>
                     ${controls}
                 </div>
@@ -831,41 +746,13 @@
     });
 
     function updateMandadoStatus(id, newStatus) { db.collection("mandaditos").doc(id).update({ status: newStatus }); }
-    
-    function markStoreArrival(id) {
-        db.collection("mandaditos").doc(id).update({ storeArrivalTimestamp: Date.now() }).then(() => alert("📍 Llegada a tienda registrada."));
-    }
-
-    function markDestArrivalAndDeliver(id) {
-        db.collection("mandaditos").doc(id).update({ destArrivalTimestamp: Date.now(), status: 'Entregado' }).then(() => alert("🏁 Llegada a destino registrada y pedido entregado."));
-    }
-
-    function toggleDeleteOrder(id, val) { db.collection("mandaditos").doc(id).update({ deletedByAdmin: val }); }
-    
-    function startMandadoTimer(id) { db.collection("mandaditos").doc(id).update({ timerStartedAt: Date.now(), timerRunning: true }); }
-    
-    function stopMandadoTimer(id) {
-        db.collection("mandaditos").doc(id).get().then(doc => {
-            if (!doc.exists) return;
-            const d = doc.data();
-            if (!d.timerStartedAt || !d.timerRunning) return;
-            const elapsedMins = (Date.now() - d.timerStartedAt) / (1000 * 60);
-            const extraLabor = elapsedMins * (39.38 / 60);
-            const newTotalLabor = (d.laborCost || 0) + extraLabor;
-            const newShipping = Math.ceil((d.fuelCost || 0) + newTotalLabor + (d.wearCost || 0));
-            db.collection("mandaditos").doc(id).update({
-                timerRunning: false, queueMinutes: (d.queueMinutes || 0) + elapsedMins,
-                laborCost: newTotalLabor, shippingCost: newShipping, totalCost: (d.productsCost || 0) + newShipping
-            }).then(() => alert(`⏱️ Se sumaron ${elapsedMins.toFixed(1)} min de fila.`));
-        });
-    }
-
+    function markStoreArrival(id) { db.collection("mandaditos").doc(id).update({ storeArrivalTimestamp: Date.now() }).then(() => alert("📍 Registrado.")); }
+    function markDestArrivalAndDeliver(id) { db.collection("mandaditos").doc(id).update({ destArrivalTimestamp: Date.now(), status: 'Entregado' }).then(() => alert("🏁 Entregado.")); }
     function sendMandadoQuote(id, shipCost) {
         const prodCost = parseFloat(document.getElementById(`admin-prod-cost-${id}`).value);
-        if (isNaN(prodCost) || prodCost <= 0) { alert("Ingresa un costo válido."); return; }
-        db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => alert("Cotización enviada."));
+        if (isNaN(prodCost) || prodCost <= 0) { alert("Ingresa costo válido"); return; }
+        db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => alert("Enviado."));
     }
-
     async function clearAllMandaditos() {
         if (confirm("¿Borrar historial?")) {
             const snap = await db.collection("mandaditos").get();
@@ -875,22 +762,13 @@
         }
     }
 
-    // Configuración y Menú estándar
-    db.collection("config").doc("main").onSnapshot((doc) => {
-        if (doc.exists) {
-            storeConfig = { ...storeConfig, ...doc.data() };
-            document.getElementById("store-address-display").innerText = sanitizeText(storeConfig.address);
-            document.getElementById("admin-store-address").value = storeConfig.address || "";
-        }
-    });
-
     db.collection("menu").onSnapshot((snapshot) => {
         let html = "", adminHtml = "";
         snapshot.forEach((doc) => {
             const item = { id: doc.id, ...doc.data() };
             menuItems.push(item);
-            html += `<div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center"><img src="${item.image||'https://via.placeholder.com/100'}" class="w-16 h-16 object-cover rounded"><div class="flex-1"><h3 class="font-bold text-sm">${sanitizeText(item.name)}</h3><p class="text-xs text-orange-600 font-semibold">$${item.price}</p></div><button onclick="cart.push({...item, qty:1});updateCartUI();" class="bg-orange-500 text-white px-2.5 py-1 rounded text-xs font-bold">+ Agregar</button></div>`;
-            adminHtml += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-xs"><span><b>${sanitizeText(item.name)}</b> - $${item.price}</span><button onclick="db.collection('menu').doc('${item.id}').delete()" class="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button></div>`;
+            html += `<div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center"><img src="${item.image||'https://via.placeholder.com/100'}" class="w-16 h-16 object-cover rounded"><div class="flex-1"><h3 class="font-bold text-sm">${sanitizeText(item.name)}</h3><p class="text-xs text-orange-600 font-semibold">$${item.price}</p></div><button type="button" onclick="cart.push({...item, qty:1});updateCartUI();" class="bg-orange-500 text-white px-2.5 py-1 rounded text-xs font-bold cursor-pointer">+ Agregar</button></div>`;
+            adminHtml += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-xs"><span><b>${sanitizeText(item.name)}</b> - $${item.price}</span><button type="button" onclick="db.collection('menu').doc('${item.id}').delete()" class="bg-red-500 text-white px-2 py-1 rounded cursor-pointer">Eliminar</button></div>`;
         });
         document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay menú.</p>';
         document.getElementById("admin-dish-list").innerHTML = adminHtml;
@@ -901,7 +779,7 @@
         let html = "", subtotal = 0;
         cart.forEach((i, idx) => {
             subtotal += i.price * i.qty;
-            html += `<div class="flex justify-between items-center py-2 text-sm"><div><p class="font-bold">${sanitizeText(i.name)}</p><p class="text-xs text-gray-500">$${i.price} x ${i.qty}</p></div><button onclick="cart.splice(${idx},1);updateCartUI();" class="text-red-500 text-xs font-bold">Quitar</button></div>`;
+            html += `<div class="flex justify-between items-center py-2 text-sm"><div><p class="font-bold">${sanitizeText(i.name)}</p><p class="text-xs text-gray-500">$${i.price} x ${i.qty}</p></div><button type="button" onclick="cart.splice(${idx},1);updateCartUI();" class="text-red-500 text-xs font-bold cursor-pointer">Quitar</button></div>`;
         });
         document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Carrito vacío</p>';
         document.getElementById("cart-subtotal").innerText = `$${subtotal.toFixed(2)}`;
@@ -917,7 +795,7 @@
     function closeScheduleModal() { document.getElementById("schedule-modal").classList.add("hidden"); }
     function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
     function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
-    
+
     function verifyAdmin() {
         if (document.getElementById("admin-pass").value === "PocilloInc") {
             document.getElementById("admin-login-view").classList.add("hidden");
@@ -927,7 +805,7 @@
     }
 
     function saveConfig() {
-        db.collection("config").doc("main").set({ address: sanitizeText(document.getElementById("admin-store-address").value), lat: adminStoreLat || storeConfig.lat, lng: adminStoreLng || storeConfig.lng }, { merge: true }).then(() => alert("Configuración guardada"));
+        db.collection("config").doc("main").set({ address: sanitizeText(document.getElementById("admin-store-address").value), lat: adminStoreLat || storeConfig.lat, lng: adminStoreLng || storeConfig.lng }, { merge: true }).then(() => alert("Guardado"));
     }
 
     function saveDish() {
@@ -944,7 +822,14 @@
                 selectedLat = e.latlng.lat; selectedLng = e.latlng.lng;
                 if (deliveryMarker) deliveryMarker.setLatLng([selectedLat, selectedLng]);
                 else deliveryMarker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(deliveryMap);
-                recalculateDeliveryCost();
+                
+                const dist = calculateHaversineKm(storeConfig.lat, storeConfig.lng, selectedLat, selectedLng);
+                currentDeliveryDistanceKm = Math.max(0.3, dist * 1.3);
+                const calc = computeTransparentShipping(currentDeliveryDistanceKm);
+                currentDeliveryShippingCost = calc.totalCost;
+                document.getElementById("delivery-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km`;
+                document.getElementById("delivery-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
+                updateCartUI();
             });
         } else { deliveryMap.invalidateSize(); }
     }
@@ -973,14 +858,9 @@
     function togglePaymentFields() {
         const m = document.getElementById("payment-method").value;
         document.getElementById("cash-fields").classList.toggle("hidden", m !== "efectivo");
-        document.getElementById("tarjeta-fields").classList.toggle("hidden", m !== "tarjeta");
-        document.getElementById("transfer-fields").classList.toggle("hidden", m !== "transferencia");
     }
     function toggleDeliveryFields() { setTimeout(initDeliveryMap, 200); }
     function checkoutOrder(type) { alert("Pedido enviado con éxito."); cart = []; updateCartUI(); closeCart(); closeScheduleModal(); }
-    function loadClientOrders(phone) {}
 </script>
 </body>
 </html>
-
-
