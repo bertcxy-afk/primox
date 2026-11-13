@@ -307,7 +307,7 @@
             <div><label class="block font-semibold text-sm mb-1">Hora:</label><input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm"></div>
         </div>
         <div><label class="block font-semibold text-sm mb-1">Referencias:</label><input type="text" id="schedule-address" placeholder="Calle, número, fachada" class="w-full p-2 border rounded-lg text-sm"></div>
-        <div><label class="block text-xs font-semibold text-gray-700 mb-1">📍 Ubicación en el mapa:</label><div id="schedule-map"></div></div>
+        <div><label class="block font-xs font-semibold text-gray-700 mb-1">📍 Ubicación en el mapa:</label><div id="schedule-map"></div></div>
         <button type="button" onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition cursor-pointer">Enviar Reserva</button>
     </div>
 </div>
@@ -592,6 +592,11 @@
                 let statusMsg = '⏳ Esperando aprobación...';
                 let actionBtn = '', ticketHtml = '';
 
+                // Live status info for client
+                const startStrClient = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pendiente';
+                const storeArrClient = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'En camino / Pendiente';
+                const destArrClient = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'En camino / Pendiente';
+
                 if (status === 'Aceptado / En Tienda' || status === 'En Ruta') {
                     badgeClass = 'bg-blue-50 text-blue-900';
                     statusMsg = '🛵 Conductor en marcha / en tienda.';
@@ -644,6 +649,15 @@
                     `;
                 }
 
+                // Live status tracker for client view
+                let liveTrackerHtml = `
+                    <div class="bg-gray-50 p-2 rounded border space-y-1 my-1 text-[11px]">
+                        <div class="flex justify-between"><span>🚀 Inicio:</span> <b>${startStrClient}</b></div>
+                        <div class="flex justify-between"><span>📍 Llegada Tienda:</span> <b>${storeArrClient}</b></div>
+                        <div class="flex justify-between"><span>🏠 Llegada Destino:</span> <b>${destArrClient}</b></div>
+                    </div>
+                `;
+
                 html += `
                     <div class="p-3 rounded-xl border ${badgeClass} space-y-1.5">
                         <div class="flex justify-between items-center font-bold">
@@ -652,6 +666,7 @@
                         </div>
                         <p class="text-gray-700 bg-white/70 p-1.5 rounded">📝 ${sanitizeText(m.itemsText)}</p>
                         <p class="font-medium">${statusMsg}</p>
+                        ${liveTrackerHtml}
                         ${actionBtn}
                         ${ticketHtml}
                     </div>
@@ -767,10 +782,10 @@
                             ${!m.startTimestamp ? `<button type="button" onclick="markMandadoStart('${m.id}')" class="bg-indigo-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-indigo-700">Iniciar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
                         </div>
 
-                        <!-- Botón Llegada a Tienda -->
+                        <!-- Botón Llegada a Tienda (Corregido para mostrar ✔ Registrado cuando tiene storeArrivalTimestamp) -->
                         <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
                             <span>📍 <b>Tienda:</b> ${storeArrStr}</span>
-                            <button type="button" onclick="markStoreArrival('${m.id}')" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>
+                            ${!m.storeArrivalTimestamp ? `<button type="button" onclick="markStoreArrival('${m.id}')" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
                         </div>
 
                         <!-- Cronómetro para Filas -->
@@ -794,7 +809,7 @@
                         <!-- Botón Llegada a Destino -->
                         <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
                             <span>🏠 <b>Destino:</b> ${destArrStr}</span>
-                            <button type="button" onclick="markDestArrivalAndDeliver('${m.id}')" class="bg-gray-900 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Destino y Entregar</button>
+                            ${!m.destArrivalTimestamp ? `<button type="button" onclick="markDestArrivalAndDeliver('${m.id}')" class="bg-gray-900 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Destino y Entregar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
                         </div>
                     </div>
                 `;
