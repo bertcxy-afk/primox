@@ -610,6 +610,7 @@
                     const storeArr = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No registrada';
                     const destArr = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No registrada';
                     const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
+                    const queueCost = ((m.queueMinutes || 0) * (39.38 / 60)).toFixed(2);
 
                     ticketHtml = `
                         <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
@@ -617,7 +618,7 @@
                             <div class="flex justify-between"><span>Tienda:</span> <b>${sanitizeText(m.storeName)}</b></div>
                             <div class="flex justify-between"><span>🕒 Hora de Inicio:</span> <b class="text-indigo-700">${startTime}</b></div>
                             <div class="flex justify-between"><span>📍 Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArr}</b></div>
-                            <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min ($0.66/min)</b></div>
+                            <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min (Costo: $${queueCost})</b></div>
                             <div class="flex justify-between"><span>🏠 Hora Llegada a Destino:</span> <b class="text-green-700">${destArr}</b></div>
                             <hr class="my-1">
                             <div class="flex justify-between"><span>Distancia Total (3 Puntos):</span> <b>${(m.distanceKm||0).toFixed(2)} km</b></div>
@@ -707,7 +708,7 @@
     }
 
     // =========================================================================
-    // PANEL ADMINISTRADOR MEJORADO
+    // PANEL ADMINISTRADOR MEJORADO CON TICKET DIGITAL COMPLETO EN TIEMPO REAL
     // =========================================================================
     db.collection("mandaditos").onSnapshot((snapshot) => {
         let mandados = [];
@@ -736,6 +737,26 @@
                     <button type="button" onclick="updateMandadoStatus('${m.id}', 'Aceptado / En Tienda')" class="w-full bg-emerald-600 text-white py-1.5 rounded text-xs font-bold cursor-pointer hover:bg-emerald-700 shadow">
                         ✔ Aceptar Mandadito
                     </button>
+                `;
+            } else if (status === 'Entregado') {
+                const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
+                const queueCost = ((m.queueMinutes || 0) * (39.38 / 60)).toFixed(2);
+                controls = `
+                    <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
+                        <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (ADMIN)</p>
+                        <div class="flex justify-between"><span>Tienda:</span> <b>${storeName}</b></div>
+                        <div class="flex justify-between"><span>🕒 Hora de Inicio:</span> <b class="text-indigo-700">${startStr}</b></div>
+                        <div class="flex justify-between"><span>📍 Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArrStr}</b></div>
+                        <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min (Costo: $${queueCost})</b></div>
+                        <div class="flex justify-between"><span>🏠 Hora Llegada a Destino:</span> <b class="text-green-700">${destArrStr}</b></div>
+                        <hr class="my-1">
+                        <div class="flex justify-between"><span>Distancia Total (3 Puntos):</span> <b>${(m.distanceKm||0).toFixed(2)} km</b></div>
+                        <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${(m.fuelCost||0).toFixed(2)}</b></div>
+                        <div class="flex justify-between"><span>Pago Conductor / Trayecto:</span> <b>$${(m.laborCost||0).toFixed(2)}</b></div>
+                        <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
+                        <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
+                        ${m.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación del Cliente: ${m.rating} Estrellas</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
+                    </div>
                 `;
             } else {
                 controls = `
@@ -956,4 +977,3 @@
 </script>
 </body>
 </html>
-
