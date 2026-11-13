@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -30,6 +31,17 @@
             z-index: 5;
         }
         .font-handwriting { font-family: 'Caveat', cursive; }
+        .map-number-icon {
+            background: #059669;
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 26px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 14px;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans pb-24">
@@ -52,6 +64,7 @@
     </header>
 
 <!-- Main Container -->
+
 <main class="max-w-md mx-auto p-4 space-y-4">
     <!-- Registro Cliente -->
     <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
@@ -59,49 +72,52 @@
         <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm focus:ring-2 focus:ring-orange-400 outline-none">
         <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-orange-400 outline-none">
 
-        <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">
-            ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Aquí verás en vivo tus pedidos y tickets digitales.
+    <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">
+        ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Aquí verás en vivo tus pedidos y tickets digitales.
+    </div>
+</section>
+
+<!-- Sección de Estatus de Mis Mandaditos -->
+<section id="client-mandaditos-status-section" class="bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-400 hidden">
+    <div class="flex items-center justify-between mb-1">
+        <h3 class="font-bold text-md text-emerald-900">🛵 Tus Mandaditos en Vivo</h3>
+        <span class="animate-pulse inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+    </div>
+    <p class="text-[11px] text-gray-500 mb-3">Actualización automática en tiempo real con seguimiento de ruta y tickets completos.</p>
+    <div id="client-my-mandaditos-list" class="space-y-3 text-xs"></div>
+</section>
+
+<!-- Accesos Rápidos -->
+<section class="grid grid-cols-1 gap-2.5">
+    <button type="button" onclick="openMandaditoModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3.5 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4 cursor-pointer">
+        <div class="text-left">
+            <span class="block text-sm sm:text-base">🛵 Servicio de Mandaditos Express</span>
+            <span class="block text-[11px] font-normal text-emerald-100">Cálculo exacto: 1 Base ➔ 2 Tienda ➔ 3 Cliente</span>
         </div>
-    </section>
+        <span class="bg-white text-emerald-700 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">Pedir Mandado</span>
+    </button>
 
-    <!-- Sección de Estatus de Mis Mandaditos -->
-    <section id="client-mandaditos-status-section" class="bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-400 hidden">
-        <div class="flex items-center justify-between mb-1">
-            <h3 class="font-bold text-md text-emerald-900">🛵 Tus Mandaditos en Vivo</h3>
-            <span class="animate-pulse inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
-        </div>
-        <p class="text-[11px] text-gray-500 mb-3">Actualización automática en tiempo real con seguimiento de ruta y tickets completos.</p>
-        <div id="client-my-mandaditos-list" class="space-y-3 text-xs"></div>
-    </section>
+    <button type="button" onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4 cursor-pointer">
+        <span class="text-sm">📅 ¿Quieres reservar comida para otro día?</span>
+        <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold shrink-0">Agendar</span>
+    </button>
+</section>
 
-    <!-- Accesos Rápidos -->
-    <section class="grid grid-cols-1 gap-2.5">
-        <button type="button" onclick="openMandaditoModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3.5 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4 cursor-pointer">
-            <div class="text-left">
-                <span class="block text-sm sm:text-base">🛵 Servicio de Mandaditos Express</span>
-                <span class="block text-[11px] font-normal text-emerald-100">Cálculo exacto: Base ➔ Tienda ➔ Cliente</span>
-            </div>
-            <span class="bg-white text-emerald-700 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">Pedir Mandado</span>
-        </button>
-
-        <button type="button" onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4 cursor-pointer">
-            <span class="text-sm">📅 ¿Quieres reservar comida para otro día?</span>
-            <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold shrink-0">Agendar</span>
-        </button>
-    </section>
-
-    <!-- Menú de Comida -->
-    <section>
-        <h2 class="font-bold text-xl mb-3">Menú Disponible</h2>
-        <div id="menu-container" class="space-y-4">
-            <p class="text-gray-500 text-center py-4">Cargando menú...</p>
-        </div>
-    </section>
+<!-- Menú de Comida -->
+<section>
+    <h2 class="font-bold text-xl mb-3">Menú Disponible</h2>
+    <div id="menu-container" class="space-y-4">
+        <p class="text-gray-500 text-center py-4">Cargando menú...</p>
+    </div>
+</section>
 </main>
 
 <!-- ===================================================================== -->
+
 <!-- MODAL NUEVO MANDADITO (CLIENTE SOLICITA)                              -->
+
 <!-- ===================================================================== -->
+
 <div id="mandadito-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b pb-3">
@@ -112,71 +128,74 @@
             <button type="button" onclick="closeMandaditoModal()" class="text-gray-500 font-bold text-xl px-2 cursor-pointer">✕</button>
         </div>
 
-        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-xs text-emerald-950 space-y-1">
-            <p class="font-bold">📍 Sistema de Ruta de 3 Ubicaciones:</p>
-            <p>1) Base del local, 2) Tienda de recolección y 3) Tu Domicilio de entrega.</p>
-        </div>
-
-        <!-- Paso 1: Tienda -->
-        <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 space-y-2">
-            <label class="block font-bold text-sm text-emerald-900">1. ¿En qué tienda compraremos?</label>
-            <input type="text" id="mandado-store-name" placeholder="Nombre de la tienda (Oxxo, Farmacia...)" class="w-full p-2 bg-white border rounded-lg text-sm">
-            <p class="text-xs text-gray-600">📍 Toca el mapa para marcar la ubicación de la <b>Tienda (Punto 2)</b>:</p>
-            <div id="mandado-store-map"></div>
-            <p id="mandado-store-coords" class="text-[11px] font-semibold text-emerald-700">Ubicación tienda: Sin seleccionar</p>
-        </div>
-
-        <!-- Paso 2: Productos -->
-        <div class="space-y-1.5">
-            <label class="block font-bold text-sm text-gray-800">2. Lista de productos a comprar:</label>
-            <textarea id="mandado-items" rows="3" placeholder="Escribe detalladamente lo que necesitas..." class="w-full p-2.5 border rounded-lg text-sm"></textarea>
-            <p class="text-[11px] text-gray-500">💡 Fila: Cronómetro especial remunerado ($39.38/hr o ~$0.66/min).</p>
-        </div>
-
-        <!-- Paso 3: Destino -->
-        <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 space-y-2">
-            <label class="block font-bold text-sm text-blue-900">3. ¿A dónde te lo llevamos?</label>
-            <input type="text" id="mandado-dest-address" placeholder="Calle, número y referencias" class="w-full p-2 bg-white border rounded-lg text-sm">
-            <p class="text-xs text-gray-600">🏠 Toca el mapa para marcar tu <b>Domicilio de entrega (Punto 3)</b>:</p>
-            <div id="mandado-dest-map"></div>
-            <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
-        </div>
-
-        <!-- Desglose -->
-        <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2">
-            <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
-                <span>📏 Distancia Total (3 Puntos):</span>
-                <span id="mandado-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
-            </div>
-            <div class="space-y-1 text-xs">
-                <div class="flex justify-between text-gray-300">
-                    <span>⛽ Combustible:</span>
-                    <span id="mandado-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
-                </div>
-                <div class="flex justify-between text-gray-300">
-                    <span>⏱️ Pago Conductor (<span id="mandado-time-display">0 min</span>):</span>
-                    <span id="mandado-labor-display" class="text-blue-300 font-semibold">$0.00</span>
-                </div>
-                <div class="flex justify-between text-gray-300">
-                    <span>🔧 Desgaste:</span>
-                    <span id="mandado-wear-display" class="text-amber-300 font-semibold">$0.00</span>
-                </div>
-            </div>
-            <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
-                <span>Costo Total del Envío Base:</span>
-                <span id="mandado-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
-            </div>
-        </div>
-
-        <button type="button" onclick="submitMandadito()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md cursor-pointer">
-            Enviar Solicitud de Mandadito en Vivo
-        </button>
+    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-xs text-emerald-950 space-y-1">
+        <p class="font-bold">📍 Sistema de Ruta de 3 Ubicaciones:</p>
+        <p>1) Ubicación 1 Base, 2) Tienda de recolección y 3) Tu Domicilio de entrega.</p>
     </div>
+
+    <!-- Paso 1: Tienda -->
+    <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 space-y-2">
+        <label class="block font-bold text-sm text-emerald-900">1. ¿En qué tienda compraremos?</label>
+        <input type="text" id="mandado-store-name" placeholder="Nombre de la tienda (Oxxo, Farmacia...)" class="w-full p-2 bg-white border rounded-lg text-sm">
+        <p class="text-xs text-gray-600">📍 Toca el mapa para marcar la ubicación de la <b>Tienda (Punto 2)</b>:</p>
+        <div id="mandado-store-map"></div>
+        <p id="mandado-store-coords" class="text-[11px] font-semibold text-emerald-700">Ubicación tienda: Sin seleccionar</p>
+    </div>
+
+    <!-- Paso 2: Productos -->
+    <div class="space-y-1.5">
+        <label class="block font-bold text-sm text-gray-800">2. Lista de productos a comprar:</label>
+        <textarea id="mandado-items" rows="3" placeholder="Escribe detalladamente lo que necesitas..." class="w-full p-2.5 border rounded-lg text-sm"></textarea>
+        <p class="text-[11px] text-gray-500">💡 Fila: Cronómetro especial remunerado ($39.38/hr o ~$0.66/min).</p>
+    </div>
+
+    <!-- Paso 3: Destino -->
+    <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 space-y-2">
+        <label class="block font-bold text-sm text-blue-900">3. ¿A dónde te lo llevamos?</label>
+        <input type="text" id="mandado-dest-address" placeholder="Calle, número y referencias" class="w-full p-2 bg-white border rounded-lg text-sm">
+        <p class="text-xs text-gray-600">🏠 Toca el mapa para marcar tu <b>Domicilio de entrega (Punto 3)</b>:</p>
+        <div id="mandado-dest-map"></div>
+        <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
+    </div>
+
+    <!-- Desglose -->
+    <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2">
+        <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
+            <span>📏 Distancia Total (3 Puntos):</span>
+            <span id="mandado-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
+        </div>
+        <div class="space-y-1 text-xs">
+            <div class="flex justify-between text-gray-300">
+                <span>⛽ Combustible:</span>
+                <span id="mandado-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
+            </div>
+            <div class="flex justify-between text-gray-300">
+                <span>⏱️ Pago Conductor (<span id="mandado-time-display">0 min</span>):</span>
+                <span id="mandado-labor-display" class="text-blue-300 font-semibold">$0.00</span>
+            </div>
+            <div class="flex justify-between text-gray-300">
+                <span>🔧 Desgaste:</span>
+                <span id="mandado-wear-display" class="text-amber-300 font-semibold">$0.00</span>
+            </div>
+        </div>
+        <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
+            <span>Costo Total del Envío Base:</span>
+            <span id="mandado-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
+        </div>
+    </div>
+
+    <button type="button" onclick="submitMandadito()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md cursor-pointer">
+        Enviar Solicitud de Mandadito en Vivo
+    </button>
+</div>
 </div>
 
 <!-- ===================================================================== -->
+
 <!-- MODAL PAGO / ACEPTACIÓN CLIENTE MANDADITO                             -->
+
 <!-- ===================================================================== -->
+
 <div id="mandado-confirm-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b pb-2">
@@ -184,52 +203,53 @@
             <button type="button" onclick="closeMandadoConfirmModal()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
         </div>
 
-        <input type="hidden" id="confirm-mandado-id">
-        
-        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1 text-sm">
-            <div class="flex justify-between"><span>Costo de productos en tienda:</span> <b id="conf-prod-cost">$0.00</b></div>
-            <div class="flex justify-between"><span>Costo de envío (3 Puntos + Fila):</span> <b id="conf-ship-cost">$0.00</b></div>
-            <div class="flex justify-between text-base font-bold text-emerald-950 border-t border-emerald-300 pt-1.5 mt-1">
-                <span>TOTAL A PAGAR:</span>
-                <span id="conf-grand-total">$0.00</span>
-            </div>
-        </div>
-
-        <div>
-            <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
-            <select id="mandado-payment-method" onchange="toggleMandadoPaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <option value="efectivo">Efectivo al recibir</option>
-                <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
-            </select>
-
-            <div id="mandado-cash-fields" class="bg-gray-50 p-3 rounded-lg border space-y-1.5">
-                <label class="block text-xs font-semibold text-gray-700">¿Con cuánto vas a pagar? (Para cambio):</label>
-                <input type="number" id="mandado-cash-amount" placeholder="Ej. 500" oninput="calculateMandadoChange()" class="w-full p-2 bg-white border rounded-lg text-sm">
-                <p id="mandado-change-text" class="text-xs font-bold text-green-600"></p>
-            </div>
-
-            <div id="mandado-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2">
-                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA:</p>
-                <div class="bg-white p-2.5 rounded border border-blue-200 font-mono select-all font-bold text-blue-950">
-                    012533015277749576
-                </div>
-                <input type="text" id="mandado-transfer-ref" placeholder="Folio o referencia de transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
-            </div>
-        </div>
-
-        <div class="flex gap-2 pt-2">
-            <button type="button" onclick="rejectMandadoQuote()" class="w-1/3 bg-red-100 text-red-700 py-2.5 rounded-xl font-bold text-xs hover:bg-red-200 cursor-pointer">
-                Cancelar
-            </button>
-            <button type="button" onclick="confirmMandadoPurchase()" class="w-2/3 bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow cursor-pointer">
-                ✔ Aceptar Costo y Pagar
-            </button>
+    <input type="hidden" id="confirm-mandado-id">
+    
+    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1 text-sm">
+        <div class="flex justify-between"><span>Costo de productos en tienda:</span> <b id="conf-prod-cost">$0.00</b></div>
+        <div class="flex justify-between"><span>Costo de envío (3 Puntos + Fila):</span> <b id="conf-ship-cost">$0.00</b></div>
+        <div class="flex justify-between text-base font-bold text-emerald-950 border-t border-emerald-300 pt-1.5 mt-1">
+            <span>TOTAL A PAGAR:</span>
+            <span id="conf-grand-total">$0.00</span>
         </div>
     </div>
+
+    <div>
+        <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
+        <select id="mandado-payment-method" onchange="toggleMandadoPaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <option value="efectivo">Efectivo al recibir</option>
+            <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
+            <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
+        </select>
+
+        <div id="mandado-cash-fields" class="bg-gray-50 p-3 rounded-lg border space-y-1.5">
+            <label class="block text-xs font-semibold text-gray-700">¿Con cuánto vas a pagar? (Para cambio):</label>
+            <input type="number" id="mandado-cash-amount" placeholder="Ej. 500" oninput="calculateMandadoChange()" class="w-full p-2 bg-white border rounded-lg text-sm">
+            <p id="mandado-change-text" class="text-xs font-bold text-green-600"></p>
+        </div>
+
+        <div id="mandado-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2">
+            <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA:</p>
+            <div class="bg-white p-2.5 rounded border border-blue-200 font-mono select-all font-bold text-blue-950">
+                012533015277749576
+            </div>
+            <input type="text" id="mandado-transfer-ref" placeholder="Folio o referencia de transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
+        </div>
+    </div>
+
+    <div class="flex gap-2 pt-2">
+        <button type="button" onclick="rejectMandadoQuote()" class="w-1/3 bg-red-100 text-red-700 py-2.5 rounded-xl font-bold text-xs hover:bg-red-200 cursor-pointer">
+            Cancelar
+        </button>
+        <button type="button" onclick="confirmMandadoPurchase()" class="w-2/3 bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow cursor-pointer">
+            ✔ Aceptar Costo y Pagar
+        </button>
+    </div>
+</div>
 </div>
 
 <!-- Modal Carrito Comida -->
+
 <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
         <div class="flex justify-between items-center mb-4">
@@ -252,52 +272,53 @@
             </div>
         </div>
 
-        <div class="mb-4">
-            <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
-            <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <option value="efectivo">Efectivo</option>
-                <option value="tarjeta">Tarjeta / Mercado Pago</option>
-                <option value="transferencia">Transferencia Bancaria BBVA</option>
-            </select>
+    <div class="mb-4">
+        <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
+        <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta / Mercado Pago</option>
+            <option value="transferencia">Transferencia Bancaria BBVA</option>
+        </select>
 
-            <div id="cash-fields">
-                <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para cambio):</label>
-                <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
-                <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
-            </div>
+        <div id="cash-fields">
+            <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para cambio):</label>
+            <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
+            <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
         </div>
-
-        <div class="mb-4">
-            <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
-            <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <option value="local">Asistir al local por mi comida</option>
-                <option value="domicilio">Recibir en domicilio</option>
-            </select>
-
-            <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm space-y-2">
-                <p class="font-semibold">Dirección del local:</p>
-                <p id="store-address-display" class="text-gray-600">Cargando...</p>
-                <div id="store-map"></div>
-            </div>
-
-            <div id="domicilio-fields" class="hidden space-y-3">
-                <input type="text" id="delivery-address" placeholder="Calle y número" class="w-full p-2 border rounded-lg text-sm">
-                <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Ubicación exacta en el mapa:</label>
-                <div id="delivery-map"></div>
-                <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1 text-xs">
-                    <div class="flex justify-between"><span>Distancia:</span> <span id="delivery-distance-display" class="font-bold">0.00 km</span></div>
-                    <div class="flex justify-between"><span>Costo Envío:</span> <span id="delivery-shipping-cost" class="text-emerald-400 font-bold text-base">$0.00</span></div>
-                </div>
-            </div>
-        </div>
-
-        <button type="button" onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition cursor-pointer">
-            Confirmar Pedido Inmediato
-        </button>
     </div>
+
+    <div class="mb-4">
+        <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
+        <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <option value="local">Asistir a la Base por mi comida</option>
+            <option value="domicilio">Recibir en domicilio</option>
+        </select>
+
+        <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm space-y-2">
+            <p class="font-semibold">Ubicación de la Base:</p>
+            <p id="store-address-display" class="text-gray-600">Cargando...</p>
+            <div id="store-map"></div>
+        </div>
+
+        <div id="domicilio-fields" class="hidden space-y-3">
+            <input type="text" id="delivery-address" placeholder="Calle y número" class="w-full p-2 border rounded-lg text-sm">
+            <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Ubicación exacta en el mapa:</label>
+            <div id="delivery-map"></div>
+            <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1 text-xs">
+                <div class="flex justify-between"><span>Distancia:</span> <span id="delivery-distance-display" class="font-bold">0.00 km</span></div>
+                <div class="flex justify-between"><span>Costo Envío:</span> <span id="delivery-shipping-cost" class="text-emerald-400 font-bold text-base">$0.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition cursor-pointer">
+        Confirmar Pedido Inmediato
+    </button>
+</div>
 </div>
 
 <!-- Modal Agendar Pedido a Futuro -->
+
 <div id="schedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
@@ -319,6 +340,7 @@
 </div>
 
 <!-- Modal Panel Administrador -->
+
 <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xl rounded-2xl p-5 max-h-[92vh] overflow-y-auto shadow-2xl">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -326,53 +348,56 @@
             <button type="button" onclick="closeAdmin()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
         </div>
 
-        <div id="admin-login-view">
-            <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
-            <button type="button" onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold cursor-pointer">Ingresar</button>
+    <div id="admin-login-view">
+        <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
+        <button type="button" onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold cursor-pointer">Ingresar</button>
+    </div>
+
+    <div id="admin-panel-view" class="hidden space-y-6">
+        <!-- Mandaditos en Vivo -->
+        <div class="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-300">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-bold text-emerald-950 flex items-center gap-1.5">
+                    🛵 Mandaditos en Vivo (<span id="admin-mandaditos-count">0</span>)
+                </h4>
+                <button type="button" onclick="clearAllMandaditos()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer">🗑️ Limpiar</button>
+            </div>
+            <div id="admin-mandaditos-list" class="space-y-3 text-sm">
+                <p class="text-gray-500 text-xs">No hay mandaditos activos.</p>
+            </div>
         </div>
 
-        <div id="admin-panel-view" class="hidden space-y-6">
-            <!-- Mandaditos en Vivo -->
-            <div class="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-300">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold text-emerald-950 flex items-center gap-1.5">
-                        🛵 Mandaditos en Vivo (<span id="admin-mandaditos-count">0</span>)
-                    </h4>
-                    <button type="button" onclick="clearAllMandaditos()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer">🗑️ Limpiar</button>
-                </div>
-                <div id="admin-mandaditos-list" class="space-y-3 text-sm">
-                    <p class="text-gray-500 text-xs">No hay mandaditos activos.</p>
-                </div>
-            </div>
+        <!-- Configuración Base -->
+        <div class="border-b pb-4 space-y-2">
+            <h4 class="font-bold mb-2">Configuración General (Ubicación 1 Base)</h4>
+            <input type="text" id="admin-store-address" placeholder="Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
+            <div id="admin-store-map"></div>
+            <button type="button" onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2 cursor-pointer">Guardar Configuración Base</button>
+        </div>
 
-            <!-- Configuración Local -->
-            <div class="border-b pb-4 space-y-2">
-                <h4 class="font-bold mb-2">Configuración General del Local</h4>
-                <input type="text" id="admin-store-address" placeholder="Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
-                <div id="admin-store-map"></div>
-                <button type="button" onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2 cursor-pointer">Guardar Configuración</button>
-            </div>
-
-            <!-- Platillos -->
-            <div class="border-b pb-4 space-y-2">
-                <h4 class="font-bold mb-2">Agregar Platillo al Menú</h4>
-                <input type="text" id="dish-name" placeholder="Nombre" class="w-full p-2 border rounded-lg text-sm">
-                <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm">
-                <input type="text" id="dish-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg text-sm">
-                <input type="text" id="dish-img" placeholder="URL Imagen" class="w-full p-2 border rounded-lg text-sm">
-                <button type="button" onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold cursor-pointer">Guardar Platillo</button>
-            </div>
-            <div>
-                <h4 class="font-bold mb-2">Menú Actual</h4>
-                <div id="admin-dish-list" class="space-y-2 text-sm"></div>
-            </div>
+        <!-- Platillos -->
+        <div class="border-b pb-4 space-y-2">
+            <h4 class="font-bold mb-2">Agregar Platillo al Menú</h4>
+            <input type="text" id="dish-name" placeholder="Nombre" class="w-full p-2 border rounded-lg text-sm">
+            <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm">
+            <input type="text" id="dish-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg text-sm">
+            <input type="text" id="dish-img" placeholder="URL Imagen" class="w-full p-2 border rounded-lg text-sm">
+            <button type="button" onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold cursor-pointer">Guardar Platillo</button>
+        </div>
+        <div>
+            <h4 class="font-bold mb-2">Menú Actual</h4>
+            <div id="admin-dish-list" class="space-y-2 text-sm"></div>
         </div>
     </div>
 </div>
+</div>
 
 <!-- ===================================================================== -->
+
 <!-- SCRIPT DE LÓGICA Y FIREBASE                                           -->
+
 <!-- ===================================================================== -->
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
@@ -384,15 +409,17 @@
         measurementId: "G-37491Y8MRL"
     };
 
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     db.enableNetwork().catch(err => console.log(err));
+
 
     let menuItems = [];
     let cart = [];
     let clientMandaditosCache = {};
     let storeConfig = { 
-        address: "Local principal", 
+        address: "Base principal", 
         lat: 20.3333, 
         lng: -102.2333,
         gasPrice: 24.00,
@@ -403,15 +430,18 @@
     let scheduleMap = null, scheduleMarker = null, scheduleLat = null, scheduleLng = null;
     let adminStoreMap = null, adminStoreMarker = null, adminStoreLat = null, adminStoreLng = null;
 
+
     let mandadoStoreMap = null, mandadoStoreMarker = null, mandadoStoreLat = null, mandadoStoreLng = null;
     let mandadoDestMap = null, mandadoDestMarker = null, mandadoDestLat = null, mandadoDestLng = null;
     let currentMandadoDistanceKm = 0, currentMandadoShippingCost = 0, currentMandadoFuelCost = 0, currentMandadoLaborCost = 0, currentMandadoWearCost = 0;
     let currentDeliveryDistanceKm = 0, currentDeliveryShippingCost = 0;
 
+
     function sanitizeText(str) {
         if (!str) return '';
         return String(str).replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
     }
+
 
     function calculateHaversineKm(lat1, lon1, lat2, lon2) {
         const R = 6371;
@@ -422,6 +452,7 @@
                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
         return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
+
 
     function computeTransparentShipping(distanceKm) {
         const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
@@ -434,6 +465,7 @@
         return { distanceKm, meters: Math.round(distanceKm * 1000), litersUsed, fuelCost, estimatedMinutes, laborCost, wearCost, totalCost: Math.ceil(fuelCost + laborCost + wearCost) };
     }
 
+
     function recalculateMandaditoCost() {
         if (!mandadoStoreLat || !mandadoStoreLng || !mandadoDestLat || !mandadoDestLng) return;
         const baseLat = storeConfig.lat || 20.3333, baseLng = storeConfig.lng || -102.2333;
@@ -442,11 +474,13 @@
         const realRouteKm = ((distBaseToStore * 0.5) + distStoreToClient) * 1.3;
         currentMandadoDistanceKm = Math.max(0.3, realRouteKm);
 
+
         const calc = computeTransparentShipping(currentMandadoDistanceKm);
         currentMandadoFuelCost = calc.fuelCost;
         currentMandadoLaborCost = calc.laborCost;
         currentMandadoWearCost = calc.wearCost;
         currentMandadoShippingCost = calc.totalCost;
+
 
         document.getElementById("mandado-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km (${calc.meters} m)`;
         document.getElementById("mandado-fuel-display").innerText = `$${calc.fuelCost.toFixed(2)} MXN`;
@@ -456,7 +490,30 @@
         document.getElementById("mandado-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
     }
 
+
+    // Cargar configuración inicial de la Base desde Firebase (Persistente)
+    function loadStoreConfig() {
+        db.collection("config").doc("main").get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (data.lat && data.lng) {
+                    storeConfig.lat = data.lat;
+                    storeConfig.lng = data.lng;
+                }
+                if (data.address) {
+                    storeConfig.address = data.address;
+                }
+                const addrDisplay = document.getElementById("store-address-display");
+                if (addrDisplay) addrDisplay.innerText = storeConfig.address;
+                const adminAddr = document.getElementById("admin-store-address");
+                if (adminAddr) adminAddr.value = storeConfig.address;
+            }
+        }).catch(err => console.log("Error cargando config:", err));
+    }
+
+
     window.addEventListener('DOMContentLoaded', () => {
+        loadStoreConfig();
         const savedName = localStorage.getItem('primo_user_name');
         const savedPhone = localStorage.getItem('primo_user_phone');
         if (savedName && savedPhone) {
@@ -469,6 +526,7 @@
         if (document.getElementById('schedule-date')) document.getElementById('schedule-date').value = today;
     });
 
+
     function saveClientIdentity() {
         const name = sanitizeText(document.getElementById('client-name').value);
         const phone = sanitizeText(document.getElementById('client-phone').value);
@@ -480,6 +538,7 @@
         }
     }
 
+
     function openMandaditoModal() {
         const nameInput = document.getElementById("client-name");
         const phoneInput = document.getElementById("client-phone");
@@ -487,11 +546,13 @@
         const name = nameInput ? nameInput.value.trim() : "";
         const phone = phoneInput ? phoneInput.value.trim() : "";
 
+
         if (!name || !phone) {
             alert("Por favor ingresa tu Nombre y Teléfono en la sección superior antes de pedir un mandadito.");
             if (nameInput) nameInput.focus();
             return;
         }
+
 
         saveClientIdentity();
         
@@ -502,10 +563,12 @@
         }
     }
 
+
     function closeMandaditoModal() {
         const modal = document.getElementById("mandadito-modal");
         if (modal) modal.classList.add("hidden");
     }
+
 
     function initMandadoMaps() {
         const defLat = storeConfig.lat || 20.3333, defLng = storeConfig.lng || -102.2333;
@@ -527,6 +590,7 @@
             mandadoStoreMap.invalidateSize();
         }
 
+
         if (!mandadoDestMap) {
             const destEl = document.getElementById('mandado-dest-map');
             if (destEl) {
@@ -545,6 +609,7 @@
         }
     }
 
+
     function submitMandadito() {
         const name = sanitizeText(document.getElementById("client-name").value);
         const phone = sanitizeText(document.getElementById("client-phone").value);
@@ -552,10 +617,12 @@
         const itemsText = sanitizeText(document.getElementById("mandado-items").value);
         const destAddress = sanitizeText(document.getElementById("mandado-dest-address").value);
 
+
         if (!name || !phone || !storeName || !itemsText || !destAddress || !mandadoStoreLat || !mandadoDestLat) {
             alert("Por favor completa todos los datos y marca las ubicaciones en los mapas.");
             return;
         }
+
 
         db.collection("mandaditos").add({
             clientName: name, clientPhone: phone, storeName, storeLat: mandadoStoreLat, storeLng: mandadoStoreLng,
@@ -565,6 +632,7 @@
             status: 'Solicitado', paymentMethod: 'Pendiente', cashAmount: 0, change: 0, transferRef: '',
             timerRunning: false, timerStartedAt: null, queueMinutes: 0,
             startTimestamp: null, storeArrivalTimestamp: null, destArrivalTimestamp: null,
+            startLat: null, startLng: null,
             rating: null, feedbackComment: "", deletedByAdmin: false,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
@@ -576,6 +644,7 @@
             alert("Error al enviar el mandadito.");
         });
     }
+
 
     function loadClientMandaditos(phone) {
         if (!phone) return;
@@ -589,7 +658,9 @@
                 clientMandaditosCache[doc.id] = data;
             });
 
+
             list.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+
 
             let html = "";
             list.forEach(m => {
@@ -598,11 +669,12 @@
                 let statusMsg = '⏳ Esperando aprobación...';
                 let actionBtn = '', ticketHtml = '';
 
-                // Live status info for client
+
                 const startStrClient = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pendiente';
                 const storeArrClient = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'En camino / Pendiente';
                 const destArrClient = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'En camino / Pendiente';
                 const queueMinsLive = (m.queueMinutes || 0).toFixed(1);
+
 
                 if (status === 'Aceptado / En Tienda' || status === 'En Ruta') {
                     badgeClass = 'bg-blue-50 text-blue-900';
@@ -624,6 +696,7 @@
                     const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
                     const queueCost = ((m.queueMinutes || 0) * (39.38 / 60)).toFixed(2);
 
+
                     ticketHtml = `
                         <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
                             <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO</p>
@@ -639,11 +712,12 @@
                             <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
                             <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL PAGADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
                             
-                            <!-- Mapa de Paradas realizadas -->
+                            <!-- Mapa de Paradas numeradas -->
                             <div class="mt-2 space-y-1">
-                                <p class="font-bold text-center text-gray-800">🗺️ Mapa de Ruta Realizada</p>
+                                <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Base), 2 (Tienda), 3 (Destino)</p>
                                 <div id="ticket-map-${m.id}" class="ticket-map"></div>
                             </div>
+
 
                             <div class="pt-2 border-t mt-2 text-center">
                                 ${m.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${m.rating} Estrellas ${m.feedbackComment ? `("${sanitizeText(m.feedbackComment)}")` : ''}</p>` : `
@@ -663,7 +737,7 @@
                     setTimeout(() => initTicketRouteMap(m), 300);
                 }
 
-                // Live status tracker for client view including cronometro
+
                 let liveTrackerHtml = `
                     <div class="bg-gray-50 p-2 rounded border space-y-1 my-1 text-[11px]">
                         <div class="flex justify-between"><span>🚀 Inicio:</span> <b>${startStrClient}</b></div>
@@ -672,6 +746,7 @@
                         <div class="flex justify-between"><span>🏠 Llegada Destino:</span> <b>${destArrClient}</b></div>
                     </div>
                 `;
+
 
                 html += `
                     <div class="p-3 rounded-xl border ${badgeClass} space-y-1.5">
@@ -688,10 +763,12 @@
                 `;
             });
 
+
             document.getElementById("client-mandaditos-status-section").classList.toggle("hidden", list.length === 0);
             document.getElementById("client-my-mandaditos-list").innerHTML = html;
         });
     }
+
 
     function rateOrder(id, stars) {
         if (stars <= 3) {
@@ -708,33 +785,45 @@
         }
     }
 
+
     function initTicketRouteMap(m) {
         const containerId = `ticket-map-${m.id}`;
         const el = document.getElementById(containerId);
         if (!el || el._leaflet_id) return;
 
-        const baseLat = storeConfig.lat || 20.3333;
-        const baseLng = storeConfig.lng || -102.2333;
+
+        const baseLat = m.startLat || storeConfig.lat || 20.3333;
+        const baseLng = m.startLng || storeConfig.lng || -102.2333;
         const storeLat = m.storeLat || baseLat;
         const storeLng = m.storeLng || baseLng;
         const destLat = m.destLat || baseLat;
         const destLng = m.destLng || baseLng;
 
+
         const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([storeLat, storeLng], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        L.marker([baseLat, baseLng]).addTo(map).bindPopup('🚀 INICIO (Base)');
-        L.marker([storeLat, storeLng]).addTo(map).bindPopup('📍 TIENDA');
-        L.marker([destLat, destLng]).addTo(map).bindPopup('🏠 DESTINO');
+
+        const icon1 = L.divIcon({className: 'map-number-icon', html: '1', iconSize: [26, 26], iconAnchor: [13, 13]});
+        const icon2 = L.divIcon({className: 'map-number-icon', html: '2', iconSize: [26, 26], iconAnchor: [13, 13]});
+        const icon3 = L.divIcon({className: 'map-number-icon', html: '3', iconSize: [26, 26], iconAnchor: [13, 13]});
+
+
+        L.marker([baseLat, baseLng], {icon: icon1}).addTo(map).bindPopup('1 - Base (Inicio)');
+        L.marker([storeLat, storeLng], {icon: icon2}).addTo(map).bindPopup('2 - Tienda');
+        L.marker([destLat, destLng], {icon: icon3}).addTo(map).bindPopup('3 - Destino');
+
 
         const polyline = L.polyline([
             [baseLat, baseLng],
             [storeLat, storeLng],
             [destLat, destLng]
-        ], {color: 'emerald', weight: 3}).addTo(map);
+        ], {color: '#059669', weight: 3}).addTo(map);
+
 
         map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
     }
+
 
     function openMandadoConfirmModal(id) {
         const m = clientMandaditosCache[id];
@@ -746,6 +835,7 @@
         document.getElementById("conf-grand-total").innerText = `$${total.toFixed(2)}`;
         document.getElementById("mandado-confirm-modal").classList.remove("hidden");
     }
+
 
     function closeMandadoConfirmModal() { document.getElementById("mandado-confirm-modal").classList.add("hidden"); }
     function toggleMandadoPaymentFields() {
@@ -773,6 +863,7 @@
         const total = m ? ((m.productsCost||0) + (m.shippingCost||0)) : 0;
         const changeVal = method === 'efectivo' && cashAmt >= total ? cashAmt - total : 0;
 
+
         db.collection("mandaditos").doc(id).update({ 
             status: 'Pagado y Confirmado', 
             paymentMethod: method, 
@@ -781,14 +872,16 @@
         }).then(() => { alert("¡Pago confirmado!"); closeMandadoConfirmModal(); });
     }
 
+
     // =========================================================================
-    // PANEL ADMINISTRADOR CON TICKET DIGITAL Y CAMBIO A ENTREGAR
+    // PANEL ADMINISTRADOR (Optimizado con Firebase en tiempo real)
     // =========================================================================
-    db.collection("mandaditos").onSnapshot((snapshot) => {
+    db.collection("mandaditos").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
         let mandados = [];
         snapshot.forEach(doc => mandados.push({ id: doc.id, ...doc.data() }));
         mandados.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
         document.getElementById("admin-mandaditos-count").innerText = mandados.length;
+
 
         let html = "";
         mandados.forEach(m => {
@@ -799,13 +892,16 @@
             const destAddress = sanitizeText(m.destAddress);
             const itemsText = sanitizeText(m.itemsText);
 
+
             const isRunning = m.timerRunning;
             const startStr = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
             const storeArrStr = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin llegar';
             const destArrStr = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
             const queueMinsAdmin = (m.queueMinutes || 0).toFixed(1);
 
+
             let controls = "";
+
 
             if (status === 'Solicitado') {
                 controls = `
@@ -834,18 +930,24 @@
                         <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
                         <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
                         
-                        <!-- Mapa de Paradas en Admin -->
+                        <!-- Mapa de Paradas numeradas en Admin -->
                         <div class="mt-2 space-y-1">
-                            <p class="font-bold text-center text-gray-800">🗺️ Mapa de Ruta Realizada</p>
+                            <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Base), 2 (Tienda), 3 (Destino)</p>
                             <div id="admin-ticket-map-${m.id}" class="ticket-map"></div>
                         </div>
+
 
                         ${m.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación: ${m.rating} Estrellas ${m.feedbackComment ? `("${sanitizeText(m.feedbackComment)}")` : ''}</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
                     </div>
                 `;
                 setTimeout(() => initAdminTicketRouteMap(m), 300);
             } else {
+                const isCotizadoOrPaid = status === 'Cotizado' || status === 'Pagado y Confirmado';
+                const startBtnState = m.startTimestamp ? '<span class="text-green-600 font-bold">✔ Registrado</span>' : `<button type="button" onclick="markMandadoStart('${m.id}')" class="bg-indigo-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-indigo-700">Iniciar (GPS)</button>`;
+                const quoteBtnState = isCotizadoOrPaid ? '<span class="text-green-600 font-bold">✔ Registrado</span>' : `<button type="button" onclick="sendMandadoQuote('${m.id}', ${m.shippingCost||0})" class="w-full bg-emerald-700 text-white py-1 rounded text-xs font-bold cursor-pointer hover:bg-emerald-800">Enviar Cotización al Cliente</button>`;
                 const paymentInfo = m.paymentMethod === 'efectivo' ? `<span class="text-emerald-800 font-bold">💵 Efectivo (Cambio a entregar: $${(m.change||0).toFixed(2)})</span>` : `💳 Pago: ${m.paymentMethod || 'Pendiente'}`;
+
+
                 controls = `
                     <div class="space-y-2 pt-1 border-t border-emerald-200">
                         <!-- Cambio a entregar si aplica -->
@@ -853,17 +955,20 @@
                             ${paymentInfo}
                         </div>
 
-                        <!-- Botón Inicio -->
+
+                        <!-- Botón Inicio con GPS de alta precisión -->
                         <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
-                            <span>🚀 <b>Inicio:</b> ${startStr}</span>
-                            ${!m.startTimestamp ? `<button type="button" onclick="markMandadoStart('${m.id}')" class="bg-indigo-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-indigo-700">Iniciar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
+                            <span>🚀 <b>Inicio (Base):</b> ${startStr}</span>
+                            ${startBtnState}
                         </div>
+
 
                         <!-- Botón Llegada a Tienda -->
                         <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
                             <span>📍 <b>Tienda:</b> ${storeArrStr}</span>
                             ${!m.storeArrivalTimestamp ? `<button type="button" onclick="markStoreArrival('${m.id}')" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
                         </div>
+
 
                         <!-- Cronómetro para Filas -->
                         <div class="bg-amber-50 p-2 rounded border border-amber-300 text-xs">
@@ -876,12 +981,14 @@
                             </div>
                         </div>
 
+
                         <!-- Cotización de Productos -->
                         <div class="bg-emerald-50 p-2 rounded border">
                             <label class="block text-[11px] font-semibold text-emerald-900 mb-1">Costo de productos en tienda ($):</label>
                             <input type="number" step="0.5" id="admin-prod-cost-${m.id}" value="${m.productsCost||''}" placeholder="Ej. 150" class="w-full p-1 bg-white border rounded font-bold mb-1 text-xs">
-                            <button type="button" onclick="sendMandadoQuote('${m.id}', ${m.shippingCost||0})" class="w-full bg-emerald-700 text-white py-1 rounded text-xs font-bold cursor-pointer hover:bg-emerald-800">Enviar Cotización al Cliente</button>
+                            ${quoteBtnState}
                         </div>
+
 
                         <!-- Botón Llegada a Destino -->
                         <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
@@ -892,12 +999,14 @@
                 `;
             }
 
+
             html += `
                 <div class="bg-white p-3.5 rounded-xl border-2 border-emerald-200 shadow-sm space-y-2 text-xs">
                     <div class="flex justify-between items-center font-bold text-emerald-950 border-b pb-1">
                         <span>🏪 ${storeName}</span>
                         <span class="px-2 py-0.5 rounded bg-emerald-100 text-[11px] text-emerald-900">${status}</span>
                     </div>
+
 
                     <!-- Datos del Cliente y Botones de Contacto Directo -->
                     <div class="bg-gray-50 p-2 rounded space-y-1">
@@ -909,6 +1018,7 @@
                         </div>
                     </div>
 
+
                     <p class="text-gray-700">🏠 <b>Destino:</b> ${destAddress}</p>
                     <p class="bg-gray-50 p-1.5 rounded text-gray-800">📝 <b>Mandado:</b> ${itemsText}</p>
                     ${controls}
@@ -918,51 +1028,94 @@
         document.getElementById("admin-mandaditos-list").innerHTML = html || '<p class="text-gray-500 text-xs">No hay mandaditos activos.</p>';
     });
 
+
     function initAdminTicketRouteMap(m) {
         const containerId = `admin-ticket-map-${m.id}`;
         const el = document.getElementById(containerId);
         if (!el || el._leaflet_id) return;
 
-        const baseLat = storeConfig.lat || 20.3333;
-        const baseLng = storeConfig.lng || -102.2333;
+
+        const baseLat = m.startLat || storeConfig.lat || 20.3333;
+        const baseLng = m.startLng || storeConfig.lng || -102.2333;
         const storeLat = m.storeLat || baseLat;
         const storeLng = m.storeLng || baseLng;
         const destLat = m.destLat || baseLat;
         const destLng = m.destLng || baseLng;
 
+
         const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([storeLat, storeLng], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        L.marker([baseLat, baseLng]).addTo(map).bindPopup('🚀 INICIO (Base)');
-        L.marker([storeLat, storeLng]).addTo(map).bindPopup('📍 TIENDA');
-        L.marker([destLat, destLng]).addTo(map).bindPopup('🏠 DESTINO');
+
+        const icon1 = L.divIcon({className: 'map-number-icon', html: '1', iconSize: [26, 26], iconAnchor: [13, 13]});
+        const icon2 = L.divIcon({className: 'map-number-icon', html: '2', iconSize: [26, 26], iconAnchor: [13, 13]});
+        const icon3 = L.divIcon({className: 'map-number-icon', html: '3', iconSize: [26, 26], iconAnchor: [13, 13]});
+
+
+        L.marker([baseLat, baseLng], {icon: icon1}).addTo(map).bindPopup('1 - Base (Inicio)');
+        L.marker([storeLat, storeLng], {icon: icon2}).addTo(map).bindPopup('2 - Tienda');
+        L.marker([destLat, destLng], {icon: icon3}).addTo(map).bindPopup('3 - Destino');
+
 
         const polyline = L.polyline([
             [baseLat, baseLng],
             [storeLat, storeLng],
             [destLat, destLng]
-        ], {color: 'emerald', weight: 3}).addTo(map);
+        ], {color: '#059669', weight: 3}).addTo(map);
+
 
         map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
     }
 
+
     function updateMandadoStatus(id, newStatus) { db.collection("mandaditos").doc(id).update({ status: newStatus }); }
     
+    // GPS de exactitud extrema para registrar el inicio del pedido
     function markMandadoStart(id) {
-        db.collection("mandaditos").doc(id).update({ startTimestamp: Date.now() }).then(() => alert("🚀 Hora de inicio registrada."));
+        if (!navigator.geolocation) {
+            alert("Tu navegador no soporta geolocalización GPS.");
+            db.collection("mandaditos").doc(id).update({ startTimestamp: Date.now(), startLat: storeConfig.lat, startLng: storeConfig.lng });
+            return;
+        }
+
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                db.collection("mandaditos").doc(id).update({
+                    startTimestamp: Date.now(),
+                    startLat: lat,
+                    startLng: lng
+                }).then(() => alert(`🚀 Inicio registrado con GPS exacto (${lat.toFixed(5)}, ${lng.toFixed(5)}).`));
+            },
+            (error) => {
+                console.warn("Error GPS exacto, usando Base:", error);
+                db.collection("mandaditos").doc(id).update({
+                    startTimestamp: Date.now(),
+                    startLat: storeConfig.lat,
+                    startLng: storeConfig.lng
+                }).then(() => alert("🚀 Inicio registrado (usando Base predeterminada)."));
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
     }
+
 
     function markStoreArrival(id) {
         db.collection("mandaditos").doc(id).update({ storeArrivalTimestamp: Date.now() }).then(() => alert("📍 Llegada a tienda registrada."));
     }
 
+
     function markDestArrivalAndDeliver(id) {
         db.collection("mandaditos").doc(id).update({ destArrivalTimestamp: Date.now(), status: 'Entregado' }).then(() => alert("🏁 Llegada a destino registrada y pedido entregado."));
     }
 
+
     function startMandadoTimer(id) {
         db.collection("mandaditos").doc(id).update({ timerStartedAt: Date.now(), timerRunning: true }).then(() => alert("⏱️ Cronómetro de fila iniciado."));
     }
+
 
     function stopMandadoTimer(id) {
         db.collection("mandaditos").doc(id).get().then(doc => {
@@ -980,11 +1133,13 @@
         });
     }
 
+
     function sendMandadoQuote(id, shipCost) {
         const prodCost = parseFloat(document.getElementById(`admin-prod-cost-${id}`).value);
         if (isNaN(prodCost) || prodCost <= 0) { alert("Ingresa costo válido de productos"); return; }
         db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => alert("Cotización enviada al cliente."));
     }
+
 
     async function clearAllMandaditos() {
         if (confirm("¿Borrar historial?")) {
@@ -995,7 +1150,8 @@
         }
     }
 
-    db.collection("menu").onSnapshot((snapshot) => {
+
+    db.collection("menu").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
         let html = "", adminHtml = "";
         snapshot.forEach((doc) => {
             const item = { id: doc.id, ...doc.data() };
@@ -1006,6 +1162,7 @@
         document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay menú.</p>';
         document.getElementById("admin-dish-list").innerHTML = adminHtml;
     });
+
 
     function updateCartUI() {
         document.getElementById("cart-count").innerText = cart.reduce((s, i) => s + i.qty, 0);
@@ -1022,12 +1179,14 @@
         document.getElementById("cart-total").innerText = `$${(subtotal + shipping).toFixed(2)}`;
     }
 
+
     function openCart() { document.getElementById("cart-modal").classList.remove("hidden"); setTimeout(initDeliveryMap, 200); }
     function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
     function openScheduleModal() { document.getElementById("schedule-modal").classList.remove("hidden"); setTimeout(initScheduleMap, 200); }
     function closeScheduleModal() { document.getElementById("schedule-modal").classList.add("hidden"); }
     function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
     function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
+
 
     function verifyAdmin() {
         if (document.getElementById("admin-pass").value === "PocilloInc") {
@@ -1037,15 +1196,36 @@
         } else { alert("Contraseña incorrecta"); }
     }
 
+
     function saveConfig() {
-        db.collection("config").doc("main").set({ address: sanitizeText(document.getElementById("admin-store-address").value), lat: adminStoreLat || storeConfig.lat, lng: adminStoreLng || storeConfig.lng }, { merge: true }).then(() => alert("Guardado"));
+        const newAddress = sanitizeText(document.getElementById("admin-store-address").value);
+        const latToSave = adminStoreLat || storeConfig.lat;
+        const lngToSave = adminStoreLng || storeConfig.lng;
+
+
+        db.collection("config").doc("main").set({
+            address: newAddress,
+            lat: latToSave,
+            lng: lngToSave
+        }, { merge: true }).then(() => {
+            storeConfig.address = newAddress;
+            storeConfig.lat = latToSave;
+            storeConfig.lng = lngToSave;
+            document.getElementById("store-address-display").innerText = newAddress;
+            alert("Configuración de la Base guardada y persistida con éxito.");
+        }).catch(err => {
+            console.error(err);
+            alert("Error al guardar la configuración.");
+        });
     }
+
 
     function saveDish() {
         const name = sanitizeText(document.getElementById("dish-name").value), price = parseFloat(document.getElementById("dish-price").value);
         if (!name || !price) return;
         db.collection("menu").add({ name, price, description: sanitizeText(document.getElementById("dish-desc").value), image: sanitizeText(document.getElementById("dish-img").value), available: true }).then(() => alert("Platillo guardado"));
     }
+
 
     function initDeliveryMap() {
         if (!deliveryMap) {
@@ -1067,6 +1247,7 @@
         } else { deliveryMap.invalidateSize(); }
     }
 
+
     function initScheduleMap() {
         if (!scheduleMap) {
             scheduleMap = L.map('schedule-map').setView([storeConfig.lat, storeConfig.lng], 14);
@@ -1079,14 +1260,25 @@
         } else { scheduleMap.invalidateSize(); }
     }
 
+
     function initAdminStoreMap() {
         if (!adminStoreMap) {
             adminStoreMap = L.map('admin-store-map').setView([storeConfig.lat, storeConfig.lng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(adminStoreMap);
             adminStoreMarker = L.marker([storeConfig.lat, storeConfig.lng], {draggable: true}).addTo(adminStoreMap);
             adminStoreMarker.on('dragend', e => { adminStoreLat = e.target.getLatLng().lat; adminStoreLng = e.target.getLatLng().lng; });
-        } else { adminStoreMap.invalidateSize(); }
+            adminStoreMap.on('click', e => {
+                adminStoreLat = e.latlng.lat;
+                adminStoreLng = e.latlng.lng;
+                adminStoreMarker.setLatLng([adminStoreLat, adminStoreLng]);
+            });
+        } else {
+            adminStoreMap.setView([storeConfig.lat, storeConfig.lng], 15);
+            adminStoreMarker.setLatLng([storeConfig.lat, storeConfig.lng]);
+            adminStoreMap.invalidateSize();
+        }
     }
+
 
     function togglePaymentFields() {
         const m = document.getElementById("payment-method").value;
@@ -1095,5 +1287,6 @@
     function toggleDeliveryFields() { setTimeout(initDeliveryMap, 200); }
     function checkoutOrder(type) { alert("Pedido enviado con éxito."); cart = []; updateCartUI(); closeCart(); closeScheduleModal(); }
 </script>
+
 </body>
 </html>
