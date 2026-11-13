@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -46,63 +47,67 @@
     </header>
 
 <!-- Main Container -->
+
 <main class="max-w-md mx-auto p-4 space-y-4">
     <!-- Registro Cliente (Usuario Único) -->
     <section id="client-setup" class="bg-white p-4 rounded-xl shadow-sm border border-orange-100">
         <h2 class="font-bold text-lg mb-2 text-orange-900">Tus Datos de Usuario</h2>
         <input type="text" id="client-name" placeholder="Tu Nombre Completo *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg mb-2 text-sm">
         <input type="tel" id="client-phone" placeholder="Número Telefónico (Tu ID Único) *" onchange="saveClientIdentity()" class="w-full p-2 border rounded-lg text-sm">
-        
-        <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">
-            ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Aquí verás en vivo tus pedidos de comida y tus mandaditos.
+
+    <div id="user-registered-badge" class="mt-2 bg-green-50 border border-green-200 p-2 rounded-lg text-xs text-green-800 hidden font-medium">
+        ✅ <b>Usuario Registrado:</b> Tu cuenta ha sido enlazada a tu teléfono. Aquí verás en vivo tus pedidos de comida y tus mandaditos.
+    </div>
+</section>
+
+<!-- Sección de Estatus de Mis Mandaditos en Tiempo Real -->
+<section id="client-mandaditos-status-section" class="bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-400 hidden">
+    <div class="flex items-center justify-between mb-1">
+        <h3 class="font-bold text-md text-emerald-900">🛵 Tus Mandaditos en Vivo</h3>
+        <span class="animate-pulse inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+    </div>
+    <p class="text-[11px] text-gray-500 mb-3">Actualización automática. Cuando el repartidor cotice tus productos en tienda, podrás confirmar y pagar aquí mismo.</p>
+    <div id="client-my-mandaditos-list" class="space-y-3 text-xs"></div>
+</section>
+
+<!-- Sección de Estatus de Mis Pedidos y Reservas en Tiempo Real -->
+<section id="client-orders-status-section" class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 hidden">
+    <h3 class="font-bold text-md text-orange-900 mb-1">🔔 Estatus de tus Pedidos de Comida</h3>
+    <p class="text-[11px] text-gray-500 mb-3">Se actualiza en tiempo real cuando el local acepta o rechaza.</p>
+    <div id="client-my-orders-list" class="space-y-2 text-xs"></div>
+</section>
+
+<!-- Accesos Rápidos: Mandaditos y Agendar -->
+<section class="grid grid-cols-1 gap-2.5">
+    <button onclick="openMandaditoModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3.5 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
+        <div class="text-left">
+            <span class="block text-sm sm:text-base">🛵 Servicio de Mandaditos Express</span>
+            <span class="block text-[11px] font-normal text-emerald-100">Compramos en cualquier tienda y te lo llevamos en moto</span>
         </div>
-    </section>
+        <span class="bg-white text-emerald-700 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">Pedir Mandado</span>
+    </button>
 
-    <!-- Sección de Estatus de Mis Mandaditos en Tiempo Real -->
-    <section id="client-mandaditos-status-section" class="bg-white p-4 rounded-xl shadow-sm border-2 border-emerald-400 hidden">
-        <div class="flex items-center justify-between mb-1">
-            <h3 class="font-bold text-md text-emerald-900">🛵 Tus Mandaditos en Vivo</h3>
-            <span class="animate-pulse inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
-        </div>
-        <p class="text-[11px] text-gray-500 mb-3">Actualización automática. Cuando el repartidor cotice tus productos en tienda, podrás confirmar y pagar aquí mismo.</p>
-        <div id="client-my-mandaditos-list" class="space-y-3 text-xs"></div>
-    </section>
+    <button onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
+        <span class="text-sm">📅 ¿Quieres reservar comida para otro día u hora?</span>
+        <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold shrink-0">Agendar</span>
+    </button>
+</section>
 
-    <!-- Sección de Estatus de Mis Pedidos y Reservas en Tiempo Real -->
-    <section id="client-orders-status-section" class="bg-white p-4 rounded-xl shadow-sm border border-orange-200 hidden">
-        <h3 class="font-bold text-md text-orange-900 mb-1">🔔 Estatus de tus Pedidos de Comida</h3>
-        <p class="text-[11px] text-gray-500 mb-3">Se actualiza en tiempo real cuando el local acepta o rechaza.</p>
-        <div id="client-my-orders-list" class="space-y-2 text-xs"></div>
-    </section>
-
-    <!-- Accesos Rápidos: Mandaditos y Agendar -->
-    <section class="grid grid-cols-1 gap-2.5">
-        <button onclick="openMandaditoModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3.5 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
-            <div class="text-left">
-                <span class="block text-sm sm:text-base">🛵 Servicio de Mandaditos Express</span>
-                <span class="block text-[11px] font-normal text-emerald-100">Compramos en cualquier tienda y te lo llevamos en moto</span>
-            </div>
-            <span class="bg-white text-emerald-700 px-2.5 py-1.5 rounded-lg text-xs font-bold shrink-0">Pedir Mandado</span>
-        </button>
-
-        <button onclick="openScheduleModal()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white p-3 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4">
-            <span class="text-sm">📅 ¿Quieres reservar comida para otro día u hora?</span>
-            <span class="bg-white text-orange-600 px-2 py-1 rounded text-xs font-bold shrink-0">Agendar</span>
-        </button>
-    </section>
-
-    <!-- Menú de Comida -->
-    <section>
-        <h2 class="font-bold text-xl mb-3">Menú Disponible</h2>
-        <div id="menu-container" class="space-y-4">
-            <p class="text-gray-500 text-center py-4">Cargando menú...</p>
-        </div>
-    </section>
+<!-- Menú de Comida -->
+<section>
+    <h2 class="font-bold text-xl mb-3">Menú Disponible</h2>
+    <div id="menu-container" class="space-y-4">
+        <p class="text-gray-500 text-center py-4">Cargando menú...</p>
+    </div>
+</section>
 </main>
 
 <!-- ===================================================================== -->
+
 <!-- MODAL NUEVO MANDADITO (CLIENTE SOLICITA)                              -->
+
 <!-- ===================================================================== -->
+
 <div id="mandadito-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 max-h-[92vh] overflow-y-auto space-y-4">
         <div class="flex justify-between items-center border-b pb-3">
@@ -113,70 +118,74 @@
             <button onclick="closeMandaditoModal()" class="text-gray-500 font-bold text-xl px-2">✕</button>
         </div>
 
-        <!-- Paso 1: Seleccionar Tienda en Mapa -->
-        <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 space-y-2">
-            <label class="block font-bold text-sm text-emerald-900">1. ¿En qué tienda compraremos?</label>
-            <input type="text" id="mandado-store-name" placeholder="Nombre de la tienda (Ej. Oxxo, Farmacia Guadalajara, Super...)" class="w-full p-2 bg-white border rounded-lg text-sm">
-            <p class="text-xs text-gray-600">📍 Toca el mapa para marcar la ubicación de la <b>Tienda</b>:</p>
-            <div id="mandado-store-map"></div>
-            <p id="mandado-store-coords" class="text-[11px] font-semibold text-emerald-700">Ubicación tienda: Sin seleccionar</p>
-        </div>
-
-        <!-- Paso 2: Lista de Productos a Comprar -->
-        <div class="space-y-1.5">
-            <label class="block font-bold text-sm text-gray-800">2. Lista de productos a comprar:</label>
-            <textarea id="mandado-items" rows="3" placeholder="Escribe detalladamente lo que necesitas (Ej. 1 Garrafón de agua, 1 Kg de tortillas, 1 Coca-Cola 2L sin azúcar...)" class="w-full p-2.5 border rounded-lg text-sm"></textarea>
-        </div>
-
-        <!-- Paso 3: Seleccionar Destino en Mapa -->
-        <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 space-y-2">
-            <label class="block font-bold text-sm text-blue-900">3. ¿A dónde te lo llevamos?</label>
-            <input type="text" id="mandado-dest-address" placeholder="Calle, número y referencias de tu domicilio" class="w-full p-2 bg-white border rounded-lg text-sm">
-            <p class="text-xs text-gray-600">🏠 Toca el mapa para marcar tu <b>Domicilio de entrega</b>:</p>
-            <div id="mandado-dest-map"></div>
-            <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
-        </div>
-
-        <!-- Paso 4: Desglose Matemático Transparente -->
-        <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2">
-            <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
-                <span>📏 Distancia estimada:</span>
-                <span id="mandado-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
-            </div>
-            
-            <div class="space-y-1 text-xs">
-                <div class="flex justify-between text-gray-300">
-                    <span>⛽ Gasolina (Costo puro sin ganancia, 33 km/L):</span>
-                    <span id="mandado-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
-                </div>
-                <div class="flex justify-between text-gray-300">
-                    <span>⏱️ Tiempo conductor (<span id="mandado-time-display">0 min</span> @ $0.66/min - Salario Mín.):</span>
-                    <span id="mandado-labor-display" class="text-blue-300 font-semibold">$0.00</span>
-                </div>
-                <div class="flex justify-between text-gray-300">
-                    <span>🔧 Mantenimiento Italika FT150 (Desgaste/m):</span>
-                    <span id="mandado-wear-display" class="text-amber-300 font-semibold">$0.00</span>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
-                <span>Costo Total del Envío:</span>
-                <span id="mandado-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
-            </div>
-            <p class="text-[10px] text-gray-400 leading-tight pt-1">
-                * Transparencia Primo: La gasolina se cobra a costo real exacto sin ganancia. El servicio cubre el tiempo legal del repartidor y el fondo de refacciones de la moto.
-            </p>
-        </div>
-
-        <button onclick="submitMandadito()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md">
-            Enviar Solicitud de Mandadito en Vivo
-        </button>
+    <!-- Paso 1: Seleccionar Tienda en Mapa -->
+    <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 space-y-2">
+        <label class="block font-bold text-sm text-emerald-900">1. ¿En qué tienda compraremos?</label>
+        <input type="text" id="mandado-store-name" placeholder="Nombre de la tienda (Ej. Oxxo, Farmacia Guadalajara, Super...)" class="w-full p-2 bg-white border rounded-lg text-sm">
+        <p class="text-xs text-gray-600">📍 Toca el mapa para marcar la ubicación de la <b>Tienda</b>:</p>
+        <div id="mandado-store-map"></div>
+        <p id="mandado-store-coords" class="text-[11px] font-semibold text-emerald-700">Ubicación tienda: Sin seleccionar</p>
     </div>
+
+    <!-- Paso 2: Lista de Productos a Comprar -->
+    <div class="space-y-1.5">
+        <label class="block font-bold text-sm text-gray-800">2. Lista de productos a comprar:</label>
+        <textarea id="mandado-items" rows="3" placeholder="Escribe detalladamente lo que necesitas (Ej. 1 Kg de tortillas, 1 Coca-Cola 2L sin azúcar... Máximo 3L en líquidos)" class="w-full p-2.5 border rounded-lg text-sm"></textarea>
+        <p class="text-[11px] text-gray-500">💡 *Nota: Si la tienda tiene fila, el repartidor activará un cronómetro especial para que su tiempo de espera se remunere justamente en base al salario mínimo, ya que el tiempo de fila es independiente al traslado en moto.*</p>
+    </div>
+
+    <!-- Paso 3: Seleccionar Destino en Mapa -->
+    <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 space-y-2">
+        <label class="block font-bold text-sm text-blue-900">3. ¿A dónde te lo llevamos?</label>
+        <input type="text" id="mandado-dest-address" placeholder="Calle, número y referencias de tu domicilio" class="w-full p-2 bg-white border rounded-lg text-sm">
+        <p class="text-xs text-gray-600">🏠 Toca el mapa para marcar tu <b>Domicilio de entrega</b>:</p>
+        <div id="mandado-dest-map"></div>
+        <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
+    </div>
+
+    <!-- Paso 4: Desglose Matemático Transparente -->
+    <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2">
+        <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
+            <span>📏 Distancia estimada:</span>
+            <span id="mandado-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
+        </div>
+        
+        <div class="space-y-1 text-xs">
+            <div class="flex justify-between text-gray-300">
+                <span>⛽ Gasolina (Costo puro sin ganancia, 33 km/L):</span>
+                <span id="mandado-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
+            </div>
+            <div class="flex justify-between text-gray-300">
+                <span>⏱️ Tiempo conductor (<span id="mandado-time-display">0 min</span> @ $0.66/min - Salario Mín.):</span>
+                <span id="mandado-labor-display" class="text-blue-300 font-semibold">$0.00</span>
+            </div>
+            <div class="flex justify-between text-gray-300">
+                <span>🔧 Mantenimiento Italika FT150 (Desgaste/m):</span>
+                <span id="mandado-wear-display" class="text-amber-300 font-semibold">$0.00</span>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
+            <span>Costo Total del Envío Base:</span>
+            <span id="mandado-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
+        </div>
+        <p class="text-[10px] text-gray-400 leading-tight pt-1">
+            * Transparencia Primo: Si hay filas largas en la tienda, el repartidor activará un cronómetro de espera que se sumará equitativamente en base al salario mínimo.
+        </p>
+    </div>
+
+    <button onclick="submitMandadito()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md">
+        Enviar Solicitud de Mandadito en Vivo
+    </button>
+</div>
 </div>
 
 <!-- ===================================================================== -->
+
 <!-- MODAL PAGO / ACEPTACIÓN DEL CLIENTE PARA MANDADITO COTIZADO           -->
+
 <!-- ===================================================================== -->
+
 <div id="mandado-confirm-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto space-y-4">
         <div class="flex justify-between items-center border-b pb-2">
@@ -184,68 +193,69 @@
             <button onclick="closeMandadoConfirmModal()" class="text-gray-500 font-bold text-lg">✕</button>
         </div>
 
-        <input type="hidden" id="confirm-mandado-id">
-        
-        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1 text-sm">
-            <div class="flex justify-between"><span>Costo de los productos en tienda:</span> <b id="conf-prod-cost">$0.00</b></div>
-            <div class="flex justify-between"><span>Costo transparente del envío:</span> <b id="conf-ship-cost">$0.00</b></div>
-            <div class="flex justify-between text-base font-bold text-emerald-950 border-t border-emerald-300 pt-1.5 mt-1">
-                <span>TOTAL A PAGAR:</span>
-                <span id="conf-grand-total">$0.00</span>
-            </div>
-        </div>
-
-        <div>
-            <label class="block font-semibold text-sm mb-1">Selecciona tu Método de Pago:</label>
-            <select id="mandado-payment-method" onchange="toggleMandadoPaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <option value="efectivo">Efectivo al recibir</option>
-                <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
-            </select>
-
-            <!-- Efectivo -->
-            <div id="mandado-cash-fields" class="bg-gray-50 p-3 rounded-lg border space-y-1.5">
-                <label class="block text-xs font-semibold text-gray-700">¿Con cuánto vas a pagar? (Para que el repartidor lleve cambio):</label>
-                <input type="number" id="mandado-cash-amount" placeholder="Ej. 500" oninput="calculateMandadoChange()" class="w-full p-2 bg-white border rounded-lg text-sm">
-                <p id="mandado-change-text" class="text-xs font-bold text-green-600"></p>
-            </div>
-
-            <!-- Tarjeta Mercado Pago -->
-            <div id="mandado-tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-1.5">
-                <p class="font-bold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                <p class="text-blue-700">Se aplica comisión por cobro: <b>(3.49%) + $4.64</b>.</p>
-                <div class="bg-white p-2 rounded border border-blue-100 space-y-1">
-                    <div class="flex justify-between"><span>Subtotal Mandadito + Productos:</span> <span id="m-mp-sub">$0.00</span></div>
-                    <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="m-mp-comm">$0.00</span></div>
-                    <div class="flex justify-between font-bold text-blue-900 border-t pt-1"><span>Total con comisión:</span> <span id="m-mp-total">$0.00</span></div>
-                </div>
-            </div>
-
-            <!-- Transferencia BBVA -->
-            <div id="mandado-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2">
-                <p class="font-bold text-blue-900">🏦 Datos para Transferencia SPEI (SIN COMISIÓN):</p>
-                <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-blue-950">
-                    <p><b>Banco:</b> BBVA</p>
-                    <p><b>Titular:</b> Roberto Carlos Martínez León</p>
-                    <p><b>CLABE:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
-                </div>
-                <p class="text-green-700 font-bold">✅ Sin comisiones extra: Transfiere exactamente el total de tu pedido (<span id="m-tr-exact-total">$0.00</span>).</p>
-                <input type="text" id="mandado-transfer-ref" placeholder="Folio o referencia de tu transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
-            </div>
-        </div>
-
-        <div class="flex gap-2 pt-2">
-            <button onclick="rejectMandadoQuote()" class="w-1/3 bg-red-100 text-red-700 py-2.5 rounded-xl font-bold text-xs hover:bg-red-200">
-                Cancelar Pedido
-            </button>
-            <button onclick="confirmMandadoPurchase()" class="w-2/3 bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow">
-                ✔ Aceptar Costo y Comprar
-            </button>
+    <input type="hidden" id="confirm-mandado-id">
+    
+    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1 text-sm">
+        <div class="flex justify-between"><span>Costo de los productos en tienda:</span> <b id="conf-prod-cost">$0.00</b></div>
+        <div class="flex justify-between"><span>Costo transparente del envío (incluye tiempo de traslado / filas):</span> <b id="conf-ship-cost">$0.00</b></div>
+        <div class="flex justify-between text-base font-bold text-emerald-950 border-t border-emerald-300 pt-1.5 mt-1">
+            <span>TOTAL A PAGAR:</span>
+            <span id="conf-grand-total">$0.00</span>
         </div>
     </div>
+
+    <div>
+        <label class="block font-semibold text-sm mb-1">Selecciona tu Método de Pago:</label>
+        <select id="mandado-payment-method" onchange="toggleMandadoPaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <option value="efectivo">Efectivo al recibir</option>
+            <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
+            <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
+        </select>
+
+        <!-- Efectivo -->
+        <div id="mandado-cash-fields" class="bg-gray-50 p-3 rounded-lg border space-y-1.5">
+            <label class="block text-xs font-semibold text-gray-700">¿Con cuánto vas a pagar? (Para que el repartidor lleve cambio):</label>
+            <input type="number" id="mandado-cash-amount" placeholder="Ej. 500" oninput="calculateMandadoChange()" class="w-full p-2 bg-white border rounded-lg text-sm">
+            <p id="mandado-change-text" class="text-xs font-bold text-green-600"></p>
+        </div>
+
+        <!-- Tarjeta Mercado Pago -->
+        <div id="mandado-tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-1.5">
+            <p class="font-bold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
+            <p class="text-blue-700">Se aplica comisión por cobro: <b>(3.49%) + $4.64</b>.</p>
+            <div class="bg-white p-2 rounded border border-blue-100 space-y-1">
+                <div class="flex justify-between"><span>Subtotal Mandadito + Productos:</span> <span id="m-mp-sub">$0.00</span></div>
+                <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="m-mp-comm">$0.00</span></div>
+                <div class="flex justify-between font-bold text-blue-900 border-t pt-1"><span>Total con comisión:</span> <span id="m-mp-total">$0.00</span></div>
+            </div>
+        </div>
+
+        <!-- Transferencia BBVA -->
+        <div id="mandado-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2">
+            <p class="font-bold text-blue-900">🏦 Datos para Transferencia SPEI (SIN COMISIÓN):</p>
+            <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-blue-950">
+                <p><b>Banco:</b> BBVA</p>
+                <p><b>Titular:</b> Roberto Carlos Martínez León</p>
+                <p><b>CLABE:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
+            </div>
+            <p class="text-green-700 font-bold">✅ Sin comisiones extra: Transfiere exactamente el total de tu pedido (<span id="m-tr-exact-total">$0.00</span>).</p>
+            <input type="text" id="mandado-transfer-ref" placeholder="Folio o referencia de tu transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
+        </div>
+    </div>
+
+    <div class="flex gap-2 pt-2">
+        <button onclick="rejectMandadoQuote()" class="w-1/3 bg-red-100 text-red-700 py-2.5 rounded-xl font-bold text-xs hover:bg-red-200">
+            Cancelar Pedido
+        </button>
+        <button onclick="confirmMandadoPurchase()" class="w-2/3 bg-emerald-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow">
+            ✔ Aceptar Costo y Comprar
+        </button>
+    </div>
+</div>
 </div>
 
 <!-- Modal Carrito / Checkout Inmediato -->
+
 <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
@@ -268,275 +278,282 @@
             </div>
         </div>
 
-        <!-- Método de Pago -->
-        <div class="mb-4">
-            <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
-            <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <option value="efectivo">Efectivo</option>
-                <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
-            </select>
+    <!-- Método de Pago -->
+    <div class="mb-4">
+        <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
+        <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
+            <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
+        </select>
 
-            <!-- Si es efectivo -->
-            <div id="cash-fields">
-                <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>
-                <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
-                <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
-            </div>
+        <!-- Si es efectivo -->
+        <div id="cash-fields">
+            <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para calcular tu cambio):</label>
+            <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
+            <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
+        </div>
 
-            <!-- Si es tarjeta (Mercado Pago) -->
-            <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago - Link Seguro):</p>
-                <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. <b>Comisión por cobro: (3.49%) + $4.64</b>.</p>
-                <div class="bg-white p-2 rounded border border-blue-100 space-y-1 text-xs text-gray-700">
-                    <div class="flex justify-between"><span>Costo total pedido:</span> <span id="mp-food-total">$0.00</span></div>
-                    <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="mp-commission-val">$0.00</span></div>
-                    <div class="flex justify-between font-bold border-t pt-1 text-blue-900"><span>Monto neto que recibe el negocio:</span> <span id="mp-net-amount">$0.00</span></div>
-                </div>
-            </div>
-
-            <!-- Si es transferencia BBVA -->
-            <div id="transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (0% Comisión):</p>
-                <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-xs text-blue-950">
-                    <p><b>Banco:</b> BBVA</p>
-                    <p><b>Propietario:</b> Roberto Carlos Martínez León</p>
-                    <p><b>CLABE Interbancaria:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
-                </div>
-                <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Transfiere el total exacto: <span id="tr-exact-food-total">$0.00</span></p>
-
-                <div class="border-t border-blue-200 pt-2 mt-2">
-                    <label class="block text-xs font-semibold text-blue-900 mb-1">Confirma el monto transferido:</label>
-                    <input type="number" id="transfer-amount" placeholder="Ej. 150" oninput="calculateTransferChange()" class="w-full p-2 bg-white border rounded-lg text-sm mb-2">
-                    <p id="transfer-change-text" class="text-xs font-semibold text-green-700"></p>
-
-                    <label class="block text-xs font-semibold text-blue-900 mt-2 mb-1">Folio o Referencia de tu comprobante:</label>
-                    <input type="text" id="transfer-clabe" placeholder="Ej. Folio o clave de rastreo de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
-                </div>
+        <!-- Si es tarjeta (Mercado Pago) -->
+        <div id="tarjeta-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+            <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago - Link Seguro):</p>
+            <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. <b>Comisión por cobro: (3.49%) + $4.64</b>.</p>
+            <div class="bg-white p-2 rounded border border-blue-100 space-y-1 text-xs text-gray-700">
+                <div class="flex justify-between"><span>Costo total pedido:</span> <span id="mp-food-total">$0.00</span></div>
+                <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="mp-commission-val">$0.00</span></div>
+                <div class="flex justify-between font-bold border-t pt-1 text-blue-900"><span>Monto neto que recibe el negocio:</span> <span id="mp-net-amount">$0.00</span></div>
             </div>
         </div>
 
-        <!-- Tipo de Entrega -->
-        <div class="mb-4">
-            <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
-            <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <option value="local">Asistir al local por mi comida</option>
-                <option value="domicilio">Recibir en domicilio</option>
-            </select>
-
-            <!-- Si asiste al local (Con Mapa del Negocio) -->
-            <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm space-y-2">
-                <p class="font-semibold">Dirección del local:</p>
-                <p id="store-address-display" class="text-gray-600">Cargando dirección...</p>
-                <p class="text-xs text-gray-500">📍 Ubicación exacta del establecimiento:</p>
-                <div id="store-map"></div>
+        <!-- Si es transferencia BBVA -->
+        <div id="transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+            <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (0% Comisión):</p>
+            <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-xs text-blue-950">
+                <p><b>Banco:</b> BBVA</p>
+                <p><b>Propietario:</b> Roberto Carlos Martínez León</p>
+                <p><b>CLABE Interbancaria:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
             </div>
+            <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Transfiere el total exacto: <span id="tr-exact-food-total">$0.00</span></p>
 
-            <!-- Si es a domicilio -->
-            <div id="domicilio-fields" class="hidden space-y-3">
-                <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">
-                <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Selecciona tu ubicación exacta en el mapa:</label>
-                <div id="delivery-map"></div>
-                <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
+            <div class="border-t border-blue-200 pt-2 mt-2">
+                <label class="block text-xs font-semibold text-blue-900 mb-1">Confirma el monto transferido:</label>
+                <input type="number" id="transfer-amount" placeholder="Ej. 150" oninput="calculateTransferChange()" class="w-full p-2 bg-white border rounded-lg text-sm mb-2">
+                <p id="transfer-change-text" class="text-xs font-semibold text-green-700"></p>
 
-                <!-- Recuadro Transparente de Cálculo de Envío -->
-                <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2 shadow-sm">
-                    <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
-                        <span>📏 Distancia estimada:</span>
-                        <span id="delivery-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
-                    </div>
-
-                    <div class="space-y-1 text-xs">
-                        <div class="flex justify-between text-gray-300">
-                            <span>⛽ Gasolina (Costo puro sin ganancia, 33 km/L):</span>
-                            <span id="delivery-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-gray-300">
-                            <span>⏱️ Tiempo conductor (<span id="delivery-time-display">0 min</span> @ $0.66/min - Salario Mín.):</span>
-                            <span id="delivery-labor-display" class="text-blue-300 font-semibold">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-gray-300">
-                            <span>🔧 Mantenimiento Italika FT150 (Desgaste/m):</span>
-                            <span id="delivery-wear-display" class="text-amber-300 font-semibold">$0.00</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
-                        <span>Costo de Envío (Moto):</span>
-                        <span id="delivery-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
-                    </div>
-                </div>
+                <label class="block text-xs font-semibold text-blue-900 mt-2 mb-1">Folio o Referencia de tu comprobante:</label>
+                <input type="text" id="transfer-clabe" placeholder="Ej. Folio o clave de rastreo de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
             </div>
         </div>
-
-        <button onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
-            Confirmar Pedido Inmediato
-        </button>
     </div>
+
+    <!-- Tipo de Entrega -->
+    <div class="mb-4">
+        <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
+        <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <option value="local">Asistir al local por mi comida</option>
+            <option value="domicilio">Recibir en domicilio</option>
+        </select>
+
+        <!-- Si asiste al local (Con Mapa del Negocio) -->
+        <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm space-y-2">
+            <p class="font-semibold">Dirección del local:</p>
+            <p id="store-address-display" class="text-gray-600">Cargando dirección...</p>
+            <p class="text-xs text-gray-500">📍 Ubicación exacta del establecimiento:</p>
+            <div id="store-map"></div>
+        </div>
+
+        <!-- Si es a domicilio -->
+        <div id="domicilio-fields" class="hidden space-y-3">
+            <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">
+            <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Selecciona tu ubicación exacta en el mapa:</label>
+            <div id="delivery-map"></div>
+            <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
+
+            <!-- Recuadro Transparente de Cálculo de Envío -->
+            <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2 shadow-sm">
+                <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
+                    <span>📏 Distancia estimada:</span>
+                    <span id="delivery-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
+                </div>
+
+                <div class="space-y-1 text-xs">
+                    <div class="flex justify-between text-gray-300">
+                        <span>⛽ Gasolina (Costo puro sin ganancia, 33 km/L):</span>
+                        <span id="delivery-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-300">
+                        <span>⏱️ Tiempo conductor (<span id="delivery-time-display">0 min</span> @ $0.66/min - Salario Mín.):</span>
+                        <span id="delivery-labor-display" class="text-blue-300 font-semibold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-300">
+                        <span>🔧 Mantenimiento Italika FT150 (Desgaste/m):</span>
+                        <span id="delivery-wear-display" class="text-amber-300 font-semibold">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
+                    <span>Costo de Envío (Moto):</span>
+                    <span id="delivery-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="checkoutOrder('inmediato')" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition">
+        Confirmar Pedido Inmediato
+    </button>
+</div>
 </div>
 
 <!-- Modal Agendar Pedido a Futuro (Reserva) -->
+
 <div id="schedule-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[90vh] overflow-y-auto space-y-4">
         <div class="flex justify-between items-center">
             <h3 class="text-lg font-bold text-amber-900">📅 Agendar Pedido a Futuro (Reserva)</h3>
             <button onclick="closeScheduleModal()" class="text-gray-500 font-bold text-lg">✕</button>
         </div>
-        
-        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
-            Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para apartar pedidos a futuro se realiza pago por tarjeta o transferencia bancaria directa a BBVA.
-        </div>
 
-        <div>
-            <label class="block font-semibold text-sm mb-1">Tu Número Telefónico para la Reserva *:</label>
-            <input type="tel" id="schedule-phone" placeholder="Número de contacto" class="w-full p-2 border rounded-lg text-sm">
-        </div>
-
-        <div>
-            <label class="block font-semibold text-sm mb-1">Fecha de Recepción:</label>
-            <input type="date" id="schedule-date" class="w-full p-2 border rounded-lg text-sm">
-        </div>
-
-        <div>
-            <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>
-            <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">
-        </div>
-
-        <!-- Método de Pago exclusivo para Reservas -->
-        <div>
-            <label class="block font-semibold text-sm mb-1">Método de Pago para la Reserva:</label>
-            <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
-                <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
-            </select>
-
-            <div id="schedule-tarjeta-fields" class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
-                <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se aplica la <b>comisión por cobro (3.49%) + $4.64</b>.</p>
-                <div class="bg-white p-2 rounded border border-blue-100 space-y-1 text-xs text-gray-700">
-                    <div class="flex justify-between"><span>Costo de alimentos:</span> <span id="sch-mp-food-total">$0.00</span></div>
-                    <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="sch-mp-commission-val">$0.00</span></div>
-                    <div class="flex justify-between font-bold border-t pt-1 text-blue-900"><span>Monto neto que recibe el negocio:</span> <span id="sch-mp-net-amount">$0.00</span></div>
-                </div>
-            </div>
-
-            <div id="schedule-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
-                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (0% Comisión):</p>
-                <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-xs text-blue-950">
-                    <p><b>Banco:</b> BBVA</p>
-                    <p><b>Propietario:</b> Roberto Carlos Martínez León</p>
-                    <p><b>CLABE Interbancaria:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
-                </div>
-                <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Total exacto a transferir: <span id="sch-tr-exact-total">$0.00</span></p>
-                <label class="block text-xs font-semibold text-blue-900 mt-2 mb-1">Folio o Referencia de tu comprobante:</label>
-                <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o clave de rastreo de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
-            </div>
-        </div>
-
-        <div>
-            <label class="block font-semibold text-sm mb-1">Descripción de Domicilio / Referencias:</label>
-            <input type="text" id="schedule-address" placeholder="Calle, número, fachada o detalles de tu casa" class="w-full p-2 border rounded-lg text-sm mb-2">
-        </div>
-
-        <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1">📍 Selecciona tu ubicación exacta de entrega en el mapa:</label>
-            <div id="schedule-map"></div>
-            <p id="schedule-map-coords-text" class="text-xs text-gray-500 mt-1">Haz clic en el mapa para fijar tu ubicación de reserva.</p>
-        </div>
-
-        <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">
-            Enviar Solicitud de Reserva
-        </button>
+    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-800">
+        Selecciona la fecha y hora de tu reserva. <b>Nota:</b> Para apartar pedidos a futuro se realiza pago por tarjeta o transferencia bancaria directa a BBVA.
     </div>
+
+    <div>
+        <label class="block font-semibold text-sm mb-1">Tu Número Telefónico para la Reserva *:</label>
+        <input type="tel" id="schedule-phone" placeholder="Número de contacto" class="w-full p-2 border rounded-lg text-sm">
+    </div>
+
+    <div>
+        <label class="block font-semibold text-sm mb-1">Fecha de Recepción:</label>
+        <input type="date" id="schedule-date" class="w-full p-2 border rounded-lg text-sm">
+    </div>
+
+    <div>
+        <label class="block font-semibold text-sm mb-1">Hora de Recepción:</label>
+        <input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm">
+    </div>
+
+    <!-- Método de Pago exclusivo para Reservas -->
+    <div>
+        <label class="block font-semibold text-sm mb-1">Método de Pago para la Reserva:</label>
+        <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <option value="tarjeta">Tarjeta / Mercado Pago (Link Seguro)</option>
+            <option value="transferencia">Transferencia Bancaria BBVA (Sin Comisión)</option>
+        </select>
+
+        <div id="schedule-tarjeta-fields" class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+            <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago):</p>
+            <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. Se aplica la <b>comisión por cobro (3.49%) + $4.64</b>.</p>
+            <div class="bg-white p-2 rounded border border-blue-100 space-y-1 text-xs text-gray-700">
+                <div class="flex justify-between"><span>Costo de alimentos:</span> <span id="sch-mp-food-total">$0.00</span></div>
+                <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="sch-mp-commission-val">$0.00</span></div>
+                <div class="flex justify-between font-bold border-t pt-1 text-blue-900"><span>Monto neto que recibe el negocio:</span> <span id="sch-mp-net-amount">$0.00</span></div>
+            </div>
+        </div>
+
+        <div id="schedule-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-sm border border-blue-200 space-y-2">
+            <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA (0% Comisión):</p>
+            <div class="bg-white p-2.5 rounded border border-blue-200 space-y-1 text-xs text-blue-950">
+                <p><b>Banco:</b> BBVA</p>
+                <p><b>Propietario:</b> Roberto Carlos Martínez León</p>
+                <p><b>CLABE Interbancaria:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
+            </div>
+            <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Total exacto a transferir: <span id="sch-tr-exact-total">$0.00</span></p>
+            <label class="block text-xs font-semibold text-blue-900 mt-2 mb-1">Folio o Referencia de tu comprobante:</label>
+            <input type="text" id="schedule-transfer-clabe" placeholder="Ej. Folio o clave de rastreo de tu transferencia" class="w-full p-2 bg-white border rounded-lg text-sm">
+        </div>
+    </div>
+
+    <div>
+        <label class="block font-semibold text-sm mb-1">Descripción de Domicilio / Referencias:</label>
+        <input type="text" id="schedule-address" placeholder="Calle, número, fachada o detalles de tu casa" class="w-full p-2 border rounded-lg text-sm mb-2">
+    </div>
+
+    <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">📍 Selecciona tu ubicación exacta de entrega en el mapa:</label>
+        <div id="schedule-map"></div>
+        <p id="schedule-map-coords-text" class="text-xs text-gray-500 mt-1">Haz clic en el mapa para fijar tu ubicación de reserva.</p>
+    </div>
+
+    <button onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition">
+        Enviar Solicitud de Reserva
+    </button>
+</div>
 </div>
 
 <!-- ===================================================================== -->
+
 <!-- MODAL PANEL ADMINISTRADOR                                             -->
+
 <!-- ===================================================================== -->
+
 <div id="admin-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xl rounded-2xl p-5 max-h-[92vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
             <h3 class="text-lg font-bold">Panel Administrador</h3>
             <button onclick="closeAdmin()" class="text-gray-500 font-bold text-lg">✕</button>
         </div>
-        
-        <div id="admin-login-view">
-            <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
-            <button onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold">Ingresar</button>
+
+    <div id="admin-login-view">
+        <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
+        <button onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold">Ingresar</button>
+    </div>
+
+    <div id="admin-panel-view" class="hidden space-y-6">
+        <!-- SECCIÓN 1: MANDADITOS EN VIVO -->
+        <div class="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-300">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-bold text-emerald-950 flex items-center gap-1.5">
+                    🛵 Mandaditos en Vivo (<span id="admin-mandaditos-count">0</span>)
+                </h4>
+                <button onclick="clearAllMandaditos()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold hover:bg-red-600">🗑️ Limpiar</button>
+            </div>
+            <p class="text-[11px] text-emerald-800 mb-3">Acepta el mandado, utiliza el cronómetro especial en filas largas para remunerar el tiempo de espera del conductor en base al salario mínimo, y cotiza en vivo.</p>
+            <div id="admin-mandaditos-list" class="space-y-3 text-sm">
+                <p class="text-gray-500 text-xs">No hay mandaditos activos.</p>
+            </div>
         </div>
 
-        <div id="admin-panel-view" class="hidden space-y-6">
-            <!-- SECCIÓN 1: MANDADITOS EN VIVO -->
-            <div class="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-300">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold text-emerald-950 flex items-center gap-1.5">
-                        🛵 Mandaditos en Vivo (<span id="admin-mandaditos-count">0</span>)
-                    </h4>
-                    <button onclick="clearAllMandaditos()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold hover:bg-red-600">🗑️ Limpiar</button>
-                </div>
-                <p class="text-[11px] text-emerald-800 mb-3">Acepta el mandado, ve a la tienda, captura el costo real de los productos para que el cliente pague/acepte en vivo.</p>
-                <div id="admin-mandaditos-list" class="space-y-3 text-sm">
-                    <p class="text-gray-500 text-xs">No hay mandaditos activos.</p>
-                </div>
+        <!-- SECCIÓN 2: PEDIDOS DE COMIDA Y RESERVAS -->
+        <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-bold text-orange-900">📦 Pedidos de Comida y Reservas</h4>
+                <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Todo</button>
             </div>
-
-            <!-- SECCIÓN 2: PEDIDOS DE COMIDA Y RESERVAS -->
-            <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-bold text-orange-900">📦 Pedidos de Comida y Reservas</h4>
-                    <button onclick="clearAllOrders()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold hover:bg-red-600">🗑️ Borrar Todo</button>
-                </div>
-                <div id="admin-orders-list" class="space-y-3 text-sm">
-                    <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
-                </div>
+            <div id="admin-orders-list" class="space-y-3 text-sm">
+                <p class="text-gray-500 text-xs">No hay pedidos nuevos.</p>
             </div>
+        </div>
 
-            <!-- SECCIÓN 3: CONFIGURACIÓN GENERAL DEL LOCAL -->
-            <div class="border-b pb-4 space-y-2">
-                <h4 class="font-bold mb-2">Configuración General del Local</h4>
-                <div class="bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-xs text-blue-950">
-                    <p class="font-bold">Cuenta de Transferencia Configurada (Sin Comisión):</p>
-                    <p>Banco: <b>BBVA</b> | Titular: <b>Roberto Carlos Martínez León</b></p>
-                    <p>CLABE: <b class="font-mono">012533015277749576</b></p>
-                </div>
-                
-                <label class="text-xs text-gray-600">Dirección física del local / Base Moto:</label>
-                <input type="text" id="admin-store-address" placeholder="Ej. Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
-
-                <label class="text-xs text-gray-600">📍 Ubicación Base (Haz clic en el mapa para ajustar):</label>
-                <div id="admin-store-map"></div>
-                <p id="admin-store-coords-text" class="text-xs text-gray-500">Coordenadas guardadas: No configuradas</p>
-
-                <button onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2">Guardar Toda la Configuración</button>
+        <!-- SECCIÓN 3: CONFIGURACIÓN GENERAL DEL LOCAL -->
+        <div class="border-b pb-4 space-y-2">
+            <h4 class="font-bold mb-2">Configuración General del Local</h4>
+            <div class="bg-blue-50 p-2.5 rounded-lg border border-blue-200 text-xs text-blue-950">
+                <p class="font-bold">Cuenta de Transferencia Configurada (Sin Comisión):</p>
+                <p>Banco: <b>BBVA</b> | Titular: <b>Roberto Carlos Martínez León</b></p>
+                <p>CLABE: <b class="font-mono">012533015277749576</b></p>
             </div>
+            
+            <label class="text-xs text-gray-600">Dirección física del local / Base Moto:</label>
+            <input type="text" id="admin-store-address" placeholder="Ej. Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
 
-            <!-- SECCIÓN 4: AGREGAR / EDITAR PLATILLO -->
-            <div class="border-b pb-4">
-                <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
-                <input type="hidden" id="edit-dish-id">
-                <input type="text" id="dish-name" placeholder="Nombre del platillo" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <input type="text" id="dish-desc" placeholder="Descripción corta" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <input type="text" id="dish-img" placeholder="URL de la imagen" class="w-full p-2 border rounded-lg text-sm mb-2">
-                <select id="dish-available" class="w-full p-2 border rounded-lg text-sm mb-2">
-                    <option value="true">Disponible</option>
-                    <option value="false">Agotado</option>
-                </select>
-                <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
-            </div>
+            <label class="text-xs text-gray-600">📍 Ubicación Base (Haz clic en el mapa para ajustar):</label>
+            <div id="admin-store-map"></div>
+            <p id="admin-store-coords-text" class="text-xs text-gray-500">Coordenadas guardadas: No configuradas</p>
 
-            <!-- SECCIÓN 5: LISTA DE PLATILLOS -->
-            <div>
-                <h4 class="font-bold mb-2">Menú Actual</h4>
-                <div id="admin-dish-list" class="space-y-2 text-sm"></div>
-            </div>
+            <button onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2">Guardar Toda la Configuración</button>
+        </div>
+
+        <!-- SECCIÓN 4: AGREGAR / EDITAR PLATILLO -->
+        <div class="border-b pb-4">
+            <h4 class="font-bold mb-2">Agregar / Editar Platillo</h4>
+            <input type="hidden" id="edit-dish-id">
+            <input type="text" id="dish-name" placeholder="Nombre del platillo" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <input type="text" id="dish-desc" placeholder="Descripción corta" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <input type="text" id="dish-img" placeholder="URL de la imagen" class="w-full p-2 border rounded-lg text-sm mb-2">
+            <select id="dish-available" class="w-full p-2 border rounded-lg text-sm mb-2">
+                <option value="true">Disponible</option>
+                <option value="false">Agotado</option>
+            </select>
+            <button onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold">Guardar Platillo</button>
+        </div>
+
+        <!-- SECCIÓN 5: LISTA DE PLATILLOS -->
+        <div>
+            <h4 class="font-bold mb-2">Menú Actual</h4>
+            <div id="admin-dish-list" class="space-y-2 text-sm"></div>
         </div>
     </div>
 </div>
+</div>
 
 <!-- ===================================================================== -->
+
 <!-- SCRIPT FIREBASE Y LÓGICA COMPLETA                                     -->
+
 <!-- ===================================================================== -->
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyC9cUJyYesxRim8zOpGUfS5aHkB_qzAaJo",
@@ -548,9 +565,11 @@
         measurementId: "G-37491Y8MRL"
     };
 
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     db.enableNetwork().catch(err => console.log(err));
+
 
     let menuItems = [];
     let cart = [];
@@ -574,6 +593,7 @@
     let storeMap = null, storeMarker = null;
     let adminStoreMap = null, adminStoreMarker = null, adminStoreLat = null, adminStoreLng = null;
 
+
     // Mapas Mandaditos
     let mandadoStoreMap = null, mandadoStoreMarker = null, mandadoStoreLat = null, mandadoStoreLng = null;
     let mandadoDestMap = null, mandadoDestMarker = null, mandadoDestLat = null, mandadoDestLng = null;
@@ -584,6 +604,7 @@
     let currentMandadoWearCost = 0;
     let currentMandadoMinutes = 0;
 
+
     // Variables Envío Pedido Inmediato Domicilio
     let currentDeliveryDistanceKm = 0;
     let currentDeliveryShippingCost = 0;
@@ -592,10 +613,12 @@
     let currentDeliveryWearCost = 0;
     let currentDeliveryMinutes = 0;
 
+
     function sanitizeText(str) {
         if (!str) return '';
         return String(str).replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
     }
+
 
     // =========================================================================
     // CÁLCULO DE DISTANCIA HAVERSINE Y MATEMÁTICA TRANSPARENTE ITALIKA FT150 TS
@@ -611,21 +634,27 @@
         return R * c;
     }
 
+
     function computeTransparentShipping(distanceKm) {
         const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
         const motoKml = parseFloat(storeConfig.motoKml) || 33;
 
+
         const litersUsed = distanceKm / motoKml;
         const fuelCost = litersUsed * gasPrice;
+
 
         const estimatedMinutes = Math.max(3, Math.round(distanceKm * 2));
         const ratePerMinute = 39.38 / 60;
         const laborCost = estimatedMinutes * ratePerMinute;
 
+
         const wearCostPerKm = 0.40;
         const wearCost = distanceKm * wearCostPerKm;
 
+
         const totalCost = Math.ceil(fuelCost + laborCost + wearCost);
+
 
         return {
             distanceKm,
@@ -639,8 +668,10 @@
         };
     }
 
+
     function recalculateMandaditoCost() {
         if (!mandadoStoreLat || !mandadoStoreLng || !mandadoDestLat || !mandadoDestLng) return;
+
 
         const baseLat = storeConfig.lat || 20.3333;
         const baseLng = storeConfig.lng || -102.2333;
@@ -651,12 +682,14 @@
         const realRouteKm = ((distBaseToStore * 0.5) + distStoreToClient) * 1.3;
         currentMandadoDistanceKm = Math.max(0.3, realRouteKm);
 
+
         const calc = computeTransparentShipping(currentMandadoDistanceKm);
         currentMandadoFuelCost = calc.fuelCost;
         currentMandadoLaborCost = calc.laborCost;
         currentMandadoWearCost = calc.wearCost;
         currentMandadoMinutes = calc.estimatedMinutes;
         currentMandadoShippingCost = calc.totalCost;
+
 
         document.getElementById("mandado-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km (${calc.meters} m)`;
         document.getElementById("mandado-fuel-display").innerText = `$${calc.fuelCost.toFixed(2)} MXN (${(calc.litersUsed * 1000).toFixed(0)} ml)`;
@@ -666,8 +699,10 @@
         document.getElementById("mandado-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
     }
 
+
     function recalculateDeliveryCost() {
         if (!selectedLat || !selectedLng) return;
+
 
         const baseLat = storeConfig.lat || 20.3333;
         const baseLng = storeConfig.lng || -102.2333;
@@ -676,12 +711,14 @@
         const realRouteKm = distStoreToClient * 1.3;
         currentDeliveryDistanceKm = Math.max(0.3, realRouteKm);
 
+
         const calc = computeTransparentShipping(currentDeliveryDistanceKm);
         currentDeliveryFuelCost = calc.fuelCost;
         currentDeliveryLaborCost = calc.laborCost;
         currentDeliveryWearCost = calc.wearCost;
         currentDeliveryMinutes = calc.estimatedMinutes;
         currentDeliveryShippingCost = calc.totalCost;
+
 
         document.getElementById("delivery-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km (${calc.meters} m)`;
         document.getElementById("delivery-fuel-display").innerText = `$${calc.fuelCost.toFixed(2)} MXN (${(calc.litersUsed * 1000).toFixed(0)} ml)`;
@@ -690,8 +727,10 @@
         document.getElementById("delivery-wear-display").innerText = `$${calc.wearCost.toFixed(2)}`;
         document.getElementById("delivery-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
 
+
         updateCartUI();
     }
+
 
     // =========================================================================
     // INICIALIZACIÓN Y RETORNO DE MERCADO PAGO
@@ -707,12 +746,14 @@
             loadClientMandaditos(savedPhone);
         }
 
+
         const today = new Date().toISOString().split('T')[0];
         const dateInput = document.getElementById('schedule-date');
         if (dateInput) {
             dateInput.min = today;
             dateInput.value = today;
         }
+
 
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('payment') === 'success') {
@@ -730,6 +771,7 @@
                 return;
             }
 
+
             const clientName = localStorage.getItem('temp_client_name') || 'Cliente Tarjeta';
             const clientPhone = localStorage.getItem('temp_client_phone') || '';
             const deliveryType = localStorage.getItem('temp_delivery_type') || 'local';
@@ -739,11 +781,13 @@
             const shippingCost = parseFloat(localStorage.getItem('temp_shipping_cost') || 0);
             let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
 
+
             if (pendingCart.length > 0) {
                 const subtotal = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
                 const total = subtotal + shippingCost;
                 const commission = (total * 0.0349) + 4.64;
                 const netReceived = total - commission;
+
 
                 db.collection("orders").add({
                     clientName: sanitizeText(clientName),
@@ -778,6 +822,7 @@
         }
     });
 
+
     function saveClientIdentity() {
         const name = sanitizeText(document.getElementById('client-name').value);
         const phone = sanitizeText(document.getElementById('client-phone').value);
@@ -789,6 +834,7 @@
             loadClientMandaditos(phone);
         }
     }
+
 
     // =========================================================================
     // MANDADITOS: LÓGICA DEL CLIENTE Y TIEMPO REAL
@@ -808,17 +854,21 @@
         }, 200);
     }
 
+
     function closeMandaditoModal() {
         document.getElementById("mandadito-modal").classList.add("hidden");
     }
+
 
     function initMandadoMaps() {
         const defaultLat = storeConfig.lat || 20.3333;
         const defaultLng = storeConfig.lng || -102.2333;
 
+
         if (!mandadoStoreMap) {
             mandadoStoreMap = L.map('mandado-store-map').setView([defaultLat, defaultLng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mandadoStoreMap);
+
 
             mandadoStoreMap.on('click', function(e) {
                 mandadoStoreLat = e.latlng.lat;
@@ -842,9 +892,11 @@
             mandadoStoreMap.invalidateSize();
         }
 
+
         if (!mandadoDestMap) {
             mandadoDestMap = L.map('mandado-dest-map').setView([defaultLat, defaultLng], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mandadoDestMap);
+
 
             mandadoDestMap.on('click', function(e) {
                 mandadoDestLat = e.latlng.lat;
@@ -869,6 +921,7 @@
         }
     }
 
+
     function submitMandadito() {
         const name = sanitizeText(document.getElementById("client-name").value);
         const phone = sanitizeText(document.getElementById("client-phone").value);
@@ -876,12 +929,14 @@
         const itemsText = sanitizeText(document.getElementById("mandado-items").value);
         const destAddress = sanitizeText(document.getElementById("mandado-dest-address").value);
 
+
         if (!name || !phone) { alert("Ingresa tu nombre y teléfono."); return; }
         if (!storeName) { alert("Escribe el nombre de la tienda donde compraremos."); return; }
         if (!mandadoStoreLat || !mandadoStoreLng) { alert("Por favor selecciona la tienda en el primer mapa."); return; }
         if (!itemsText) { alert("Escribe qué productos necesitas comprar."); return; }
         if (!destAddress) { alert("Escribe las referencias o calle de tu domicilio."); return; }
         if (!mandadoDestLat || !mandadoDestLng) { alert("Por favor marca tu domicilio de entrega en el segundo mapa."); return; }
+
 
         db.collection("mandaditos").add({
             clientName: name,
@@ -905,6 +960,9 @@
             cashAmount: 0,
             change: 0,
             transferRef: '',
+            timerRunning: false,
+            timerStartedAt: null,
+            queueMinutes: 0,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
             alert("¡Mandadito enviado! Te avisaremos en vivo cuando el repartidor lo acepte y cotice tus productos en la tienda.");
@@ -918,6 +976,7 @@
         });
     }
 
+
     function loadClientMandaditos(phone) {
         if (!phone) return;
         db.collection("mandaditos").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
@@ -929,11 +988,13 @@
                 clientMandaditosCache[doc.id] = data;
             });
 
+
             list.sort((a, b) => {
                 const tA = a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0;
                 const tB = b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0;
                 return tB - tA;
             });
+
 
             let html = "";
             list.forEach(m => {
@@ -942,9 +1003,10 @@
                 let statusMsg = '⏳ Esperando que el repartidor acepte tu mandadito...';
                 let actionBtn = '';
 
+
                 if (status === 'Aceptado / En Tienda') {
                     badgeClass = 'bg-blue-50 text-blue-900 border-blue-300';
-                    statusMsg = '🛵 ¡Mandadito Aceptado! El conductor puede intentar comunicarse contigo por WhatsApp o llamada para afinar detalles.';
+                    statusMsg = '🛵 ¡Mandadito Aceptado! El conductor está en tienda. Si hay fila, aplicará cronómetro de espera basado en salario mínimo.';
                 } else if (status === 'Cotizado') {
                     badgeClass = 'bg-emerald-50 text-emerald-950 border-emerald-500 ring-2 ring-emerald-300';
                     statusMsg = `💰 ¡Productos listos en tienda! Costo productos: <b>$${(m.productsCost || 0).toFixed(2)}</b> + Envío: <b>$${(m.shippingCost || 0).toFixed(2)}</b> = <b>Total: $${(m.totalCost || 0).toFixed(2)}</b>`;
@@ -964,6 +1026,7 @@
                     statusMsg = `❌ ${status}`;
                 }
 
+
                 html += `
                     <div class="p-3 rounded-xl border ${badgeClass} space-y-1.5">
                         <div class="flex justify-between items-center font-bold">
@@ -981,6 +1044,7 @@
                 `;
             });
 
+
             const sec = document.getElementById("client-mandaditos-status-section");
             const container = document.getElementById("client-my-mandaditos-list");
             if (list.length > 0) {
@@ -992,26 +1056,32 @@
         });
     }
 
+
     function openMandadoConfirmModal(mandadoId) {
         const m = clientMandaditosCache[mandadoId];
         if (!m) return;
+
 
         document.getElementById("confirm-mandado-id").value = mandadoId;
         const prodCost = parseFloat(m.productsCost) || 0;
         const shipCost = parseFloat(m.shippingCost) || 0;
         const grandTotal = prodCost + shipCost;
 
+
         document.getElementById("conf-prod-cost").innerText = `$${prodCost.toFixed(2)}`;
         document.getElementById("conf-ship-cost").innerText = `$${shipCost.toFixed(2)}`;
         document.getElementById("conf-grand-total").innerText = `$${grandTotal.toFixed(2)}`;
         document.getElementById("m-tr-exact-total").innerText = `$${grandTotal.toFixed(2)}`;
 
+
         const comm = (grandTotal * 0.0349) + 4.64;
         const totalWithComm = grandTotal + comm;
+
 
         document.getElementById("m-mp-sub").innerText = `$${grandTotal.toFixed(2)}`;
         document.getElementById("m-mp-comm").innerText = `$${comm.toFixed(2)}`;
         document.getElementById("m-mp-total").innerText = `$${totalWithComm.toFixed(2)}`;
+
 
         document.getElementById("mandado-cash-amount").value = "";
         document.getElementById("mandado-change-text").innerText = "";
@@ -1019,12 +1089,15 @@
         document.getElementById("mandado-payment-method").value = "efectivo";
         toggleMandadoPaymentFields();
 
+
         document.getElementById("mandado-confirm-modal").classList.remove("hidden");
     }
+
 
     function closeMandadoConfirmModal() {
         document.getElementById("mandado-confirm-modal").classList.add("hidden");
     }
+
 
     function toggleMandadoPaymentFields() {
         const method = document.getElementById("mandado-payment-method").value;
@@ -1033,6 +1106,7 @@
         document.getElementById("mandado-transfer-fields").classList.toggle("hidden", method !== "transferencia");
     }
 
+
     function calculateMandadoChange() {
         const mandadoId = document.getElementById("confirm-mandado-id").value;
         const m = clientMandaditosCache[mandadoId];
@@ -1040,6 +1114,7 @@
         const total = (parseFloat(m.productsCost) || 0) + (parseFloat(m.shippingCost) || 0);
         const cash = parseFloat(document.getElementById("mandado-cash-amount").value) || 0;
         const txt = document.getElementById("mandado-change-text");
+
 
         if (cash > 0) {
             if (cash < total) {
@@ -1055,6 +1130,7 @@
         }
     }
 
+
     function rejectMandadoQuote() {
         const mandadoId = document.getElementById("confirm-mandado-id").value;
         if (!mandadoId) return;
@@ -1067,13 +1143,16 @@
         }
     }
 
+
     function confirmMandadoPurchase() {
         const mandadoId = document.getElementById("confirm-mandado-id").value;
         const m = clientMandaditosCache[mandadoId];
         if (!m) return;
 
+
         const total = (parseFloat(m.productsCost) || 0) + (parseFloat(m.shippingCost) || 0);
         const method = document.getElementById("mandado-payment-method").value;
+
 
         if (method === "tarjeta") {
             localStorage.setItem('temp_mandado_pay_id', mandadoId);
@@ -1082,9 +1161,11 @@
             return;
         }
 
+
         let cashAmount = 0;
         let change = 0;
         let transferRef = "";
+
 
         if (method === "efectivo") {
             cashAmount = parseFloat(document.getElementById("mandado-cash-amount").value) || 0;
@@ -1101,6 +1182,7 @@
             }
         }
 
+
         db.collection("mandaditos").doc(mandadoId).update({
             status: 'Pagado y Confirmado',
             paymentMethod: method === 'transferencia' ? 'transferencia BBVA' : (method === 'tarjeta' ? 'tarjeta (Mercado Pago)' : 'efectivo'),
@@ -1116,8 +1198,9 @@
         });
     }
 
+
     // =========================================================================
-    // MANDADITOS: PANEL ADMINISTRADOR EN TIEMPO REAL
+    // MANDADITOS: PANEL ADMINISTRADOR EN TIEMPO REAL & CRONÓMETRO DE FILA
     // =========================================================================
     db.collection("mandaditos").onSnapshot((snapshot) => {
         let mandados = [];
@@ -1125,19 +1208,23 @@
             mandados.push({ id: doc.id, ...doc.data() });
         });
 
+
         mandados.sort((a, b) => {
             const tA = a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0;
             const tB = b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0;
             return tB - tA;
         });
 
+
         const countEl = document.getElementById("admin-mandaditos-count");
         if (countEl) countEl.innerText = mandados.length;
+
 
         let html = "";
         mandados.forEach(m => {
             const timeStr = m.timestamp && m.timestamp.toDate ? new Date(m.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : 'Ahora';
             const status = m.status || 'Solicitado';
+
 
             let statusColor = 'bg-yellow-100 text-yellow-800';
             if (status === 'Aceptado / En Tienda') statusColor = 'bg-blue-100 text-blue-800';
@@ -1146,8 +1233,10 @@
             if (status === 'Entregado') statusColor = 'bg-gray-200 text-gray-700';
             if (status === 'Rechazado' || status === 'Cancelado por Cliente') statusColor = 'bg-red-100 text-red-800';
 
+
             const storeMapUrl = `https://maps.google.com/?q=${m.storeLat},${m.storeLng}`;
             const destMapUrl = `https://maps.google.com/?q=${m.destLat},${m.destLng}`;
+
 
             let controlsHtml = "";
             if (status === 'Solicitado') {
@@ -1158,7 +1247,26 @@
                     </div>
                 `;
             } else if (status === 'Aceptado / En Tienda' || status === 'Cotizado') {
+                const isRunning = m.timerRunning === true;
+                const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
+                
                 controlsHtml = `
+                    <!-- Cronómetro especial para filas en tienda -->
+                    <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-300 space-y-2 mt-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-amber-950">⏱️ Cronómetro de Fila (Salario Mín.):</span>
+                            <span class="font-mono font-bold text-amber-900">${isRunning ? '🔴 En Curso...' : (queueMins > 0 ? `Registrado: ${queueMins} min` : 'Inactivo')}</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="startMandadoTimer('${m.id}')" class="flex-1 bg-amber-600 text-white py-1 rounded text-xs font-bold hover:bg-amber-700 ${isRunning ? 'opacity-50 pointer-events-none' : ''}">▶️ Iniciar Fila</button>
+                            <button onclick="stopMandadoTimer('${m.id}')" class="flex-1 bg-gray-800 text-white py-1 rounded text-xs font-bold hover:bg-gray-900 ${!isRunning ? 'opacity-50 pointer-events-none' : ''}">⏹️ Detener Fila</button>
+                        </div>
+                        <p class="text-[10px] text-amber-800 leading-tight">
+                            * Aplica solo para filas en tienda donde el tiempo de traslado no cuenta. Remunera el tiempo de espera del repartidor en base al salario mínimo.
+                        </p>
+                    </div>
+
+
                     <div class="bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 space-y-2 mt-2">
                         <label class="block text-xs font-bold text-emerald-950">💵 Costo Total de los Productos en Tienda ($):</label>
                         <div class="flex gap-1.5">
@@ -1188,6 +1296,7 @@
                 `;
             }
 
+
             html += `
                 <div class="bg-white p-3 rounded-xl border border-emerald-200 shadow-sm space-y-1.5">
                     <div class="flex justify-between items-center text-xs">
@@ -1206,17 +1315,21 @@
                     </div>
                     <p class="text-xs text-gray-600">📍 Dir. Entrega: <b>${sanitizeText(m.destAddress)}</b></p>
 
+
                     <div class="bg-gray-50 p-2 rounded border text-xs">
                         <p class="font-bold text-gray-700">Lista de compras:</p>
                         <p class="whitespace-pre-line text-gray-800">${sanitizeText(m.itemsText)}</p>
                     </div>
+
 
                     <div class="flex justify-between text-xs font-bold pt-1 text-gray-800">
                         <span>Envío Moto: <span class="text-emerald-700">$${(m.shippingCost || 0).toFixed(2)}</span> (Gas: $${(m.fuelCost || 0).toFixed(2)})</span>
                         <span>Total: <span class="text-orange-600">$${(m.totalCost || 0).toFixed(2)}</span></span>
                     </div>
 
+
                     ${controlsHtml}
+
 
                     <div class="flex justify-end pt-1">
                         <button onclick="deleteMandado('${m.id}')" class="text-[11px] text-red-500 underline">Eliminar registro</button>
@@ -1225,15 +1338,64 @@
             `;
         });
 
+
         const adminListEl = document.getElementById("admin-mandaditos-list");
         if (adminListEl) {
             adminListEl.innerHTML = html || '<p class="text-gray-500 text-xs">No hay mandaditos activos.</p>';
         }
     });
 
+
     function updateMandadoStatus(id, newStatus) {
         db.collection("mandaditos").doc(id).update({ status: newStatus });
     }
+
+
+    function startMandadoTimer(mandadoId) {
+        const startTime = Date.now();
+        db.collection("mandaditos").doc(mandadoId).update({
+            timerStartedAt: startTime,
+            timerRunning: true
+        }).then(() => {
+            alert("⏱️ Cronómetro de fila iniciado. El tiempo se acumulará al costo de espera del conductor.");
+        });
+    }
+
+
+    function stopMandadoTimer(mandadoId) {
+        db.collection("mandaditos").doc(mandadoId).get().then(doc => {
+            if (!doc.exists) return;
+            const data = doc.data();
+            if (!data.timerStartedAt || !data.timerRunning) {
+                alert("El cronómetro no estaba activo.");
+                return;
+            }
+
+
+            const elapsedMinutes = (Date.now() - data.timerStartedAt) / (1000 * 60);
+            const currentLaborCost = data.laborCost || 0;
+            
+            // Tarifa por minuto basada en salario mínimo (~$39.38/hr = ~$0.656/min)
+            const ratePerMinute = 39.38 / 60; 
+            const extraLaborCost = elapsedMinutes * ratePerMinute;
+            const newTotalLabor = currentLaborCost + extraLaborCost;
+            
+            const newShippingCost = (data.fuelCost || 0) + newTotalLabor + (data.wearCost || 0);
+            const newGrandTotal = (data.productsCost || 0) + Math.ceil(newShippingCost);
+
+
+            db.collection("mandaditos").doc(mandadoId).update({
+                timerRunning: false,
+                queueMinutes: (data.queueMinutes || 0) + elapsedMinutes,
+                laborCost: newTotalLabor,
+                shippingCost: Math.ceil(newShippingCost),
+                totalCost: newGrandTotal
+            }).then(() => {
+                alert(`⏱️ Cronómetro detenido. Se sumaron ${elapsedMinutes.toFixed(1)} minutos de espera en fila (${extraLaborCost.toFixed(2)} MXN) al costo del envío.`);
+            });
+        });
+    }
+
 
     function sendMandadoQuote(id, shippingCost) {
         const input = document.getElementById(`admin-prod-cost-${id}`);
@@ -1242,21 +1404,26 @@
             alert("Ingresa el costo válido de los productos comprados en la tienda.");
             return;
         }
-        const totalCost = prodCost + (parseFloat(shippingCost) || 0);
-        db.collection("mandaditos").doc(id).update({
-            productsCost: prodCost,
-            totalCost: totalCost,
-            status: 'Cotizado'
-        }).then(() => {
-            alert(`Cotización enviada en vivo al cliente ($${totalCost.toFixed(2)} total). Esperando confirmación de pago.`);
+        db.collection("mandaditos").doc(id).get().then(doc => {
+            const currentShipCost = doc.exists && doc.data().shippingCost ? doc.data().shippingCost : shippingCost;
+            const totalCost = prodCost + currentShipCost;
+            db.collection("mandaditos").doc(id).update({
+                productsCost: prodCost,
+                totalCost: totalCost,
+                status: 'Cotizado'
+            }).then(() => {
+                alert(`Cotización enviada en vivo al cliente ($${totalCost.toFixed(2)} total). Esperando confirmación de pago.`);
+            });
         });
     }
+
 
     function deleteMandado(id) {
         if (confirm("¿Eliminar este mandadito?")) {
             db.collection("mandaditos").doc(id).delete();
         }
     }
+
 
     async function clearAllMandaditos() {
         if (confirm("¿Borrar TODOS los mandaditos del historial?")) {
@@ -1266,6 +1433,7 @@
             await batch.commit();
         }
     }
+
 
     // =========================================================================
     // PEDIDOS DE COMIDA Y TIEMPO REAL
@@ -1282,6 +1450,7 @@
                 let statusColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
                 let statusText = '⏳ Pedido Pendiente de Revisión';
 
+
                 if (status === 'Aceptado') {
                     statusColor = 'bg-green-100 text-green-900 border-green-300';
                     statusText = '🎉 ¡Pedido Aceptado / En Preparación! El conductor podría intentar comunicarse contigo por WhatsApp o llamada para afinar detalles.';
@@ -1289,6 +1458,7 @@
                     statusColor = 'bg-red-100 text-red-900 border-red-300';
                     statusText = '❌ Pedido Rechazado por el Local';
                 }
+
 
                 myOrdersHtml += `
                     <div class="p-2.5 rounded-lg border ${statusColor} space-y-1">
@@ -1302,6 +1472,7 @@
                 `;
             });
 
+
             const section = document.getElementById("client-orders-status-section");
             const list = document.getElementById("client-my-orders-list");
             if (hasOrders) {
@@ -1312,6 +1483,7 @@
             }
         });
     }
+
 
     // =========================================================================
     // CONFIGURACIÓN GENERAL Y MENÚ
@@ -1329,6 +1501,7 @@
             }
         }
     });
+
 
     db.collection("menu").onSnapshot((snapshot) => {
         menuItems = [];
@@ -1353,6 +1526,7 @@
                 </div>
             `;
 
+
             adminHtml += `
                 <div class="flex justify-between items-center bg-gray-50 p-2 rounded border">
                     <div>
@@ -1370,17 +1544,20 @@
         document.getElementById("admin-dish-list").innerHTML = adminHtml;
     });
 
+
     db.collection("orders").onSnapshot((snapshot) => {
         let ordersList = [];
         snapshot.forEach((doc) => {
             ordersList.push({ id: doc.id, ...doc.data() });
         });
 
+
         ordersList.sort((a, b) => {
             const timeA = a.timestamp && a.timestamp.toMillis ? a.timestamp.toMillis() : 0;
             const timeB = b.timestamp && b.timestamp.toMillis ? b.timestamp.toMillis() : 0;
             return timeB - timeA;
         });
+
 
         let ordersHtml = "";
         ordersList.forEach((order) => {
@@ -1393,12 +1570,15 @@
                 });
             }
 
+
             let mapLink = "";
             if (order.lat && order.lng) {
                 mapLink = `<a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" class="text-blue-600 underline font-semibold">📍 Ver ubicación exacta en Google Maps</a>`;
             }
 
+
             let statusBadge = `<span class="px-2 py-0.5 rounded text-xs font-bold ${order.status === 'Aceptado' ? 'bg-green-100 text-green-800' : order.status === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${order.status || 'Pendiente'}</span>`;
+
 
             let paymentDetail = `Método: ${sanitizeText(order.paymentMethod).toUpperCase()}`;
             if (order.paymentMethod === 'efectivo' && order.cashAmount > 0) {
@@ -1407,7 +1587,9 @@
                 paymentDetail += ` (Ref: ${sanitizeText(order.transferClabe)})`;
             }
 
+
             let shippingInfo = order.shippingCost > 0 ? ` | Envío: $${order.shippingCost.toFixed(2)}` : '';
+
 
             ordersHtml += `
                 <div class="bg-white p-3 rounded-lg border shadow-sm space-y-2">
@@ -1425,9 +1607,11 @@
                         <ul class="pl-2">${itemsList}</ul>
                     </div>
 
+
                     <div class="text-xs font-semibold text-gray-700">
                         ${paymentDetail}${shippingInfo} | Total: <span class="text-orange-600 font-bold">$${order.total ? order.total.toFixed(2) : '0.00'}</span>
                     </div>
+
 
                     <div class="flex gap-2 pt-1 border-t">
                         <button onclick="updateOrderStatus('${order.id}', 'Aceptado')" class="flex-1 bg-green-600 text-white py-1 rounded text-xs font-bold hover:bg-green-700">✔ Aceptar</button>
@@ -1440,6 +1624,7 @@
         document.getElementById("admin-orders-list").innerHTML = ordersHtml || '<p class="text-gray-500 text-xs">No hay pedidos o reservas nuevas en este momento.</p>';
     });
 
+
     // =========================================================================
     // CARRITO Y MAPAS DE COMIDA
     // =========================================================================
@@ -1449,6 +1634,7 @@
         if (existing) { existing.qty++; } else { cart.push({ ...item, qty: 1 }); }
         updateCartUI();
     }
+
 
     function updateCartUI() {
         const count = cart.reduce((sum, i) => sum + i.qty, 0);
@@ -1479,7 +1665,9 @@
             document.getElementById("cart-shipping-row").classList.add("hidden");
         }
 
+
         const total = subtotal + shipping;
+
 
         document.getElementById("cart-subtotal").innerText = `$${subtotal.toFixed(2)}`;
         document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
@@ -1487,8 +1675,10 @@
         const trFoodEl = document.getElementById('tr-exact-food-total');
         if (trFoodEl) trFoodEl.innerText = `$${total.toFixed(2)}`;
 
+
         const schTrFoodEl = document.getElementById('sch-tr-exact-total');
         if (schTrFoodEl) schTrFoodEl.innerText = `$${subtotal.toFixed(2)}`;
+
 
         calculateNetEarnings(total);
         calculateScheduleNetEarnings();
@@ -1496,10 +1686,12 @@
         calculateTransferChange();
     }
 
+
     function removeFromCart(index) {
         cart.splice(index, 1);
         updateCartUI();
     }
+
 
     function openCart() { 
         const name = document.getElementById("client-name").value.trim();
@@ -1521,7 +1713,9 @@
         }, 200);
     }
 
+
     function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
+
 
     function openScheduleModal() {
         const name = document.getElementById("client-name").value.trim();
@@ -1543,9 +1737,11 @@
         }, 200);
     }
 
+
     function closeScheduleModal() {
         document.getElementById("schedule-modal").classList.add("hidden");
     }
+
 
     function togglePaymentFields() {
         const method = document.getElementById("payment-method").value;
@@ -1554,11 +1750,13 @@
         document.getElementById("transfer-fields").classList.toggle("hidden", method !== "transferencia");
     }
 
+
     function toggleSchedulePaymentFields() {
         const method = document.getElementById("schedule-payment-method").value;
         document.getElementById("schedule-tarjeta-fields").classList.toggle("hidden", method !== "tarjeta");
         document.getElementById("schedule-transfer-fields").classList.toggle("hidden", method !== "transferencia");
     }
+
 
     function toggleDeliveryFields() {
         const type = document.getElementById("delivery-type").value;
@@ -1566,6 +1764,7 @@
         document.getElementById("domicilio-fields").classList.toggle("hidden", type !== "domicilio");
         
         updateCartUI();
+
 
         setTimeout(() => {
             if (type === "domicilio") {
@@ -1576,9 +1775,11 @@
         }, 200);
     }
 
+
     function initStoreMap() {
         const lat = storeConfig.lat || 20.3333;
         const lng = storeConfig.lng || -102.2333;
+
 
         if (storeMap) {
             storeMap.invalidateSize();
@@ -1591,14 +1792,17 @@
             return;
         }
 
+
         storeMap = L.map('store-map').setView([lat, lng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(storeMap);
         storeMarker = L.marker([lat, lng]).addTo(storeMap);
     }
 
+
     function initAdminStoreMap() {
         const lat = adminStoreLat || storeConfig.lat || 20.3333;
         const lng = adminStoreLng || storeConfig.lng || -102.2333;
+
 
         if (adminStoreMap) {
             adminStoreMap.invalidateSize();
@@ -1611,8 +1815,10 @@
             return;
         }
 
+
         adminStoreMap = L.map('admin-store-map').setView([lat, lng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(adminStoreMap);
+
 
         adminStoreMarker = L.marker([lat, lng], {draggable: true}).addTo(adminStoreMap);
         adminStoreMarker.on('dragend', function(event) {
@@ -1622,6 +1828,7 @@
             document.getElementById("admin-store-coords-text").innerText = `Nuevas coordenadas: ${adminStoreLat.toFixed(5)}, ${adminStoreLng.toFixed(5)}`;
         });
 
+
         adminStoreMap.on('click', function(e) {
             adminStoreLat = e.latlng.lat;
             adminStoreLng = e.latlng.lng;
@@ -1630,17 +1837,21 @@
         });
     }
 
+
     function initDeliveryMap() {
         const defaultLat = storeConfig.lat || 20.3333;
         const defaultLng = storeConfig.lng || -102.2333;
+
 
         if (!deliveryMap) {
             deliveryMap = L.map('delivery-map').setView([defaultLat, defaultLng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(deliveryMap);
 
+
             deliveryMap.on('click', function(e) {
                 selectedLat = e.latlng.lat;
                 selectedLng = e.latlng.lng;
+
 
                 if (deliveryMarker) {
                     deliveryMarker.setLatLng([selectedLat, selectedLng]);
@@ -1661,17 +1872,21 @@
         }
     }
 
+
     function initScheduleMap() {
         const defaultLat = storeConfig.lat || 20.3333;
         const defaultLng = storeConfig.lng || -102.2333;
+
 
         if (!scheduleMap) {
             scheduleMap = L.map('schedule-map').setView([defaultLat, defaultLng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(scheduleMap);
 
+
             scheduleMap.on('click', function(e) {
                 scheduleLat = e.latlng.lat;
                 scheduleLng = e.latlng.lng;
+
 
                 if (scheduleMarker) {
                     scheduleMarker.setLatLng([scheduleLat, scheduleLng]);
@@ -1691,6 +1906,7 @@
         }
     }
 
+
     function calculateNetEarnings(grandTotal) {
         const total = grandTotal || (cart.reduce((sum, i) => sum + (i.price * i.qty), 0));
         const commission = (total * 0.0349) + 4.64;
@@ -1702,6 +1918,7 @@
         if (commEl) commEl.innerText = `$${commission.toFixed(2)}`;
         if (netEl) netEl.innerText = `$${net > 0 ? net.toFixed(2) : '0.00'}`;
     }
+
 
     function calculateScheduleNetEarnings() {
         const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
@@ -1715,11 +1932,13 @@
         if (netEl) netEl.innerText = `$${net > 0 ? net.toFixed(2) : '0.00'}`;
     }
 
+
     function calculateChange() {
         const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
         const deliveryType = document.getElementById("delivery-type") ? document.getElementById("delivery-type").value : "local";
         const shipping = deliveryType === "domicilio" ? currentDeliveryShippingCost : 0;
         const total = subtotal + shipping;
+
 
         const cash = parseFloat(document.getElementById("cash-amount").value) || 0;
         const changeText = document.getElementById("change-text");
@@ -1738,14 +1957,17 @@
         }
     }
 
+
     function calculateTransferChange() {
         const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
         const deliveryType = document.getElementById("delivery-type") ? document.getElementById("delivery-type").value : "local";
         const shipping = deliveryType === "domicilio" ? currentDeliveryShippingCost : 0;
         const total = subtotal + shipping;
 
+
         const transfer = parseFloat(document.getElementById("transfer-amount").value) || 0;
         const textElem = document.getElementById("transfer-change-text");
+
 
         if (document.getElementById("payment-method").value === "transferencia" && transfer > 0) {
             if (transfer < total) {
@@ -1764,6 +1986,7 @@
         }
     }
 
+
     function checkoutOrder(type) {
         const name = sanitizeText(document.getElementById("client-name").value);
         let phone = sanitizeText(document.getElementById("client-phone").value);
@@ -1773,8 +1996,10 @@
             if (schedPhone) phone = schedPhone;
         }
 
+
         if (!name || !phone) { alert("Por favor ingresa tu Nombre y Teléfono único."); return; }
         if (cart.length === 0) { alert("Tu carrito está vacío."); return; }
+
 
         let deliveryType = "local";
         let address = "";
@@ -1784,6 +2009,7 @@
         let orderLng = null;
         let paymentMethod = "";
         let shippingCost = 0;
+
 
         if (type === 'inmediato') {
             deliveryType = document.getElementById("delivery-type").value;
@@ -1811,6 +2037,7 @@
             paymentMethod = document.getElementById("schedule-payment-method").value;
             shippingCost = 0;
 
+
             if (!scheduleDate || !scheduleTime || !address) {
                 alert("Por favor completa la fecha, hora y referencias para tu reserva.");
                 return;
@@ -1821,8 +2048,10 @@
             }
         }
 
+
         const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
         const total = subtotal + shippingCost;
+
 
         if (paymentMethod === "tarjeta" && type === 'inmediato') {
             localStorage.setItem('temp_client_name', name);
@@ -1836,14 +2065,17 @@
             }
             localStorage.setItem('temp_cart', JSON.stringify(cart));
 
+
             alert("Redirigiendo a Mercado Pago para completar tu pago seguro...");
             window.location.href = "https://link.mercadopago.com.mx/primox";
             return;
         }
 
+
         let cashAmount = 0;
         let change = 0;
         let transferClabe = "";
+
 
         if (paymentMethod === "efectivo") {
             cashAmount = parseFloat(document.getElementById("cash-amount").value) || 0;
@@ -1852,6 +2084,7 @@
             const transferInputId = type === 'futuro' ? "schedule-transfer-clabe" : "transfer-clabe";
             transferClabe = sanitizeText(document.getElementById(transferInputId).value);
         }
+
 
         db.collection("orders").add({
             clientName: name,
@@ -1886,16 +2119,19 @@
         });
     }
 
+
     function updateOrderStatus(orderId, status) {
         db.collection("orders").doc(orderId).update({ status: status })
             .then(() => alert(`Pedido marcado como: ${status}`));
     }
+
 
     function deleteOrder(orderId) {
         if (confirm("¿Deseas eliminar este pedido?")) {
             db.collection("orders").doc(orderId).delete();
         }
     }
+
 
     async function clearAllOrders() {
         if (confirm("¿Estás seguro de borrar TODOS los pedidos?")) {
@@ -1907,8 +2143,10 @@
         }
     }
 
+
     function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
     function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
+
 
     function verifyAdmin() {
         const pass = document.getElementById("admin-pass").value;
@@ -1923,10 +2161,12 @@
         }
     }
 
+
     function saveConfig() {
         const address = sanitizeText(document.getElementById("admin-store-address").value);
         const lat = adminStoreLat || storeConfig.lat || 20.3333;
         const lng = adminStoreLng || storeConfig.lng || -102.2333;
+
 
         db.collection("config").doc("main").set({ 
             bank: "012533015277749576",
@@ -1940,6 +2180,7 @@
         }).then(() => alert("Configuración y mapa guardados correctamente"));
     }
 
+
     function saveDish() {
         const id = document.getElementById("edit-dish-id").value;
         const name = sanitizeText(document.getElementById("dish-name").value);
@@ -1947,6 +2188,7 @@
         const description = sanitizeText(document.getElementById("dish-desc").value);
         const image = sanitizeText(document.getElementById("dish-img").value);
         const available = document.getElementById("dish-available").value === "true";
+
 
         if (!name || !price) { alert("El nombre y el precio son obligatorios."); return; }
         const dishData = { name, price, description, image, available };
@@ -1956,6 +2198,7 @@
             db.collection("menu").add(dishData).then(() => resetDishForm());
         }
     }
+
 
     function editDish(id) {
         const item = menuItems.find(i => i.id === id);
@@ -1967,11 +2210,13 @@
         document.getElementById("dish-available").value = item.available !== false ? "true" : "false";
     }
 
+
     function deleteDish(id) {
         if (confirm("¿Estás seguro de eliminar este platillo?")) {
             db.collection("menu").doc(id).delete();
         }
     }
+
 
     function resetDishForm() {
         document.getElementById("edit-dish-id").value = "";
@@ -1982,5 +2227,7 @@
         alert("Platillo guardado correctamente.");
     }
 </script>
+
 </body>
 </html>
+
