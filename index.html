@@ -87,6 +87,16 @@
     <div id="client-my-mandaditos-list" class="space-y-3 text-xs"></div>
 </section>
 
+<!-- Sección de Estatus de Mis Pedidos de Comida y Reservas -->
+<section id="client-food-status-section" class="bg-white p-4 rounded-xl shadow-sm border-2 border-orange-400 hidden">
+    <div class="flex items-center justify-between mb-1">
+        <h3 class="font-bold text-md text-orange-900">🍽️ Tus Pedidos y Reservas en Vivo</h3>
+        <span class="animate-pulse inline-block w-2.5 h-2.5 bg-orange-500 rounded-full"></span>
+    </div>
+    <p class="text-[11px] text-gray-500 mb-3">Seguimiento en vivo de inicio, entrega, desglose transparente y ticket digital.</p>
+    <div id="client-my-food-list" class="space-y-3 text-xs"></div>
+</section>
+
 <!-- Accesos Rápidos -->
 <section class="grid grid-cols-1 gap-2.5">
     <button type="button" onclick="openMandaditoModal()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3.5 rounded-xl font-bold shadow hover:opacity-95 transition flex justify-between items-center px-4 cursor-pointer">
@@ -285,28 +295,52 @@
             <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
             <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
         </div>
+
+        <div id="cart-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2 mt-2">
+            <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA:</p>
+            <div class="bg-white p-2 rounded border border-blue-200 font-mono select-all font-bold text-blue-950">012533015277749576</div>
+            <input type="text" id="cart-transfer-ref" placeholder="Folio o referencia de transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
+        </div>
     </div>
 
     <div class="mb-4">
         <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
         <select id="delivery-type" onchange="toggleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
             <option value="local">Asistir a la Base por mi comida</option>
-            <option value="domicilio">Recibir en domicilio</option>
+            <option value="domicilio">Recibir en domicilio (Punto 1 Base ➔ Punto 2 Destino)</option>
         </select>
 
         <div id="local-delivery-info" class="bg-gray-100 p-3 rounded-lg text-sm space-y-2">
-            <p class="font-semibold">Ubicación de la Base:</p>
+            <p class="font-semibold">Ubicación de la Base (Punto 1):</p>
             <p id="store-address-display" class="text-gray-600">Cargando...</p>
             <div id="store-map"></div>
         </div>
 
         <div id="domicilio-fields" class="hidden space-y-3">
-            <input type="text" id="delivery-address" placeholder="Calle y número" class="w-full p-2 border rounded-lg text-sm">
-            <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Ubicación exacta en el mapa:</label>
+            <input type="text" id="delivery-address" placeholder="Calle, número y referencias" class="w-full p-2 border rounded-lg text-sm">
+            <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Toca el mapa para marcar tu ubicación final (Punto 2):</label>
             <div id="delivery-map"></div>
-            <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1 text-xs">
-                <div class="flex justify-between"><span>Distancia:</span> <span id="delivery-distance-display" class="font-bold">0.00 km</span></div>
-                <div class="flex justify-between"><span>Costo Envío:</span> <span id="delivery-shipping-cost" class="text-emerald-400 font-bold text-base">$0.00</span></div>
+            <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1.5 text-xs">
+                <div class="flex justify-between items-center text-gray-300 border-b border-gray-800 pb-1">
+                    <span>📏 Distancia Total (Punto 1 Base ➔ Punto 2 Destino):</span>
+                    <span id="delivery-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>⛽ Combustible:</span>
+                    <span id="delivery-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>⏱️ Pago Conductor (<span id="delivery-time-display">0 min</span>):</span>
+                    <span id="delivery-labor-display" class="text-blue-300 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>🔧 Desgaste:</span>
+                    <span id="delivery-wear-display" class="text-amber-300 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-bold border-t border-gray-700 pt-1.5 mt-1">
+                    <span>Costo Total del Envío:</span>
+                    <span id="delivery-shipping-cost" class="text-emerald-400 text-base">$0.00</span>
+                </div>
             </div>
         </div>
     </div>
@@ -337,8 +371,57 @@
             <div><label class="block font-semibold text-sm mb-1">Fecha:</label><input type="date" id="schedule-date" class="w-full p-2 border rounded-lg text-sm"></div>
             <div><label class="block font-semibold text-sm mb-1">Hora:</label><input type="time" id="schedule-time" class="w-full p-2 border rounded-lg text-sm"></div>
         </div>
-        <div><label class="block font-semibold text-sm mb-1">Referencias:</label><input type="text" id="schedule-address" placeholder="Calle, número, fachada" class="w-full p-2 border rounded-lg text-sm"></div>
-        <div><label class="block text-xs font-semibold text-gray-700 mb-1">📍 Toca el mapa para marcar tu ubicación:</label><div id="schedule-map"></div></div>
+        <div>
+            <label class="block font-semibold text-sm mb-1">Tipo de Entrega:</label>
+            <select id="schedule-delivery-type" onchange="toggleScheduleDeliveryFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                <option value="domicilio">Recibir en domicilio (Punto 1 Base ➔ Punto 2 Destino)</option>
+                <option value="local">Asistir a la Base por mi comida</option>
+            </select>
+        </div>
+        <div id="schedule-domicilio-fields" class="space-y-2">
+            <div><label class="block font-semibold text-sm mb-1">Dirección y Referencias:</label><input type="text" id="schedule-address" placeholder="Calle, número, fachada" class="w-full p-2 border rounded-lg text-sm"></div>
+            <div><label class="block text-xs font-semibold text-gray-700 mb-1">📍 Toca el mapa para marcar tu ubicación final (Punto 2):</label><div id="schedule-map"></div></div>
+            <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1.5 text-xs">
+                <div class="flex justify-between items-center text-gray-300 border-b border-gray-800 pb-1">
+                    <span>📏 Distancia Total (Punto 1 Base ➔ Punto 2 Destino):</span>
+                    <span id="schedule-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>⛽ Combustible:</span>
+                    <span id="schedule-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>⏱️ Pago Conductor (<span id="schedule-time-display">0 min</span>):</span>
+                    <span id="schedule-labor-display" class="text-blue-300 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>🔧 Desgaste:</span>
+                    <span id="schedule-wear-display" class="text-amber-300 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-bold border-t border-gray-700 pt-1.5 mt-1">
+                    <span>Costo Total del Envío:</span>
+                    <span id="schedule-shipping-cost" class="text-emerald-400 text-base">$0.00</span>
+                </div>
+            </div>
+        </div>
+        <div>
+            <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
+            <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                <option value="efectivo">Efectivo</option>
+                <option value="tarjeta">Tarjeta / Mercado Pago</option>
+                <option value="transferencia">Transferencia Bancaria BBVA</option>
+            </select>
+            <div id="schedule-cash-fields">
+                <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para cambio):</label>
+                <input type="number" id="schedule-cash-amount" placeholder="Ej. 200" oninput="calculateScheduleChange()" class="w-full p-2 border rounded-lg text-sm">
+                <p id="schedule-change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
+            </div>
+            <div id="schedule-transfer-fields" class="hidden bg-blue-50 p-3 rounded-lg text-xs border border-blue-200 space-y-2 mt-2">
+                <p class="font-bold text-blue-900">🏦 Transferencia SPEI a BBVA:</p>
+                <div class="bg-white p-2 rounded border border-blue-200 font-mono select-all font-bold text-blue-950">012533015277749576</div>
+                <input type="text" id="schedule-transfer-ref" placeholder="Folio o referencia de transferencia *" class="w-full p-2 bg-white border rounded-lg text-sm">
+            </div>
+        </div>
         <button type="button" onclick="checkoutOrder('futuro')" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold hover:bg-amber-700 transition cursor-pointer">Enviar Reserva</button>
     </div>
 </div>
@@ -358,6 +441,19 @@
     </div>
 
     <div id="admin-panel-view" class="hidden space-y-6">
+        <!-- Pedidos de Comida y Reservas en Vivo -->
+        <div class="bg-orange-50 p-4 rounded-xl border-2 border-orange-300">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-bold text-orange-950 flex items-center gap-1.5">
+                    🍽️ Pedidos de Comida y Reservas (<span id="admin-food-count">0</span>)
+                </h4>
+                <button type="button" onclick="clearAllFoodOrders()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer">🗑️ Limpiar</button>
+            </div>
+            <div id="admin-food-list" class="space-y-3 text-sm">
+                <p class="text-gray-500 text-xs">No hay pedidos de comida o reservas activas.</p>
+            </div>
+        </div>
+
         <!-- Mandaditos en Vivo -->
         <div class="bg-emerald-50 p-4 rounded-xl border-2 border-emerald-300">
             <div class="flex justify-between items-center mb-2">
@@ -406,6 +502,7 @@
         </div>
         <p class="text-xs text-gray-600">Toca el mapa para fijar manualmente el punto exacto donde inicias este pedido (obligatorio antes de avanzar):</p>
         <input type="hidden" id="start-loc-mandado-id">
+        <input type="hidden" id="start-loc-collection" value="mandaditos">
         <div id="admin-start-map" style="height: 220px; width: 100%; border-radius: 0.5rem; z-index: 10;"></div>
         <p id="admin-start-coords-text" class="text-xs font-semibold text-red-600">⚠️ Ubicación inicial: Sin seleccionar (Toca el mapa)</p>
         <button type="button" onclick="confirmManualMandadoStart()" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition cursor-pointer">
@@ -456,7 +553,8 @@
     let mandadoStoreMap = null, mandadoStoreMarker = null, mandadoStoreLat = null, mandadoStoreLng = null;
     let mandadoDestMap = null, mandadoDestMarker = null, mandadoDestLat = null, mandadoDestLng = null;
     let currentMandadoDistanceKm = 0, currentMandadoShippingCost = 0, currentMandadoFuelCost = 0, currentMandadoLaborCost = 0, currentMandadoWearCost = 0;
-    let currentDeliveryDistanceKm = 0, currentDeliveryShippingCost = 0;
+    let currentDeliveryDistanceKm = 0, currentDeliveryShippingCost = 0, currentDeliveryFuelCost = 0, currentDeliveryLaborCost = 0, currentDeliveryWearCost = 0, currentDeliveryMinutes = 0;
+    let currentScheduleDistanceKm = 0, currentScheduleShippingCost = 0, currentScheduleFuelCost = 0, currentScheduleLaborCost = 0, currentScheduleWearCost = 0, currentScheduleMinutes = 0;
 
 
     function sanitizeText(str) {
@@ -543,6 +641,7 @@
             document.getElementById('client-phone').value = sanitizeText(savedPhone);
             document.getElementById('user-registered-badge').classList.remove('hidden');
             loadClientMandaditos(savedPhone);
+            loadClientFoodOrders(savedPhone);
         }
         const today = new Date().toISOString().split('T')[0];
         if (document.getElementById('schedule-date')) document.getElementById('schedule-date').value = today;
@@ -557,6 +656,7 @@
             localStorage.setItem('primo_user_phone', phone);
             document.getElementById('user-registered-badge').classList.remove('hidden');
             loadClientMandaditos(phone);
+            loadClientFoodOrders(phone);
         }
     }
 
@@ -1126,10 +1226,11 @@
     
     let adminStartMap = null, adminStartMarker = null, manualStartLat = null, manualStartLng = null;
 
-    function openAdminStartModal(id) {
+    function openAdminStartModal(id, collectionName = 'mandaditos') {
         manualStartLat = null;
         manualStartLng = null;
         document.getElementById("start-loc-mandado-id").value = id;
+        document.getElementById("start-loc-collection").value = collectionName;
         const coordsEl = document.getElementById("admin-start-coords-text");
         coordsEl.innerText = "⚠️ Ubicación inicial: Sin seleccionar (Toca el mapa)";
         coordsEl.className = "text-xs font-semibold text-red-600";
@@ -1170,15 +1271,20 @@
 
     function confirmManualMandadoStart() {
         const id = document.getElementById("start-loc-mandado-id").value;
+        const col = document.getElementById("start-loc-collection").value || "mandaditos";
         if (!manualStartLat || !manualStartLng) {
             alert("⛔ Prohibido avanzar: Debes tocar el mapa para seleccionar manualmente la ubicación inicial antes de dar inicio al pedido.");
             return;
         }
-        db.collection("mandaditos").doc(id).update({
+        const updatePayload = {
             startTimestamp: Date.now(),
             startLat: manualStartLat,
             startLng: manualStartLng
-        }).then(() => {
+        };
+        if (col === "pedidos_comida") {
+            updatePayload.status = "En Ruta";
+        }
+        db.collection(col).doc(id).update(updatePayload).then(() => {
             closeAdminStartModal();
             alert(`🚀 Ubicación inicial guardada manualmente (${manualStartLat.toFixed(5)}, ${manualStartLng.toFixed(5)}). Ya puedes avanzar con el pedido.`);
         });
@@ -1301,22 +1407,35 @@
         }, 250);
     }
     function closeCart() { document.getElementById("cart-modal").classList.add("hidden"); }
+    function updateScheduleSummaryUI() {
+        const summaryEl = document.getElementById("schedule-cart-summary");
+        if (!summaryEl) return;
+        if (cart.length === 0) {
+            summaryEl.innerHTML = '<span class="text-red-600 font-semibold">⚠️ No has agregado alimentos del menú aún.</span>';
+            return;
+        }
+        const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const isDom = document.getElementById("schedule-delivery-type").value === "domicilio";
+        const ship = isDom ? currentScheduleShippingCost : 0;
+        summaryEl.innerHTML = cart.map(i => `<div>• ${sanitizeText(i.name)} x${i.qty} ($${(i.price * i.qty).toFixed(2)})</div>`).join('') +
+            `<div class="mt-1 border-t border-amber-300 pt-1 space-y-0.5">
+                <div>Subtotal Alimentos: <b>$${sub.toFixed(2)}</b></div>
+                ${isDom ? `<div>Costo de Envío (Punto 1 Base ➔ Punto 2 Destino): <b>$${ship.toFixed(2)}</b></div>` : ''}
+                <div class="font-bold text-amber-950 text-sm">Total Reserva: $${(sub + ship).toFixed(2)}</div>
+            </div>`;
+        calculateScheduleChange();
+    }
+
     function openScheduleModal() {
         const phoneVal = document.getElementById("client-phone").value.trim();
         if (phoneVal && !document.getElementById("schedule-phone").value) {
             document.getElementById("schedule-phone").value = phoneVal;
         }
-        const summaryEl = document.getElementById("schedule-cart-summary");
-        if (summaryEl) {
-            if (cart.length === 0) {
-                summaryEl.innerHTML = '<span class="text-red-600 font-semibold">⚠️ No has agregado alimentos del menú aún.</span>';
-            } else {
-                const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
-                summaryEl.innerHTML = cart.map(i => `<div>• ${sanitizeText(i.name)} x${i.qty} ($${(i.price * i.qty).toFixed(2)})</div>`).join('') + `<div class="font-bold mt-1 border-t border-amber-300 pt-1">Subtotal: $${sub.toFixed(2)}</div>`;
-            }
-        }
+        updateScheduleSummaryUI();
         document.getElementById("schedule-modal").classList.remove("hidden");
-        setTimeout(initScheduleMap, 250);
+        setTimeout(() => {
+            toggleScheduleDeliveryFields();
+        }, 250);
     }
     function closeScheduleModal() { document.getElementById("schedule-modal").classList.add("hidden"); }
     function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
@@ -1362,22 +1481,40 @@
     }
 
 
+    function recalcDeliveryShippingFromPoint(lat, lng) {
+        selectedLat = lat;
+        selectedLng = lng;
+        const baseLat = storeConfig.lat || 20.3333, baseLng = storeConfig.lng || -102.2333;
+        const dist = calculateHaversineKm(baseLat, baseLng, selectedLat, selectedLng);
+        currentDeliveryDistanceKm = Math.max(0.3, dist * 1.3);
+        const calc = computeTransparentShipping(currentDeliveryDistanceKm);
+        currentDeliveryFuelCost = calc.fuelCost;
+        currentDeliveryLaborCost = calc.laborCost;
+        currentDeliveryWearCost = calc.wearCost;
+        currentDeliveryMinutes = calc.estimatedMinutes;
+        currentDeliveryShippingCost = calc.totalCost;
+
+        document.getElementById("delivery-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km (${calc.meters} m)`;
+        document.getElementById("delivery-fuel-display").innerText = `$${calc.fuelCost.toFixed(2)} MXN`;
+        document.getElementById("delivery-time-display").innerText = `${calc.estimatedMinutes} min`;
+        document.getElementById("delivery-labor-display").innerText = `$${calc.laborCost.toFixed(2)}`;
+        document.getElementById("delivery-wear-display").innerText = `$${calc.wearCost.toFixed(2)}`;
+        document.getElementById("delivery-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
+        updateCartUI();
+        calculateChange();
+    }
+
     function initDeliveryMap() {
         if (!deliveryMap) {
             deliveryMap = L.map('delivery-map').setView([storeConfig.lat, storeConfig.lng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(deliveryMap);
             deliveryMap.on('click', e => {
-                selectedLat = e.latlng.lat; selectedLng = e.latlng.lng;
-                if (deliveryMarker) deliveryMarker.setLatLng([selectedLat, selectedLng]);
-                else deliveryMarker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(deliveryMap);
-                
-                const dist = calculateHaversineKm(storeConfig.lat, storeConfig.lng, selectedLat, selectedLng);
-                currentDeliveryDistanceKm = Math.max(0.3, dist * 1.3);
-                const calc = computeTransparentShipping(currentDeliveryDistanceKm);
-                currentDeliveryShippingCost = calc.totalCost;
-                document.getElementById("delivery-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km`;
-                document.getElementById("delivery-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
-                updateCartUI();
+                if (deliveryMarker) deliveryMarker.setLatLng([e.latlng.lat, e.latlng.lng]);
+                else {
+                    deliveryMarker = L.marker([e.latlng.lat, e.latlng.lng], {draggable: true}).addTo(deliveryMap);
+                    deliveryMarker.on('dragend', ev => recalcDeliveryShippingFromPoint(ev.target.getLatLng().lat, ev.target.getLatLng().lng));
+                }
+                recalcDeliveryShippingFromPoint(e.latlng.lat, e.latlng.lng);
             });
             setTimeout(() => deliveryMap.invalidateSize(), 150);
         } else {
@@ -1386,15 +1523,39 @@
         }
     }
 
+    function recalcScheduleShippingFromPoint(lat, lng) {
+        scheduleLat = lat;
+        scheduleLng = lng;
+        const baseLat = storeConfig.lat || 20.3333, baseLng = storeConfig.lng || -102.2333;
+        const dist = calculateHaversineKm(baseLat, baseLng, scheduleLat, scheduleLng);
+        currentScheduleDistanceKm = Math.max(0.3, dist * 1.3);
+        const calc = computeTransparentShipping(currentScheduleDistanceKm);
+        currentScheduleFuelCost = calc.fuelCost;
+        currentScheduleLaborCost = calc.laborCost;
+        currentScheduleWearCost = calc.wearCost;
+        currentScheduleMinutes = calc.estimatedMinutes;
+        currentScheduleShippingCost = calc.totalCost;
+
+        document.getElementById("schedule-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km (${calc.meters} m)`;
+        document.getElementById("schedule-fuel-display").innerText = `$${calc.fuelCost.toFixed(2)} MXN`;
+        document.getElementById("schedule-time-display").innerText = `${calc.estimatedMinutes} min`;
+        document.getElementById("schedule-labor-display").innerText = `$${calc.laborCost.toFixed(2)}`;
+        document.getElementById("schedule-wear-display").innerText = `$${calc.wearCost.toFixed(2)}`;
+        document.getElementById("schedule-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
+        updateScheduleSummaryUI();
+    }
 
     function initScheduleMap() {
         if (!scheduleMap) {
             scheduleMap = L.map('schedule-map').setView([storeConfig.lat, storeConfig.lng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(scheduleMap);
             scheduleMap.on('click', e => {
-                scheduleLat = e.latlng.lat; scheduleLng = e.latlng.lng;
-                if (scheduleMarker) scheduleMarker.setLatLng([scheduleLat, scheduleLng]);
-                else scheduleMarker = L.marker([scheduleLat, scheduleLng]).addTo(scheduleMap);
+                if (scheduleMarker) scheduleMarker.setLatLng([e.latlng.lat, e.latlng.lng]);
+                else {
+                    scheduleMarker = L.marker([e.latlng.lat, e.latlng.lng], {draggable: true}).addTo(scheduleMap);
+                    scheduleMarker.on('dragend', ev => recalcScheduleShippingFromPoint(ev.target.getLatLng().lat, ev.target.getLatLng().lng));
+                }
+                recalcScheduleShippingFromPoint(e.latlng.lat, e.latlng.lng);
             });
             setTimeout(() => scheduleMap.invalidateSize(), 150);
         } else {
@@ -1436,6 +1597,7 @@
     function togglePaymentFields() {
         const m = document.getElementById("payment-method").value;
         document.getElementById("cash-fields").classList.toggle("hidden", m !== "efectivo");
+        document.getElementById("cart-transfer-fields").classList.toggle("hidden", m !== "transferencia");
     }
     function toggleDeliveryFields() {
         const type = document.getElementById("delivery-type").value;
@@ -1447,6 +1609,28 @@
             if (type === "local") initStoreMap();
             else initDeliveryMap();
         }, 250);
+    }
+    function toggleScheduleDeliveryFields() {
+        const type = document.getElementById("schedule-delivery-type").value;
+        document.getElementById("schedule-domicilio-fields").classList.toggle("hidden", type !== "domicilio");
+        updateScheduleSummaryUI();
+        if (type === "domicilio") {
+            setTimeout(initScheduleMap, 250);
+        }
+    }
+    function toggleSchedulePaymentFields() {
+        const m = document.getElementById("schedule-payment-method").value;
+        document.getElementById("schedule-cash-fields").classList.toggle("hidden", m !== "efectivo");
+        document.getElementById("schedule-transfer-fields").classList.toggle("hidden", m !== "transferencia");
+    }
+    function calculateScheduleChange() {
+        const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const shipping = document.getElementById("schedule-delivery-type").value === "domicilio" ? currentScheduleShippingCost : 0;
+        const total = subtotal + shipping;
+        const cash = parseFloat(document.getElementById("schedule-cash-amount").value) || 0;
+        const changeEl = document.getElementById("schedule-change-text");
+        if (!cash) { changeEl.innerText = ""; return; }
+        changeEl.innerText = cash >= total ? `💵 Cambio a entregar: $${(cash - total).toFixed(2)}` : "⚠️ El monto es menor al total";
     }
     function checkoutOrder(type) {
         if (cart.length === 0) {
@@ -1461,44 +1645,381 @@
             alert("Por favor ingresa tu número telefónico.");
             return;
         }
+
+        const deliveryMode = type === 'futuro'
+            ? document.getElementById("schedule-delivery-type").value
+            : document.getElementById("delivery-type").value;
+        const isDomicilio = deliveryMode === "domicilio";
+
+        const destLat = type === 'futuro' ? scheduleLat : selectedLat;
+        const destLng = type === 'futuro' ? scheduleLng : selectedLng;
+        const destAddress = type === 'futuro'
+            ? sanitizeText(document.getElementById("schedule-address").value)
+            : sanitizeText(document.getElementById("delivery-address").value);
+
+        if (isDomicilio && (!destLat || !destLng)) {
+            alert("Por favor toca el mapa para marcar tu ubicación final de entrega (Punto 2).");
+            return;
+        }
+
         const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-        const isDomicilio = type === 'inmediato' && document.getElementById("delivery-type").value === "domicilio";
-        const shipping = isDomicilio ? currentDeliveryShippingCost : 0;
+        const distanceKm = isDomicilio ? (type === 'futuro' ? currentScheduleDistanceKm : currentDeliveryDistanceKm) : 0;
+        const fuelCost = isDomicilio ? (type === 'futuro' ? currentScheduleFuelCost : currentDeliveryFuelCost) : 0;
+        const laborCost = isDomicilio ? (type === 'futuro' ? currentScheduleLaborCost : currentDeliveryLaborCost) : 0;
+        const wearCost = isDomicilio ? (type === 'futuro' ? currentScheduleWearCost : currentDeliveryWearCost) : 0;
+        const estimatedMinutes = isDomicilio ? (type === 'futuro' ? currentScheduleMinutes : currentDeliveryMinutes) : 0;
+        const shipping = isDomicilio ? (type === 'futuro' ? currentScheduleShippingCost : currentDeliveryShippingCost) : 0;
         const total = subtotal + shipping;
-        const method = type === 'inmediato' ? document.getElementById("payment-method").value : 'Por definir';
-        const cashAmt = method === 'efectivo' ? (parseFloat(document.getElementById("cash-amount").value) || 0) : 0;
-        const changeVal = (method === 'efectivo' && cashAmt >= total) ? (cashAmt - total) : 0;
+
+        const method = type === 'futuro'
+            ? document.getElementById("schedule-payment-method").value
+            : document.getElementById("payment-method").value;
+        const cashAmt = method === 'efectivo'
+            ? (parseFloat(document.getElementById(type === 'futuro' ? "schedule-cash-amount" : "cash-amount").value) || 0)
+            : 0;
+        const transferRef = method === 'transferencia'
+            ? sanitizeText(document.getElementById(type === 'futuro' ? "schedule-transfer-ref" : "cart-transfer-ref").value)
+            : '';
+
+        if (method === 'efectivo' && cashAmt > 0 && cashAmt < total) {
+            alert(`El monto en efectivo ($${cashAmt.toFixed(2)}) debe ser igual o mayor al total ($${total.toFixed(2)}).`);
+            return;
+        }
+        if (method === 'transferencia' && !transferRef) {
+            alert("Por favor ingresa el folio o referencia de tu transferencia.");
+            return;
+        }
+        const changeVal = (method === 'efectivo' && cashAmt >= total) ? Number((cashAmt - total).toFixed(2)) : 0;
 
         db.collection("pedidos_comida").add({
             type,
             clientName: name,
             clientPhone: phone,
             items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
+            itemsText: cart.map(i => `${i.name} x${i.qty} ($${(i.price * i.qty).toFixed(2)})`).join(', '),
             subtotal,
+            productsCost: subtotal,
+            distanceKm,
+            fuelCost,
+            laborCost,
+            wearCost,
+            estimatedMinutes,
             shipping,
+            shippingCost: shipping,
             total,
+            totalCost: total,
             paymentMethod: method,
             cashAmount: cashAmt,
             change: changeVal,
-            deliveryType: type === 'futuro' ? 'reserva' : document.getElementById("delivery-type").value,
-            address: type === 'futuro' ? sanitizeText(document.getElementById("schedule-address").value) : sanitizeText(document.getElementById("delivery-address").value),
-            lat: type === 'futuro' ? scheduleLat : selectedLat,
-            lng: type === 'futuro' ? scheduleLng : selectedLng,
+            transferRef,
+            deliveryType: deliveryMode,
+            address: isDomicilio ? (destAddress || "Ubicación marcada en mapa") : `Recoger en Base (${storeConfig.address})`,
+            destAddress: isDomicilio ? (destAddress || "Ubicación marcada en mapa") : `Recoger en Base (${storeConfig.address})`,
+            destLat: isDomicilio ? destLat : storeConfig.lat,
+            destLng: isDomicilio ? destLng : storeConfig.lng,
+            startLat: null,
+            startLng: null,
+            startTimestamp: null,
+            destArrivalTimestamp: null,
             scheduleDate: type === 'futuro' ? document.getElementById("schedule-date").value : null,
             scheduleTime: type === 'futuro' ? document.getElementById("schedule-time").value : null,
-            status: 'Pendiente',
+            rating: null,
+            feedbackComment: "",
+            status: 'Solicitado',
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
-            alert(type === 'futuro' ? "¡Reserva agendada con éxito!" : "¡Pedido enviado con éxito!");
+            saveClientIdentity();
+            alert(type === 'futuro' ? "¡Reserva agendada con éxito! Puedes seguirla en vivo abajo." : "¡Pedido enviado con éxito! Puedes seguirlo en vivo abajo.");
             cart = [];
             updateCartUI();
             closeCart();
             closeScheduleModal();
+            loadClientFoodOrders(phone);
         }).catch(err => {
             console.error(err);
             alert("Error al enviar el pedido.");
         });
     }
+
+    // =========================================================================
+    // SEGUIMIENTO EN VIVO, MAPA 2 PUNTOS Y TICKET DIGITAL (COMIDA Y RESERVAS)
+    // =========================================================================
+    function initFoodTicketRouteMap(p, prefix = '') {
+        const containerId = `${prefix}food-ticket-map-${p.id}`;
+        const el = document.getElementById(containerId);
+        if (!el || el._leaflet_id) return;
+
+        const baseLat = p.startLat || storeConfig.lat || 20.3333;
+        const baseLng = p.startLng || storeConfig.lng || -102.2333;
+        const destLat = p.destLat || baseLat;
+        const destLng = p.destLng || baseLng;
+
+        const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([baseLat, baseLng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const icon1 = L.divIcon({className: 'map-number-icon', html: '1', iconSize: [26, 26], iconAnchor: [13, 13]});
+        const icon2 = L.divIcon({className: 'map-number-icon', html: '2', iconSize: [26, 26], iconAnchor: [13, 13]});
+
+        L.marker([baseLat, baseLng], {icon: icon1}).addTo(map).bindPopup('1 - Punto Inicio (Base)');
+        L.marker([destLat, destLng], {icon: icon2}).addTo(map).bindPopup('2 - Ubicación Final');
+
+        const polyline = L.polyline([
+            [baseLat, baseLng],
+            [destLat, destLng]
+        ], {color: '#ea580c', weight: 3}).addTo(map);
+
+        map.fitBounds(polyline.getBounds(), {padding: [25, 25]});
+    }
+
+    function rateFoodOrder(id, stars) {
+        if (stars <= 3) {
+            const comment = prompt("¿Qué podríamos mejorar para merecer tu mejor calificación?");
+            db.collection("pedidos_comida").doc(id).update({ 
+                rating: stars, 
+                feedbackComment: comment ? sanitizeText(comment) : "Sin comentario" 
+            }).then(() => alert("Gracias por tus comentarios."));
+        } else {
+            db.collection("pedidos_comida").doc(id).update({ 
+                rating: stars, 
+                feedbackComment: "Excelente" 
+            }).then(() => alert("¡Gracias por tus estrellas!"));
+        }
+    }
+
+    function markFoodDestArrivalAndDeliver(id) {
+        db.collection("pedidos_comida").doc(id).update({
+            destArrivalTimestamp: Date.now(),
+            status: 'Entregado'
+        }).then(() => alert("🏁 Llegada a ubicación final registrada y pedido entregado."));
+    }
+
+    async function clearAllFoodOrders() {
+        if (confirm("¿Borrar historial de pedidos de comida y reservas?")) {
+            const snap = await db.collection("pedidos_comida").get();
+            const batch = db.batch();
+            snap.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+        }
+    }
+
+    function loadClientFoodOrders(phone) {
+        if (!phone) return;
+        db.collection("pedidos_comida").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
+            let list = [];
+            snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+            list.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+
+            let html = "";
+            list.forEach(p => {
+                const status = p.status || 'Solicitado';
+                const isReserva = p.type === 'futuro';
+                const tipoLabel = isReserva ? `📅 Reserva (${p.scheduleDate || ''} ${p.scheduleTime || ''})` : '🍽️ Compra Inmediata';
+                const startStr = p.startTimestamp ? new Date(p.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pendiente';
+                const destArrStr = p.destArrivalTimestamp ? new Date(p.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pendiente';
+
+                let badgeClass = 'bg-orange-50 text-orange-950 border-orange-200';
+                let statusMsg = '⏳ Pedido recibido, en espera de confirmación.';
+                if (status === 'Aceptado / En Preparación') {
+                    badgeClass = 'bg-amber-50 text-amber-950 border-amber-300';
+                    statusMsg = '👨‍🍳 Tu comida está siendo preparada.';
+                } else if (status === 'En Ruta') {
+                    badgeClass = 'bg-blue-50 text-blue-950 border-blue-300';
+                    statusMsg = '🛵 ¡Repartidor en camino desde Punto 1 (Inicio) hacia Punto 2 (Ubicación Final)!';
+                } else if (status === 'Entregado') {
+                    badgeClass = 'bg-gray-100 text-gray-800 border-gray-300';
+                    statusMsg = '🏁 Pedido entregado con éxito.';
+                }
+
+                const itemsSummary = p.itemsText || (Array.isArray(p.items) ? p.items.map(i => `${sanitizeText(i.name)} x${i.qty}`).join(', ') : '');
+                const sub = Number(p.subtotal ?? p.productsCost ?? 0);
+                const ship = Number(p.shipping ?? p.shippingCost ?? 0);
+                const tot = Number(p.total ?? p.totalCost ?? (sub + ship));
+
+                let ticketHtml = '';
+                if (status === 'Entregado') {
+                    ticketHtml = `
+                        <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
+                            <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO</p>
+                            <div class="flex justify-between"><span>Modalidad:</span> <b>${tipoLabel}</b></div>
+                            <div class="flex justify-between"><span>🚀 Hora de Inicio (Punto 1):</span> <b class="text-indigo-700">${startStr}</b></div>
+                            <div class="flex justify-between"><span>🏁 Hora Fin / Entrega (Punto 2):</span> <b class="text-green-700">${destArrStr}</b></div>
+                            <hr class="my-1">
+                            <div class="flex justify-between"><span>Subtotal Alimentos:</span> <b>$${sub.toFixed(2)}</b></div>
+                            ${p.deliveryType === 'domicilio' ? `
+                                <div class="flex justify-between"><span>Distancia (Punto 1 ➔ Punto 2):</span> <b>${Number(p.distanceKm||0).toFixed(2)} km</b></div>
+                                <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${Number(p.fuelCost||0).toFixed(2)}</b></div>
+                                <div class="flex justify-between"><span>Pago Conductor (${p.estimatedMinutes||0} min):</span> <b>$${Number(p.laborCost||0).toFixed(2)}</b></div>
+                                <div class="flex justify-between"><span>Desgaste vehículo:</span> <b>$${Number(p.wearCost||0).toFixed(2)}</b></div>
+                                <div class="flex justify-between"><span>Costo de Envío Total:</span> <b>$${ship.toFixed(2)}</b></div>
+                            ` : `<div class="flex justify-between"><span>Entrega:</span> <b>Recoger en Base ($0.00)</b></div>`}
+                            <div class="flex justify-between font-bold border-t pt-1 text-orange-900 text-sm"><span>TOTAL PAGADO:</span> <span>$${tot.toFixed(2)}</span></div>
+
+                            <div class="mt-2 space-y-1">
+                                <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Inicio / Base) ➔ 2 (Ubicación Final)</p>
+                                <div id="food-ticket-map-${p.id}" class="ticket-map"></div>
+                            </div>
+
+                            <div class="pt-2 border-t mt-2 text-center">
+                                ${p.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${p.rating} Estrellas ${p.feedbackComment ? `("${sanitizeText(p.feedbackComment)}")` : ''}</p>` : `
+                                    <p class="font-semibold text-gray-700 mb-1">Califica el servicio (1 a 6 estrellas):</p>
+                                    <div class="flex justify-center gap-1">
+                                        <button type="button" onclick="rateFoodOrder('${p.id}', 1)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">1⭐</button>
+                                        <button type="button" onclick="rateFoodOrder('${p.id}', 2)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">2⭐</button>
+                                        <button type="button" onclick="rateFoodOrder('${p.id}', 3)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">3⭐</button>
+                                        <button type="button" onclick="rateFoodOrder('${p.id}', 4)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">4⭐</button>
+                                        <button type="button" onclick="rateFoodOrder('${p.id}', 5)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">5⭐</button>
+                                        <button type="button" onclick="rateFoodOrder('${p.id}', 6)" class="px-2 py-1 bg-yellow-200 rounded cursor-pointer">6⭐</button>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                    setTimeout(() => initFoodTicketRouteMap(p, ''), 300);
+                }
+
+                html += `
+                    <div class="p-3 rounded-xl border ${badgeClass} space-y-1.5">
+                        <div class="flex justify-between items-center font-bold">
+                            <span>${tipoLabel}</span>
+                            <span class="px-2 py-0.5 rounded bg-white text-[11px]">${status}</span>
+                        </div>
+                        <p class="text-gray-700 bg-white/70 p-1.5 rounded">🍽️ ${itemsSummary}</p>
+                        <p class="font-medium">${statusMsg}</p>
+                        <div class="bg-gray-50 p-2 rounded border space-y-1 my-1 text-[11px]">
+                            <div class="flex justify-between"><span>🚀 Inicio (Punto 1):</span> <b>${startStr}</b></div>
+                            <div class="flex justify-between"><span>🏁 Fin / Entrega (Punto 2):</span> <b>${destArrStr}</b></div>
+                            <div class="flex justify-between"><span>💰 Total (Alimentos + Envío):</span> <b>$${tot.toFixed(2)}</b></div>
+                        </div>
+                        ${ticketHtml}
+                    </div>
+                `;
+            });
+
+            document.getElementById("client-food-status-section").classList.toggle("hidden", list.length === 0);
+            document.getElementById("client-my-food-list").innerHTML = html;
+        });
+    }
+
+    // Panel Administrador en vivo para Pedidos de Comida y Reservas
+    db.collection("pedidos_comida").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
+        let orders = [];
+        snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+        orders.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+        document.getElementById("admin-food-count").innerText = orders.length;
+
+        let html = "";
+        orders.forEach(p => {
+            const status = p.status || 'Solicitado';
+            const isReserva = p.type === 'futuro';
+            const tipoLabel = isReserva ? `📅 Reserva (${p.scheduleDate || ''} ${p.scheduleTime || ''})` : '🍽️ Compra Inmediata';
+            const clientName = sanitizeText(p.clientName || 'Cliente');
+            const clientPhone = sanitizeText(p.clientPhone || '');
+            const destAddress = sanitizeText(p.destAddress || p.address || '');
+            const itemsSummary = sanitizeText(p.itemsText || (Array.isArray(p.items) ? p.items.map(i => `${i.name} x${i.qty}`).join(', ') : ''));
+            const sub = Number(p.subtotal ?? p.productsCost ?? 0);
+            const ship = Number(p.shipping ?? p.shippingCost ?? 0);
+            const tot = Number(p.total ?? p.totalCost ?? (sub + ship));
+
+            const startStr = p.startTimestamp ? new Date(p.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
+            const destArrStr = p.destArrivalTimestamp ? new Date(p.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
+
+            const computedChange = p.paymentMethod === 'efectivo'
+                ? (p.change !== undefined && p.change !== null && Number(p.change) > 0
+                    ? Number(p.change)
+                    : Math.max(0, Number(p.cashAmount || 0) - tot))
+                : 0;
+            const paymentInfo = p.paymentMethod === 'efectivo'
+                ? `<div class="space-y-0.5"><p class="text-emerald-900 font-bold">💵 Pago en Efectivo</p><p class="text-xs">Cliente paga con: <b>$${Number(p.cashAmount||0).toFixed(2)}</b> | <span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">Cambio a entregar: $${computedChange.toFixed(2)}</span></p></div>`
+                : `<span class="text-blue-900 font-bold">💳 Método: ${sanitizeText(p.paymentMethod || 'Pendiente').toUpperCase()} ${p.transferRef ? `(Ref: ${sanitizeText(p.transferRef)})` : ''}</span>`;
+
+            let controls = "";
+            if (status === 'Solicitado' || status === 'Pendiente') {
+                controls = `
+                    <button type="button" onclick="db.collection('pedidos_comida').doc('${p.id}').update({status: 'Aceptado / En Preparación'})" class="w-full bg-orange-600 text-white py-1.5 rounded text-xs font-bold cursor-pointer hover:bg-orange-700 shadow">
+                        ✔ Aceptar Pedido / Preparar
+                    </button>
+                `;
+            } else if (status === 'Entregado') {
+                controls = `
+                    <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
+                        <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (ADMIN)</p>
+                        <div class="flex justify-between"><span>Modalidad:</span> <b>${tipoLabel}</b></div>
+                        <div class="flex justify-between"><span>🚀 Hora de Inicio (Punto 1):</span> <b class="text-indigo-700">${startStr}</b></div>
+                        <div class="flex justify-between"><span>🏁 Hora Fin / Entrega (Punto 2):</span> <b class="text-green-700">${destArrStr}</b></div>
+                        <div class="flex justify-between"><span>💳 Pago y Cambio:</span> <b>${p.paymentMethod === 'efectivo' ? `Efectivo (Cambio: $${computedChange.toFixed(2)})` : sanitizeText(p.paymentMethod || '')}</b></div>
+                        <hr class="my-1">
+                        <div class="flex justify-between"><span>Subtotal Alimentos:</span> <b>$${sub.toFixed(2)}</b></div>
+                        ${p.deliveryType === 'domicilio' ? `
+                            <div class="flex justify-between"><span>Distancia (Punto 1 ➔ Punto 2):</span> <b>${Number(p.distanceKm||0).toFixed(2)} km</b></div>
+                            <div class="flex justify-between"><span>Combustible:</span> <b>$${Number(p.fuelCost||0).toFixed(2)}</b></div>
+                            <div class="flex justify-between"><span>Conductor (${p.estimatedMinutes||0} min):</span> <b>$${Number(p.laborCost||0).toFixed(2)}</b></div>
+                            <div class="flex justify-between"><span>Desgaste:</span> <b>$${Number(p.wearCost||0).toFixed(2)}</b></div>
+                            <div class="flex justify-between"><span>Costo Envío:</span> <b>$${ship.toFixed(2)}</b></div>
+                        ` : `<div class="flex justify-between"><span>Entrega:</span> <b>Base ($0.00)</b></div>`}
+                        <div class="flex justify-between font-bold border-t pt-1 text-orange-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${tot.toFixed(2)}</span></div>
+                        <div class="mt-2 space-y-1">
+                            <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Inicio / Base) ➔ 2 (Ubicación Final)</p>
+                            <div id="admin-food-ticket-map-${p.id}" class="ticket-map"></div>
+                        </div>
+                        ${p.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación: ${p.rating} Estrellas ${p.feedbackComment ? `("${sanitizeText(p.feedbackComment)}")` : ''}</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
+                    </div>
+                `;
+                setTimeout(() => initFoodTicketRouteMap(p, 'admin-'), 300);
+            } else {
+                const hasManualStart = Boolean(p.startTimestamp && p.startLat && p.startLng);
+                const startBtnState = hasManualStart
+                    ? `<span class="text-green-600 font-bold">✔ Registrado (${Number(p.startLat).toFixed(4)}, ${Number(p.startLng).toFixed(4)})</span>`
+                    : `<button type="button" onclick="openAdminStartModal('${p.id}', 'pedidos_comida')" class="bg-indigo-600 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-indigo-700">📍 Configurar Inicio</button>`;
+
+                const lockedEndHtml = !hasManualStart
+                    ? `<div class="bg-red-50 border border-red-200 text-red-800 p-2 rounded text-[11px] font-semibold">🔒 Debes configurar manualmente la <b>Ubicación de Inicio (Punto 1)</b> antes de finalizar y entregar el pedido.</div>`
+                    : `
+                        <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
+                            <span>🏁 <b>Fin / Destino (Punto 2):</b> ${destArrStr}</span>
+                            <button type="button" onclick="markFoodDestArrivalAndDeliver('${p.id}')" class="bg-gray-900 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Fin y Entregar</button>
+                        </div>
+                    `;
+
+                controls = `
+                    <div class="space-y-2 pt-1 border-t border-orange-200">
+                        <div class="bg-yellow-50 p-2 rounded border border-yellow-300 text-xs">
+                            ${paymentInfo}
+                        </div>
+                        <div class="bg-gray-900 text-white p-2 rounded text-[11px] space-y-0.5">
+                            <div class="flex justify-between"><span>Alimentos: <b>$${sub.toFixed(2)}</b></span><span>Envío: <b>$${ship.toFixed(2)}</b></span><span>Total: <b class="text-emerald-400">$${tot.toFixed(2)}</b></span></div>
+                            ${p.deliveryType === 'domicilio' ? `<div class="text-gray-300">📏 ${Number(p.distanceKm||0).toFixed(2)} km | ⛽ $${Number(p.fuelCost||0).toFixed(2)} | ⏱️ $${Number(p.laborCost||0).toFixed(2)} | 🔧 $${Number(p.wearCost||0).toFixed(2)}</div>` : ''}
+                        </div>
+                        <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border border-indigo-200">
+                            <span>🚀 <b>Inicio (Punto 1):</b> ${startStr}</span>
+                            ${startBtnState}
+                        </div>
+                        ${lockedEndHtml}
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="bg-white p-3.5 rounded-xl border-2 border-orange-200 shadow-sm space-y-2 text-xs">
+                    <div class="flex justify-between items-center font-bold text-orange-950 border-b pb-1">
+                        <span>${tipoLabel}</span>
+                        <span class="px-2 py-0.5 rounded bg-orange-100 text-[11px] text-orange-900">${status}</span>
+                    </div>
+                    <div class="bg-gray-50 p-2 rounded space-y-1">
+                        <p class="font-bold text-gray-900">👤 Cliente: ${clientName}</p>
+                        <p class="text-gray-600">📞 Teléfono: <b>${clientPhone}</b></p>
+                        <div class="flex gap-2 pt-1">
+                            <a href="tel:${clientPhone}" class="flex-1 bg-blue-600 text-white text-center py-1 rounded font-bold hover:bg-blue-700">📞 Llamar</a>
+                            <a href="https://wa.me/52${clientPhone.replace(/\D/g,'')}?text=Hola%20${encodeURIComponent(clientName)},%20te%20contacto%20desde%20Primo%20por%20tu%20pedido." target="_blank" class="flex-1 bg-green-600 text-white text-center py-1 rounded font-bold hover:bg-green-700">💬 WhatsApp</a>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">🏠 <b>Entrega:</b> ${destAddress}</p>
+                    <p class="bg-gray-50 p-1.5 rounded text-gray-800">🍽️ <b>Platillos:</b> ${itemsSummary}</p>
+                    ${controls}
+                </div>
+            `;
+        });
+        document.getElementById("admin-food-list").innerHTML = html || '<p class="text-gray-500 text-xs">No hay pedidos de comida o reservas activas.</p>';
+    });
 </script>
 
 </body>
