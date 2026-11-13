@@ -138,22 +138,34 @@
             <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
         </div>
 
-        <!-- Paso 4: Cálculo Automático de Distancia y Tarifa de Envío (Moto FT150 TS) -->
-        <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1.5">
-            <div class="flex justify-between items-center text-xs text-gray-300">
-                <span>📏 Distancia estimada del recorrido:</span>
+        <!-- Paso 4: Desglose Matemático Transparente (Gasolina Pura + Tiempo Salario Mínimo + Desgaste Moto) -->
+        <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2">
+            <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
+                <span>📏 Distancia estimada:</span>
                 <span id="mandado-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
             </div>
-            <div class="flex justify-between items-center text-xs text-gray-300">
-                <span>⛽ Consumo estimado (Italika FT150 TS):</span>
-                <span id="mandado-fuel-display" class="text-emerald-400">$0.00 MXN gasolina</span>
+            
+            <div class="space-y-1 text-xs">
+                <div class="flex justify-between text-gray-300">
+                    <span>⛽ Gasolina (Costo puro sin ganancia, 33 km/L):</span>
+                    <span id="mandado-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>⏱️ Tiempo conductor (<span id="mandado-time-display">0 min</span> @ $0.66/min - Salario Mín.):</span>
+                    <span id="mandado-labor-display" class="text-blue-300 font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-300">
+                    <span>🔧 Mantenimiento Italika FT150 (Desgaste/m):</span>
+                    <span id="mandado-wear-display" class="text-amber-300 font-semibold">$0.00</span>
+                </div>
             </div>
+
             <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
-                <span>Costo del Mandadito (Envío):</span>
+                <span>Costo Total del Envío:</span>
                 <span id="mandado-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
             </div>
-            <p class="text-[11px] text-gray-400 leading-tight pt-1">
-                * El repartidor irá a la tienda, verificará el precio exacto de tus productos y te enviará el total en vivo para que lo apruebes y elijas cómo pagar.
+            <p class="text-[10px] text-gray-400 leading-tight pt-1">
+                * Transparencia Primo: La gasolina se cobra a costo real exacto sin ganancia. El servicio cubre el tiempo legal del repartidor y el fondo de refacciones de la moto.
             </p>
         </div>
 
@@ -177,7 +189,7 @@
         
         <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1 text-sm">
             <div class="flex justify-between"><span>Costo de los productos en tienda:</span> <b id="conf-prod-cost">$0.00</b></div>
-            <div class="flex justify-between"><span>Costo del mandadito (envío):</span> <b id="conf-ship-cost">$0.00</b></div>
+            <div class="flex justify-between"><span>Costo transparente del envío:</span> <b id="conf-ship-cost">$0.00</b></div>
             <div class="flex justify-between text-base font-bold text-emerald-950 border-t border-emerald-300 pt-1.5 mt-1">
                 <span>TOTAL A PAGAR:</span>
                 <span id="conf-grand-total">$0.00</span>
@@ -328,16 +340,28 @@
                 <div id="delivery-map"></div>
                 <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
 
-                <!-- Recuadro de Cálculo de Envío por Distancia y Gasolina (Estilo Mandaditos) -->
-                <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1.5 shadow-sm">
-                    <div class="flex justify-between items-center text-xs text-gray-300">
-                        <span>📏 Distancia estimada del recorrido:</span>
+                <!-- Recuadro Transparente de Cálculo de Envío -->
+                <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-2 shadow-sm">
+                    <div class="flex justify-between items-center text-xs text-gray-300 border-b border-gray-800 pb-1">
+                        <span>📏 Distancia estimada:</span>
                         <span id="delivery-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
                     </div>
-                    <div class="flex justify-between items-center text-xs text-gray-300">
-                        <span>⛽ Consumo estimado (Italika FT150 TS):</span>
-                        <span id="delivery-fuel-display" class="text-emerald-400">$0.00 MXN gasolina</span>
+
+                    <div class="space-y-1 text-xs">
+                        <div class="flex justify-between text-gray-300">
+                            <span>⛽ Gasolina (Costo puro sin ganancia, 33 km/L):</span>
+                            <span id="delivery-fuel-display" class="text-emerald-400 font-semibold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-300">
+                            <span>⏱️ Tiempo conductor (<span id="delivery-time-display">0 min</span> @ $0.66/min - Salario Mín.):</span>
+                            <span id="delivery-labor-display" class="text-blue-300 font-semibold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-300">
+                            <span>🔧 Mantenimiento Italika FT150 (Desgaste/m):</span>
+                            <span id="delivery-wear-display" class="text-amber-300 font-semibold">$0.00</span>
+                        </div>
                     </div>
+
                     <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
                         <span>Costo de Envío (Moto):</span>
                         <span id="delivery-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
@@ -581,11 +605,17 @@
     let currentMandadoDistanceKm = 0;
     let currentMandadoShippingCost = 0;
     let currentMandadoFuelCost = 0;
+    let currentMandadoLaborCost = 0;
+    let currentMandadoWearCost = 0;
+    let currentMandadoMinutes = 0;
 
     // Variables Envío Pedido Inmediato Domicilio
     let currentDeliveryDistanceKm = 0;
     let currentDeliveryShippingCost = 0;
     let currentDeliveryFuelCost = 0;
+    let currentDeliveryLaborCost = 0;
+    let currentDeliveryWearCost = 0;
+    let currentDeliveryMinutes = 0;
 
     function sanitizeText(str) {
         if (!str) return '';
@@ -593,7 +623,7 @@
     }
 
     // =========================================================================
-    // CÁLCULO DE DISTANCIA HAVERSINE Y COSTO MOTO ITALIKA FT150 TS
+    // CÁLCULO DE DISTANCIA HAVERSINE Y MATEMÁTICA TRANSPARENTE ITALIKA FT150 TS
     // =========================================================================
     function calculateHaversineKm(lat1, lon1, lat2, lon2) {
         const R = 6371;
@@ -604,6 +634,41 @@
                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+    // Motor Matemático Transparente 2026:
+    // 1. Gasolina Pura: (Km / 33 km/L) * Precio Litro (Sin ganancia)
+    // 2. Tiempo Conductor: Minutos estimados @ $0.656/min ($39.38/h - Salario Mínimo 2026)
+    // 3. Desgaste Moto: $0.0004 por metro ($0.40 por km para aceite, cadena, balatas, llantas)
+    function computeTransparentShipping(distanceKm) {
+        const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
+        const motoKml = parseFloat(storeConfig.motoKml) || 33;
+
+        // 1. Gasolina Pura (sin ganancia)
+        const litersUsed = distanceKm / motoKml;
+        const fuelCost = litersUsed * gasPrice;
+
+        // 2. Tiempo del Conductor (Asumiendo velocidad promedio moto urbana ~ 30 km/h -> 2 min por km)
+        const estimatedMinutes = Math.max(3, Math.round(distanceKm * 2));
+        const ratePerMinute = 39.38 / 60; // $0.656 por minuto basado en salario mínimo $315.04/8h
+        const laborCost = estimatedMinutes * ratePerMinute;
+
+        // 3. Desgaste y Mantenimiento de la Italika FT150 TS ($0.40 por km / $0.0004 por metro)
+        const wearCostPerKm = 0.40;
+        const wearCost = distanceKm * wearCostPerKm;
+
+        const totalCost = Math.ceil(fuelCost + laborCost + wearCost);
+
+        return {
+            distanceKm,
+            meters: Math.round(distanceKm * 1000),
+            litersUsed,
+            fuelCost,
+            estimatedMinutes,
+            laborCost,
+            wearCost,
+            totalCost
+        };
     }
 
     function recalculateMandaditoCost() {
@@ -618,21 +683,19 @@
         const realRouteKm = ((distBaseToStore * 0.5) + distStoreToClient) * 1.3;
         currentMandadoDistanceKm = Math.max(0.3, realRouteKm);
 
-        const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
-        const motoKml = parseFloat(storeConfig.motoKml) || 33;
-        const baseFee = parseFloat(storeConfig.baseFee) || 15;
-        const perKmFee = parseFloat(storeConfig.perKmFee) || 4.5;
+        const calc = computeTransparentShipping(currentMandadoDistanceKm);
+        currentMandadoFuelCost = calc.fuelCost;
+        currentMandadoLaborCost = calc.laborCost;
+        currentMandadoWearCost = calc.wearCost;
+        currentMandadoMinutes = calc.estimatedMinutes;
+        currentMandadoShippingCost = calc.totalCost;
 
-        const litersUsed = currentMandadoDistanceKm / motoKml;
-        currentMandadoFuelCost = litersUsed * gasPrice;
-
-        const rawCost = baseFee + (currentMandadoDistanceKm * perKmFee) + currentMandadoFuelCost;
-        currentMandadoShippingCost = Math.ceil(rawCost);
-
-        const meters = Math.round(currentMandadoDistanceKm * 1000);
-        document.getElementById("mandado-distance-display").innerText = `${currentMandadoDistanceKm.toFixed(2)} km (${meters} m)`;
-        document.getElementById("mandado-fuel-display").innerText = `$${currentMandadoFuelCost.toFixed(2)} MXN (${(litersUsed * 1000).toFixed(0)} ml)`;
-        document.getElementById("mandado-shipping-cost").innerText = `$${currentMandadoShippingCost.toFixed(2)}`;
+        document.getElementById("mandado-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km (${calc.meters} m)`;
+        document.getElementById("mandado-fuel-display").innerText = `$${calc.fuelCost.toFixed(2)} MXN (${(calc.litersUsed * 1000).toFixed(0)} ml)`;
+        document.getElementById("mandado-time-display").innerText = `${calc.estimatedMinutes} min`;
+        document.getElementById("mandado-labor-display").innerText = `$${calc.laborCost.toFixed(2)}`;
+        document.getElementById("mandado-wear-display").innerText = `$${calc.wearCost.toFixed(2)}`;
+        document.getElementById("mandado-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
     }
 
     function recalculateDeliveryCost() {
@@ -645,21 +708,19 @@
         const realRouteKm = distStoreToClient * 1.3;
         currentDeliveryDistanceKm = Math.max(0.3, realRouteKm);
 
-        const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
-        const motoKml = parseFloat(storeConfig.motoKml) || 33;
-        const baseFee = parseFloat(storeConfig.baseFee) || 15;
-        const perKmFee = parseFloat(storeConfig.perKmFee) || 4.5;
+        const calc = computeTransparentShipping(currentDeliveryDistanceKm);
+        currentDeliveryFuelCost = calc.fuelCost;
+        currentDeliveryLaborCost = calc.laborCost;
+        currentDeliveryWearCost = calc.wearCost;
+        currentDeliveryMinutes = calc.estimatedMinutes;
+        currentDeliveryShippingCost = calc.totalCost;
 
-        const litersUsed = currentDeliveryDistanceKm / motoKml;
-        currentDeliveryFuelCost = litersUsed * gasPrice;
-
-        const rawCost = baseFee + (currentDeliveryDistanceKm * perKmFee) + currentDeliveryFuelCost;
-        currentDeliveryShippingCost = Math.ceil(rawCost);
-
-        const meters = Math.round(currentDeliveryDistanceKm * 1000);
-        document.getElementById("delivery-distance-display").innerText = `${currentDeliveryDistanceKm.toFixed(2)} km (${meters} m)`;
-        document.getElementById("delivery-fuel-display").innerText = `$${currentDeliveryFuelCost.toFixed(2)} MXN (${(litersUsed * 1000).toFixed(0)} ml)`;
-        document.getElementById("delivery-shipping-cost").innerText = `$${currentDeliveryShippingCost.toFixed(2)}`;
+        document.getElementById("delivery-distance-display").innerText = `${calc.distanceKm.toFixed(2)} km (${calc.meters} m)`;
+        document.getElementById("delivery-fuel-display").innerText = `$${calc.fuelCost.toFixed(2)} MXN (${(calc.litersUsed * 1000).toFixed(0)} ml)`;
+        document.getElementById("delivery-time-display").innerText = `${calc.estimatedMinutes} min`;
+        document.getElementById("delivery-labor-display").innerText = `$${calc.laborCost.toFixed(2)}`;
+        document.getElementById("delivery-wear-display").innerText = `$${calc.wearCost.toFixed(2)}`;
+        document.getElementById("delivery-shipping-cost").innerText = `$${calc.totalCost.toFixed(2)}`;
 
         updateCartUI();
     }
@@ -873,6 +934,8 @@
             destLng: mandadoDestLng,
             distanceKm: currentMandadoDistanceKm,
             fuelCost: currentMandadoFuelCost,
+            laborCost: currentMandadoLaborCost,
+            wearCost: currentMandadoWearCost,
             shippingCost: currentMandadoShippingCost,
             productsCost: 0,
             totalCost: currentMandadoShippingCost,
@@ -1809,7 +1872,7 @@
             orderLng = scheduleLng;
             deliveryType = "domicilio";
             paymentMethod = document.getElementById("schedule-payment-method").value;
-            shippingCost = 0; // Reservas de comida por ahora con costo de alimentos base
+            shippingCost = 0;
 
             if (!scheduleDate || !scheduleTime || !address) {
                 alert("Por favor completa la fecha, hora y referencias para tu reserva.");
