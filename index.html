@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -65,7 +64,7 @@
             <h3 class="font-bold text-md text-emerald-900">🛵 Tus Mandaditos en Vivo</h3>
             <span class="animate-pulse inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
         </div>
-        <p class="text-[11px] text-gray-500 mb-3">Actualización automática en tiempo real.</p>
+        <p class="text-[11px] text-gray-500 mb-3">Actualización automática en tiempo real con seguimiento de ruta y tickets completos.</p>
         <div id="client-my-mandaditos-list" class="space-y-3 text-xs"></div>
     </section>
 
@@ -125,7 +124,7 @@
         <div class="space-y-1.5">
             <label class="block font-bold text-sm text-gray-800">2. Lista de productos a comprar:</label>
             <textarea id="mandado-items" rows="3" placeholder="Escribe detalladamente lo que necesitas..." class="w-full p-2.5 border rounded-lg text-sm"></textarea>
-            <p class="text-[11px] text-gray-500">💡 Fila: Cronómetro especial si hay fila ($39.38/hr o ~$0.66/min).</p>
+            <p class="text-[11px] text-gray-500">💡 Fila: Cronómetro especial remunerado ($39.38/hr o ~$0.66/min).</p>
         </div>
 
         <!-- Paso 3: Destino -->
@@ -475,9 +474,6 @@
         }
     }
 
-    // =====================================================================
-    // CORRECCIÓN APERTURA MANDADITO (Funciona sin recargar la página)
-    // =====================================================================
     function openMandaditoModal() {
         const nameInput = document.getElementById("client-name");
         const phoneInput = document.getElementById("client-phone");
@@ -562,7 +558,8 @@
             wearCost: currentMandadoWearCost, shippingCost: currentMandadoShippingCost, productsCost: 0, totalCost: currentMandadoShippingCost,
             status: 'Solicitado', paymentMethod: 'Pendiente', cashAmount: 0, change: 0, transferRef: '',
             timerRunning: false, timerStartedAt: null, queueMinutes: 0,
-            storeArrivalTimestamp: null, destArrivalTimestamp: null, rating: null, feedbackComment: "", deletedByAdmin: false,
+            startTimestamp: null, storeArrivalTimestamp: null, destArrivalTimestamp: null,
+            rating: null, feedbackComment: "", deletedByAdmin: false,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         }).then(() => {
             alert("¡Mandadito enviado con éxito!");
@@ -595,9 +592,9 @@
                 let statusMsg = '⏳ Esperando aprobación...';
                 let actionBtn = '', ticketHtml = '';
 
-                if (status === 'Aceptado / En Tienda') {
+                if (status === 'Aceptado / En Tienda' || status === 'En Ruta') {
                     badgeClass = 'bg-blue-50 text-blue-900';
-                    statusMsg = '🛵 Conductor en camino a tienda.';
+                    statusMsg = '🛵 Conductor en marcha / en tienda.';
                 } else if (status === 'Cotizado') {
                     badgeClass = 'bg-emerald-50 text-emerald-950 ring-2 ring-emerald-300';
                     statusMsg = `💰 Productos: $${(m.productsCost||0).toFixed(2)} + Envío: $${(m.shippingCost||0).toFixed(2)} = <b>Total: $${(m.totalCost||0).toFixed(2)}</b>`;
@@ -609,20 +606,26 @@
                     badgeClass = 'bg-gray-100 text-gray-700';
                     statusMsg = '🏁 Entregado.';
                     
-                    const startTime = m.timestamp?.toDate() ? m.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'N/A';
+                    const startTime = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : (m.timestamp?.toDate() ? m.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'N/A');
                     const storeArr = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No registrada';
                     const destArr = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No registrada';
                     const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
 
                     ticketHtml = `
-                        <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1 mt-2 shadow-inner">
+                        <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
                             <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO</p>
                             <div class="flex justify-between"><span>Tienda:</span> <b>${sanitizeText(m.storeName)}</b></div>
-                            <div class="flex justify-between"><span>Hora Inicio:</span> <b>${startTime}</b></div>
-                            <div class="flex justify-between"><span>Llegada Tienda:</span> <b class="text-blue-700">${storeArr}</b></div>
-                            <div class="flex justify-between"><span>Llegada Destino:</span> <b class="text-green-700">${destArr}</b></div>
-                            <div class="flex justify-between"><span>Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min</b></div>
-                            <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
+                            <div class="flex justify-between"><span>🕒 Hora de Inicio:</span> <b class="text-indigo-700">${startTime}</b></div>
+                            <div class="flex justify-between"><span>📍 Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArr}</b></div>
+                            <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min ($0.66/min)</b></div>
+                            <div class="flex justify-between"><span>🏠 Hora Llegada a Destino:</span> <b class="text-green-700">${destArr}</b></div>
+                            <hr class="my-1">
+                            <div class="flex justify-between"><span>Distancia Total (3 Puntos):</span> <b>${(m.distanceKm||0).toFixed(2)} km</b></div>
+                            <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${(m.fuelCost||0).toFixed(2)}</b></div>
+                            <div class="flex justify-between"><span>Pago Conductor / Trayecto:</span> <b>$${(m.laborCost||0).toFixed(2)}</b></div>
+                            <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
+                            <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL PAGADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
+                            
                             <div class="pt-2 border-t mt-2 text-center">
                                 ${m.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${m.rating} Estrellas</p>` : `
                                     <p class="font-semibold text-gray-700 mb-1">Califica (1 a 6 estrellas):</p>
@@ -703,7 +706,9 @@
         db.collection("mandaditos").doc(id).update({ status: 'Pagado y Confirmado', paymentMethod: method }).then(() => { alert("¡Pago confirmado!"); closeMandadoConfirmModal(); });
     }
 
-    // Panel Admin y Menú
+    // =========================================================================
+    // PANEL ADMINISTRADOR MEJORADO
+    // =========================================================================
     db.collection("mandaditos").onSnapshot((snapshot) => {
         let mandados = [];
         snapshot.forEach(doc => mandados.push({ id: doc.id, ...doc.data() }));
@@ -713,31 +718,86 @@
         let html = "";
         mandados.forEach(m => {
             const status = m.status || 'Solicitado';
+            const clientName = sanitizeText(m.clientName);
+            const clientPhone = sanitizeText(m.clientPhone);
+            const storeName = sanitizeText(m.storeName);
+            const destAddress = sanitizeText(m.destAddress);
+            const itemsText = sanitizeText(m.itemsText);
+
+            const isRunning = m.timerRunning;
+            const startStr = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
+            const storeArrStr = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin llegar';
+            const destArrStr = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
+
             let controls = "";
+
             if (status === 'Solicitado') {
-                controls = `<button type="button" onclick="updateMandadoStatus('${m.id}', 'Aceptado / En Tienda')" class="w-full bg-emerald-600 text-white py-1 rounded text-xs font-bold mt-2 cursor-pointer">✔ Aceptar Mandadito</button>`;
-            } else if (status === 'Aceptado / En Tienda' || status === 'Cotizado') {
                 controls = `
-                    <div class="mt-2 space-y-2 text-xs">
-                        <button type="button" onclick="markStoreArrival('${m.id}')" class="w-full bg-blue-600 text-white py-1 rounded font-bold cursor-pointer">📍 Marcar "Llegada a Tienda"</button>
+                    <button type="button" onclick="updateMandadoStatus('${m.id}', 'Aceptado / En Tienda')" class="w-full bg-emerald-600 text-white py-1.5 rounded text-xs font-bold cursor-pointer hover:bg-emerald-700 shadow">
+                        ✔ Aceptar Mandadito
+                    </button>
+                `;
+            } else {
+                controls = `
+                    <div class="space-y-2 pt-1 border-t border-emerald-200">
+                        <!-- Botón Inicio -->
+                        <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
+                            <span>🚀 <b>Inicio:</b> ${startStr}</span>
+                            ${!m.startTimestamp ? `<button type="button" onclick="markMandadoStart('${m.id}')" class="bg-indigo-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-indigo-700">Iniciar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
+                        </div>
+
+                        <!-- Botón Llegada a Tienda -->
+                        <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
+                            <span>📍 <b>Tienda:</b> ${storeArrStr}</span>
+                            <button type="button" onclick="markStoreArrival('${m.id}')" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>
+                        </div>
+
+                        <!-- Cronómetro para Filas -->
+                        <div class="bg-amber-50 p-2 rounded border border-amber-300 text-xs">
+                            <div class="flex justify-between font-bold text-amber-950 mb-1">
+                                <span>⏱️ Fila: ${isRunning ? '🔴 En Curso' : `${(m.queueMinutes||0).toFixed(1)} min`}</span>
+                            </div>
+                            <div class="flex gap-1">
+                                <button type="button" onclick="startMandadoTimer('${m.id}')" class="flex-1 bg-amber-600 text-white py-1 rounded font-bold cursor-pointer hover:bg-amber-700">▶️ Iniciar Fila</button>
+                                <button type="button" onclick="stopMandadoTimer('${m.id}')" class="flex-1 bg-gray-800 text-white py-1 rounded font-bold cursor-pointer hover:bg-gray-900">⏹️ Detener Fila</button>
+                            </div>
+                        </div>
+
+                        <!-- Cotización de Productos -->
                         <div class="bg-emerald-50 p-2 rounded border">
-                            <input type="number" step="0.5" id="admin-prod-cost-${m.id}" value="${m.productsCost||''}" placeholder="Costo productos ($)" class="w-full p-1 bg-white border rounded font-bold mb-1">
-                            <button type="button" onclick="sendMandadoQuote('${m.id}', ${m.shippingCost||0})" class="w-full bg-emerald-700 text-white py-1 rounded font-bold cursor-pointer">Enviar Cotización</button>
+                            <label class="block text-[11px] font-semibold text-emerald-900 mb-1">Costo de productos en tienda ($):</label>
+                            <input type="number" step="0.5" id="admin-prod-cost-${m.id}" value="${m.productsCost||''}" placeholder="Ej. 150" class="w-full p-1 bg-white border rounded font-bold mb-1 text-xs">
+                            <button type="button" onclick="sendMandadoQuote('${m.id}', ${m.shippingCost||0})" class="w-full bg-emerald-700 text-white py-1 rounded text-xs font-bold cursor-pointer hover:bg-emerald-800">Enviar Cotización al Cliente</button>
+                        </div>
+
+                        <!-- Botón Llegada a Destino -->
+                        <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
+                            <span>🏠 <b>Destino:</b> ${destArrStr}</span>
+                            <button type="button" onclick="markDestArrivalAndDeliver('${m.id}')" class="bg-gray-900 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Destino y Entregar</button>
                         </div>
                     </div>
                 `;
-            } else if (status === 'Pagado y Confirmado') {
-                controls = `<button type="button" onclick="markDestArrivalAndDeliver('${m.id}')" class="w-full bg-gray-900 text-white py-1.5 rounded font-bold text-xs mt-2 cursor-pointer">🏁 Entregar</button>`;
             }
 
             html += `
-                <div class="bg-white p-3 rounded-xl border shadow-sm space-y-1">
-                    <div class="flex justify-between text-xs font-bold text-gray-500">
-                        <span>${sanitizeText(m.clientName)}</span>
-                        <span>${status}</span>
+                <div class="bg-white p-3.5 rounded-xl border-2 border-emerald-200 shadow-sm space-y-2 text-xs">
+                    <div class="flex justify-between items-center font-bold text-emerald-950 border-b pb-1">
+                        <span>🏪 ${storeName}</span>
+                        <span class="px-2 py-0.5 rounded bg-emerald-100 text-[11px] text-emerald-900">${status}</span>
                     </div>
-                    <p class="text-xs text-gray-600">🏪 Tienda: <b>${sanitizeText(m.storeName)}</b> | 🏠 <b>${sanitizeText(m.destAddress)}</b></p>
-                    <p class="text-xs bg-gray-50 p-1 rounded">📝 ${sanitizeText(m.itemsText)}</p>
+
+                    <!-- Datos del Cliente y Botones de Contacto Directo -->
+                    <div class="bg-gray-50 p-2 rounded space-y-1">
+                        <p class="font-bold text-gray-900">👤 Cliente: ${clientName}</p>
+                        <p class="text-gray-600">📞 Teléfono: <b>${clientPhone}</b></p>
+                        <div class="flex gap-2 pt-1">
+                            <a href="tel:${clientPhone}" class="flex-1 bg-blue-600 text-white text-center py-1 rounded font-bold hover:bg-blue-700">📞 Llamar</a>
+                            <a href="https://wa.me/52${clientPhone.replace(/\D/g,'')}?text=Hola%20${encodeURIComponent(clientName)},%20te%20contacto%20desde%20Primo%20por%20tu%20mandadito." target="_blank" class="flex-1 bg-green-600 text-white text-center py-1 rounded font-bold hover:bg-green-700">💬 WhatsApp</a>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-700">🏠 <b>Destino:</b> ${destAddress}</p>
+                    <p class="bg-gray-50 p-1.5 rounded text-gray-800">📝 <b>Mandado:</b> ${itemsText}</p>
                     ${controls}
                 </div>
             `;
@@ -746,13 +806,45 @@
     });
 
     function updateMandadoStatus(id, newStatus) { db.collection("mandaditos").doc(id).update({ status: newStatus }); }
-    function markStoreArrival(id) { db.collection("mandaditos").doc(id).update({ storeArrivalTimestamp: Date.now() }).then(() => alert("📍 Registrado.")); }
-    function markDestArrivalAndDeliver(id) { db.collection("mandaditos").doc(id).update({ destArrivalTimestamp: Date.now(), status: 'Entregado' }).then(() => alert("🏁 Entregado.")); }
+    
+    function markMandadoStart(id) {
+        db.collection("mandaditos").doc(id).update({ startTimestamp: Date.now() }).then(() => alert("🚀 Hora de inicio registrada."));
+    }
+
+    function markStoreArrival(id) {
+        db.collection("mandaditos").doc(id).update({ storeArrivalTimestamp: Date.now() }).then(() => alert("📍 Llegada a tienda registrada."));
+    }
+
+    function markDestArrivalAndDeliver(id) {
+        db.collection("mandaditos").doc(id).update({ destArrivalTimestamp: Date.now(), status: 'Entregado' }).then(() => alert("🏁 Llegada a destino registrada y pedido entregado."));
+    }
+
+    function startMandadoTimer(id) {
+        db.collection("mandaditos").doc(id).update({ timerStartedAt: Date.now(), timerRunning: true }).then(() => alert("⏱️ Cronómetro de fila iniciado."));
+    }
+
+    function stopMandadoTimer(id) {
+        db.collection("mandaditos").doc(id).get().then(doc => {
+            if (!doc.exists) return;
+            const d = doc.data();
+            if (!d.timerStartedAt || !d.timerRunning) return;
+            const elapsedMins = (Date.now() - d.timerStartedAt) / (1000 * 60);
+            const extraLabor = elapsedMins * (39.38 / 60);
+            const newTotalLabor = (d.laborCost || 0) + extraLabor;
+            const newShipping = Math.ceil((d.fuelCost || 0) + newTotalLabor + (d.wearCost || 0));
+            db.collection("mandaditos").doc(id).update({
+                timerRunning: false, queueMinutes: (d.queueMinutes || 0) + elapsedMins,
+                laborCost: newTotalLabor, shippingCost: newShipping, totalCost: (d.productsCost || 0) + newShipping
+            }).then(() => alert(`⏱️ Se sumaron ${elapsedMins.toFixed(1)} min de fila.`));
+        });
+    }
+
     function sendMandadoQuote(id, shipCost) {
         const prodCost = parseFloat(document.getElementById(`admin-prod-cost-${id}`).value);
-        if (isNaN(prodCost) || prodCost <= 0) { alert("Ingresa costo válido"); return; }
-        db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => alert("Enviado."));
+        if (isNaN(prodCost) || prodCost <= 0) { alert("Ingresa costo válido de productos"); return; }
+        db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => alert("Cotización enviada al cliente."));
     }
+
     async function clearAllMandaditos() {
         if (confirm("¿Borrar historial?")) {
             const snap = await db.collection("mandaditos").get();
@@ -864,3 +956,4 @@
 </script>
 </body>
 </html>
+
