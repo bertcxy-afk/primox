@@ -242,9 +242,19 @@
             <button onclick="closeCart()" class="text-gray-500 font-bold text-lg">✕</button>
         </div>
         <div id="cart-items" class="space-y-3 mb-4 divide-y"></div>
-        <div class="border-t pt-3 font-bold text-lg flex justify-between mb-4">
-            <span>Total Alimentos:</span>
-            <span id="cart-total">$0.00</span>
+        <div class="border-t pt-3 space-y-1 mb-4">
+            <div class="flex justify-between text-sm text-gray-600">
+                <span>Subtotal Alimentos:</span>
+                <span id="cart-subtotal">$0.00</span>
+            </div>
+            <div id="cart-shipping-row" class="flex justify-between text-sm text-emerald-700 hidden">
+                <span>Costo de Envío (Moto):</span>
+                <span id="cart-shipping-val">$0.00</span>
+            </div>
+            <div class="font-bold text-lg flex justify-between pt-1 border-t">
+                <span>Total General:</span>
+                <span id="cart-total">$0.00</span>
+            </div>
         </div>
 
         <!-- Método de Pago -->
@@ -268,7 +278,7 @@
                 <p class="font-semibold text-blue-900">Pago con Tarjeta (Mercado Pago - Link Seguro):</p>
                 <p class="text-blue-700 text-xs">Al confirmar, serás dirigido al enlace oficial de pago. <b>Comisión por cobro: (3.49%) + $4.64</b>.</p>
                 <div class="bg-white p-2 rounded border border-blue-100 space-y-1 text-xs text-gray-700">
-                    <div class="flex justify-between"><span>Costo de alimentos:</span> <span id="mp-food-total">$0.00</span></div>
+                    <div class="flex justify-between"><span>Costo total pedido:</span> <span id="mp-food-total">$0.00</span></div>
                     <div class="flex justify-between"><span>Comisión Mercado Pago:</span> <span id="mp-commission-val">$0.00</span></div>
                     <div class="flex justify-between font-bold border-t pt-1 text-blue-900"><span>Monto neto que recibe el negocio:</span> <span id="mp-net-amount">$0.00</span></div>
                 </div>
@@ -282,7 +292,7 @@
                     <p><b>Propietario:</b> Roberto Carlos Martínez León</p>
                     <p><b>CLABE Interbancaria:</b> <span class="font-mono font-bold text-sm select-all">012533015277749576</span></p>
                 </div>
-                <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Transfiere el total exacto de tus alimentos: <span id="tr-exact-food-total">$0.00</span></p>
+                <p class="text-xs text-green-700 font-bold">✅ No hay comisión por transferencia. Transfiere el total exacto: <span id="tr-exact-food-total">$0.00</span></p>
 
                 <div class="border-t border-blue-200 pt-2 mt-2">
                     <label class="block text-xs font-semibold text-blue-900 mb-1">Confirma el monto transferido:</label>
@@ -312,11 +322,27 @@
             </div>
 
             <!-- Si es a domicilio -->
-            <div id="domicilio-fields" class="hidden space-y-2">
+            <div id="domicilio-fields" class="hidden space-y-3">
                 <input type="text" id="delivery-address" placeholder="Referencias de tu casa (Calle, número, color)" class="w-full p-2 border rounded-lg text-sm">
-                <label class="block text-xs font-semibold text-gray-700 mt-2">📍 Selecciona tu ubicación exacta en el mapa:</label>
+                <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Selecciona tu ubicación exacta en el mapa:</label>
                 <div id="delivery-map"></div>
                 <p id="map-coords-text" class="text-xs text-gray-500">Haz clic en el mapa para fijar tu ubicación.</p>
+
+                <!-- Recuadro de Cálculo de Envío por Distancia y Gasolina (Estilo Mandaditos) -->
+                <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1.5 shadow-sm">
+                    <div class="flex justify-between items-center text-xs text-gray-300">
+                        <span>📏 Distancia estimada del recorrido:</span>
+                        <span id="delivery-distance-display" class="font-bold text-white">0.00 km (0 m)</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-300">
+                        <span>⛽ Consumo estimado (Italika FT150 TS):</span>
+                        <span id="delivery-fuel-display" class="text-emerald-400">$0.00 MXN gasolina</span>
+                    </div>
+                    <div class="flex justify-between items-center text-base font-bold border-t border-gray-700 pt-1.5 mt-1">
+                        <span>Costo de Envío (Moto):</span>
+                        <span id="delivery-shipping-cost" class="text-emerald-400 text-lg">$0.00</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -556,6 +582,11 @@
     let currentMandadoShippingCost = 0;
     let currentMandadoFuelCost = 0;
 
+    // Variables Envío Pedido Inmediato Domicilio
+    let currentDeliveryDistanceKm = 0;
+    let currentDeliveryShippingCost = 0;
+    let currentDeliveryFuelCost = 0;
+
     function sanitizeText(str) {
         if (!str) return '';
         return String(str).replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
@@ -604,6 +635,35 @@
         document.getElementById("mandado-shipping-cost").innerText = `$${currentMandadoShippingCost.toFixed(2)}`;
     }
 
+    function recalculateDeliveryCost() {
+        if (!selectedLat || !selectedLng) return;
+
+        const baseLat = storeConfig.lat || 20.3333;
+        const baseLng = storeConfig.lng || -102.2333;
+        
+        const distStoreToClient = calculateHaversineKm(baseLat, baseLng, selectedLat, selectedLng);
+        const realRouteKm = distStoreToClient * 1.3;
+        currentDeliveryDistanceKm = Math.max(0.3, realRouteKm);
+
+        const gasPrice = parseFloat(storeConfig.gasPrice) || 24.00;
+        const motoKml = parseFloat(storeConfig.motoKml) || 33;
+        const baseFee = parseFloat(storeConfig.baseFee) || 15;
+        const perKmFee = parseFloat(storeConfig.perKmFee) || 4.5;
+
+        const litersUsed = currentDeliveryDistanceKm / motoKml;
+        currentDeliveryFuelCost = litersUsed * gasPrice;
+
+        const rawCost = baseFee + (currentDeliveryDistanceKm * perKmFee) + currentDeliveryFuelCost;
+        currentDeliveryShippingCost = Math.ceil(rawCost);
+
+        const meters = Math.round(currentDeliveryDistanceKm * 1000);
+        document.getElementById("delivery-distance-display").innerText = `${currentDeliveryDistanceKm.toFixed(2)} km (${meters} m)`;
+        document.getElementById("delivery-fuel-display").innerText = `$${currentDeliveryFuelCost.toFixed(2)} MXN (${(litersUsed * 1000).toFixed(0)} ml)`;
+        document.getElementById("delivery-shipping-cost").innerText = `$${currentDeliveryShippingCost.toFixed(2)}`;
+
+        updateCartUI();
+    }
+
     // =========================================================================
     // INICIALIZACIÓN Y RETORNO DE MERCADO PAGO
     // =========================================================================
@@ -648,10 +708,12 @@
             const address = localStorage.getItem('temp_address') || '';
             const savedLat = localStorage.getItem('temp_lat');
             const savedLng = localStorage.getItem('temp_lng');
+            const shippingCost = parseFloat(localStorage.getItem('temp_shipping_cost') || 0);
             let pendingCart = JSON.parse(localStorage.getItem('temp_cart') || '[]');
 
             if (pendingCart.length > 0) {
-                const total = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+                const subtotal = pendingCart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+                const total = subtotal + shippingCost;
                 const commission = (total * 0.0349) + 4.64;
                 const netReceived = total - commission;
 
@@ -660,6 +722,8 @@
                     clientPhone: sanitizeText(clientPhone),
                     clientBank: sanitizeText(clientBank),
                     items: pendingCart,
+                    subtotal: subtotal,
+                    shippingCost: shippingCost,
                     total: total,
                     commission: commission,
                     netReceived: netReceived,
@@ -676,6 +740,7 @@
                     localStorage.removeItem('temp_cart');
                     localStorage.removeItem('temp_lat');
                     localStorage.removeItem('temp_lng');
+                    localStorage.removeItem('temp_shipping_cost');
                     window.history.replaceState({}, document.title, window.location.pathname);
                     if (clientPhone) loadClientOrders(clientPhone);
                 }).catch((error) => {
@@ -1326,6 +1391,8 @@
                 paymentDetail += ` (Ref: ${sanitizeText(order.transferClabe)})`;
             }
 
+            let shippingInfo = order.shippingCost > 0 ? ` | Envío: $${order.shippingCost.toFixed(2)}` : '';
+
             ordersHtml += `
                 <div class="bg-white p-3 rounded-lg border shadow-sm space-y-2">
                     <div class="flex justify-between font-bold text-xs text-gray-500">
@@ -1343,7 +1410,7 @@
                     </div>
 
                     <div class="text-xs font-semibold text-gray-700">
-                        ${paymentDetail} | Total: <span class="text-orange-600 font-bold">$${order.total ? order.total.toFixed(2) : '0.00'}</span>
+                        ${paymentDetail}${shippingInfo} | Total: <span class="text-orange-600 font-bold">$${order.total ? order.total.toFixed(2) : '0.00'}</span>
                     </div>
 
                     <div class="flex gap-2 pt-1 border-t">
@@ -1371,9 +1438,9 @@
         const count = cart.reduce((sum, i) => sum + i.qty, 0);
         document.getElementById("cart-count").innerText = count;
         let html = "";
-        let total = 0;
+        let subtotal = 0;
         cart.forEach((item, index) => {
-            total += item.price * item.qty;
+            subtotal += item.price * item.qty;
             html += `
                 <div class="flex justify-between items-center py-2 text-sm">
                     <div>
@@ -1385,15 +1452,29 @@
             `;
         });
         document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Tu carrito está vacío</p>';
+        
+        const deliveryType = document.getElementById("delivery-type") ? document.getElementById("delivery-type").value : "local";
+        let shipping = 0;
+        if (deliveryType === "domicilio") {
+            shipping = currentDeliveryShippingCost;
+            document.getElementById("cart-shipping-row").classList.remove("hidden");
+            document.getElementById("cart-shipping-val").innerText = `$${shipping.toFixed(2)}`;
+        } else {
+            document.getElementById("cart-shipping-row").classList.add("hidden");
+        }
+
+        const total = subtotal + shipping;
+
+        document.getElementById("cart-subtotal").innerText = `$${subtotal.toFixed(2)}`;
         document.getElementById("cart-total").innerText = `$${total.toFixed(2)}`;
         
         const trFoodEl = document.getElementById('tr-exact-food-total');
         if (trFoodEl) trFoodEl.innerText = `$${total.toFixed(2)}`;
 
         const schTrFoodEl = document.getElementById('sch-tr-exact-total');
-        if (schTrFoodEl) schTrFoodEl.innerText = `$${total.toFixed(2)}`;
+        if (schTrFoodEl) schTrFoodEl.innerText = `$${subtotal.toFixed(2)}`;
 
-        calculateNetEarnings();
+        calculateNetEarnings(total);
         calculateScheduleNetEarnings();
         calculateChange();
         calculateTransferChange();
@@ -1468,6 +1549,8 @@
         document.getElementById("local-delivery-info").classList.toggle("hidden", type !== "local");
         document.getElementById("domicilio-fields").classList.toggle("hidden", type !== "domicilio");
         
+        updateCartUI();
+
         setTimeout(() => {
             if (type === "domicilio") {
                 initDeliveryMap();
@@ -1562,9 +1645,11 @@
                         const position = marker.getLatLng();
                         selectedLat = position.lat;
                         selectedLng = position.lng;
+                        recalculateDeliveryCost();
                     });
                 }
                 document.getElementById("map-coords-text").innerText = `Ubicación fijada: ${selectedLat.toFixed(5)}, ${selectedLng.toFixed(5)}`;
+                recalculateDeliveryCost();
             });
         } else {
             deliveryMap.invalidateSize();
@@ -1605,8 +1690,8 @@
         }
     }
 
-    function calculateNetEarnings() {
-        const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    function calculateNetEarnings(grandTotal) {
+        const total = grandTotal || (cart.reduce((sum, i) => sum + (i.price * i.qty), 0));
         const commission = (total * 0.0349) + 4.64;
         const net = total - commission;
         const foodEl = document.getElementById('mp-food-total');
@@ -1630,7 +1715,11 @@
     }
 
     function calculateChange() {
-        const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+        const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+        const deliveryType = document.getElementById("delivery-type") ? document.getElementById("delivery-type").value : "local";
+        const shipping = deliveryType === "domicilio" ? currentDeliveryShippingCost : 0;
+        const total = subtotal + shipping;
+
         const cash = parseFloat(document.getElementById("cash-amount").value) || 0;
         const changeText = document.getElementById("change-text");
         
@@ -1649,7 +1738,11 @@
     }
 
     function calculateTransferChange() {
-        const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+        const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+        const deliveryType = document.getElementById("delivery-type") ? document.getElementById("delivery-type").value : "local";
+        const shipping = deliveryType === "domicilio" ? currentDeliveryShippingCost : 0;
+        const total = subtotal + shipping;
+
         const transfer = parseFloat(document.getElementById("transfer-amount").value) || 0;
         const textElem = document.getElementById("transfer-change-text");
 
@@ -1690,6 +1783,7 @@
         let orderLat = null;
         let orderLng = null;
         let paymentMethod = "";
+        let shippingCost = 0;
 
         if (type === 'inmediato') {
             deliveryType = document.getElementById("delivery-type").value;
@@ -1698,11 +1792,14 @@
                 address = sanitizeText(document.getElementById("delivery-address").value);
                 orderLat = selectedLat;
                 orderLng = selectedLng;
+                shippingCost = currentDeliveryShippingCost;
                 if (!address) { alert("Por favor ingresa tu dirección de entrega."); return; }
+                if (!orderLat || !orderLng) { alert("Por favor selecciona tu ubicación exacta en el mapa de domicilio."); return; }
             } else {
                 address = "Asistir al local: " + storeConfig.address;
                 orderLat = storeConfig.lat;
                 orderLng = storeConfig.lng;
+                shippingCost = 0;
             }
         } else {
             scheduleDate = sanitizeText(document.getElementById("schedule-date").value);
@@ -1712,6 +1809,7 @@
             orderLng = scheduleLng;
             deliveryType = "domicilio";
             paymentMethod = document.getElementById("schedule-payment-method").value;
+            shippingCost = 0; // Reservas de comida por ahora con costo de alimentos base
 
             if (!scheduleDate || !scheduleTime || !address) {
                 alert("Por favor completa la fecha, hora y referencias para tu reserva.");
@@ -1723,12 +1821,16 @@
             }
         }
 
+        const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+        const total = subtotal + shippingCost;
+
         if (paymentMethod === "tarjeta" && type === 'inmediato') {
             localStorage.setItem('temp_client_name', name);
             localStorage.setItem('temp_client_phone', phone);
             localStorage.setItem('temp_client_bank', clientBank);
             localStorage.setItem('temp_delivery_type', deliveryType);
             localStorage.setItem('temp_address', address);
+            localStorage.setItem('temp_shipping_cost', shippingCost);
             if (orderLat && orderLng) {
                 localStorage.setItem('temp_lat', orderLat);
                 localStorage.setItem('temp_lng', orderLng);
@@ -1743,7 +1845,6 @@
         let cashAmount = 0;
         let change = 0;
         let transferClabe = "";
-        const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
 
         if (paymentMethod === "efectivo") {
             cashAmount = parseFloat(document.getElementById("cash-amount").value) || 0;
@@ -1758,6 +1859,8 @@
             clientPhone: phone,
             clientBank: clientBank || "",
             items: cart,
+            subtotal: subtotal,
+            shippingCost: shippingCost,
             total: total,
             deliveryType: deliveryType,
             address: address,
