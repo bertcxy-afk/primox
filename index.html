@@ -11,6 +11,7 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -41,9 +42,19 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             font-size: 14px;
         }
+        @keyframes slideInToast {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-enter {
+            animation: slideInToast 0.25s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans pb-24">
+    <!-- Contenedor de Notificaciones Toast -->
+    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm space-y-2 pointer-events-none"></div>
+
     <!-- Header -->
     <header class="bg-orange-500 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
         <h1 class="text-2xl sm:text-3xl font-handwriting tracking-wide flex items-center gap-2">
@@ -140,7 +151,12 @@
             <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200 space-y-2">
                 <label class="block font-bold text-sm text-emerald-900">1. ¿En qué tienda compraremos?</label>
                 <input type="text" id="mandado-store-name" placeholder="Nombre de la tienda (Oxxo, Farmacia...)" class="w-full p-2 bg-white border rounded-lg text-sm">
-                <p class="text-xs text-gray-600">📍 Toca el mapa para marcar la ubicación de la <b>Tienda (Punto 2)</b>:</p>
+                <div class="flex justify-between items-center gap-2">
+                    <p class="text-xs text-gray-600">📍 Toca el mapa para marcar la <b>Tienda (Punto 2)</b>:</p>
+                    <button type="button" onclick="useCurrentGPS('mandado-store')" class="bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 hover:bg-emerald-800 cursor-pointer">
+                        🛰️ Mi GPS
+                    </button>
+                </div>
                 <div id="mandado-store-map"></div>
                 <p id="mandado-store-coords" class="text-[11px] font-semibold text-emerald-700">Ubicación tienda: Sin seleccionar</p>
             </div>
@@ -156,7 +172,12 @@
             <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-200 space-y-2">
                 <label class="block font-bold text-sm text-blue-900">3. ¿A dónde te lo llevamos?</label>
                 <input type="text" id="mandado-dest-address" placeholder="Calle, número y referencias" class="w-full p-2 bg-white border rounded-lg text-sm">
-                <p class="text-xs text-gray-600">🏠 Toca el mapa para marcar tu <b>Domicilio de entrega (Punto 3)</b>:</p>
+                <div class="flex justify-between items-center gap-2">
+                    <p class="text-xs text-gray-600">🏠 Toca el mapa para marcar tu <b>Domicilio (Punto 3)</b>:</p>
+                    <button type="button" onclick="useCurrentGPS('mandado-dest')" class="bg-blue-700 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 hover:bg-blue-800 cursor-pointer">
+                        🛰️ Usar mi GPS
+                    </button>
+                </div>
                 <div id="mandado-dest-map"></div>
                 <p id="mandado-dest-coords" class="text-[11px] font-semibold text-blue-700">Ubicación entrega: Sin seleccionar</p>
             </div>
@@ -305,7 +326,12 @@
 
                 <div id="domicilio-fields" class="hidden space-y-3">
                     <input type="text" id="delivery-address" placeholder="Calle, número y referencias" class="w-full p-2 border rounded-lg text-sm">
-                    <label class="block text-xs font-semibold text-gray-700 mt-1">📍 Toca el mapa para marcar tu ubicación final (Punto 2):</label>
+                    <div class="flex justify-between items-center gap-2 mt-1">
+                        <label class="block text-xs font-semibold text-gray-700">📍 Toca el mapa para marcar tu ubicación (Punto 2):</label>
+                        <button type="button" onclick="useCurrentGPS('delivery')" class="bg-orange-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 hover:bg-orange-700 cursor-pointer">
+                            🛰️ Usar mi GPS
+                        </button>
+                    </div>
                     <div id="delivery-map"></div>
                     <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1.5 text-xs">
                         <div class="flex justify-between items-center text-gray-300 border-b border-gray-800 pb-1">
@@ -366,7 +392,15 @@
             </div>
             <div id="schedule-domicilio-fields" class="space-y-2">
                 <div><label class="block font-semibold text-sm mb-1">Dirección y Referencias:</label><input type="text" id="schedule-address" placeholder="Calle, número, fachada" class="w-full p-2 border rounded-lg text-sm"></div>
-                <div><label class="block text-xs font-semibold text-gray-700 mb-1">📍 Toca el mapa para marcar tu ubicación final (Punto 2):</label><div id="schedule-map"></div></div>
+                <div>
+                    <div class="flex justify-between items-center gap-2 mb-1">
+                        <label class="block text-xs font-semibold text-gray-700">📍 Toca el mapa para marcar tu ubicación (Punto 2):</label>
+                        <button type="button" onclick="useCurrentGPS('schedule')" class="bg-amber-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 hover:bg-amber-700 cursor-pointer">
+                            🛰️ Usar mi GPS
+                        </button>
+                    </div>
+                    <div id="schedule-map"></div>
+                </div>
                 <div class="bg-gray-900 text-white p-3.5 rounded-xl space-y-1.5 text-xs">
                     <div class="flex justify-between items-center text-gray-300 border-b border-gray-800 pb-1">
                         <span>📏 Distancia Total (Punto 1 Base ➔ Punto 2 Destino):</span>
@@ -420,19 +454,26 @@
                 <button type="button" onclick="closeAdmin()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
             </div>
 
-            <div id="admin-login-view">
-                <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg mb-3 text-sm">
-                <button type="button" onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-bold cursor-pointer">Ingresar</button>
+            <div id="admin-login-view" class="space-y-3">
+                <p class="text-xs text-gray-500">Acceso exclusivo para administradores autorizados (Firebase Auth):</p>
+                <input type="email" id="admin-email" placeholder="Correo electrónico de administrador" class="w-full p-2 border rounded-lg text-sm">
+                <input type="password" id="admin-pass" placeholder="Contraseña de Administrador" class="w-full p-2 border rounded-lg text-sm">
+                <button type="button" id="admin-login-btn" onclick="verifyAdmin()" class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-bold cursor-pointer hover:bg-black transition">Ingresar con Cuenta Admin</button>
             </div>
 
             <div id="admin-panel-view" class="hidden space-y-6">
+                <div class="flex justify-between items-center bg-gray-100 px-3 py-2 rounded-lg text-xs">
+                    <span id="admin-logged-email" class="font-semibold text-gray-700">Sesión activa</span>
+                    <button type="button" onclick="logoutAdmin()" class="text-red-600 font-bold hover:underline cursor-pointer">Cerrar Sesión</button>
+                </div>
+
                 <!-- Pedidos de Comida y Reservas en Vivo -->
                 <div class="bg-orange-50 p-4 rounded-xl border-2 border-orange-300">
                     <div class="flex justify-between items-center mb-2">
                         <h4 class="font-bold text-orange-950 flex items-center gap-1.5">
                             🍽️ Pedidos de Comida y Reservas (<span id="admin-food-count">0</span>)
                         </h4>
-                        <button type="button" onclick="clearAllFoodOrders()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer">🗑️ Limpiar</button>
+                        <button type="button" onclick="archiveAllFoodOrders()" class="bg-amber-600 text-white px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-amber-700">📦 Archivar</button>
                     </div>
                     <div id="admin-food-list" class="space-y-3 text-sm">
                         <p class="text-gray-500 text-xs">No hay pedidos de comida o reservas activas.</p>
@@ -445,19 +486,32 @@
                         <h4 class="font-bold text-emerald-950 flex items-center gap-1.5">
                             🛵 Mandaditos en Vivo (<span id="admin-mandaditos-count">0</span>)
                         </h4>
-                        <button type="button" onclick="clearAllMandaditos()" class="bg-red-500 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer">🗑️ Limpiar</button>
+                        <button type="button" onclick="archiveAllMandaditos()" class="bg-amber-600 text-white px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-amber-700">📦 Archivar</button>
                     </div>
                     <div id="admin-mandaditos-list" class="space-y-3 text-sm">
                         <p class="text-gray-500 text-xs">No hay mandaditos activos.</p>
                     </div>
                 </div>
 
-                <!-- Configuración Base -->
-                <div class="border-b pb-4 space-y-2">
-                    <h4 class="font-bold mb-2">Configuración General (Ubicación 1 Base)</h4>
-                    <input type="text" id="admin-store-address" placeholder="Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
+                <!-- Configuración Base y Tarifas -->
+                <div class="border-b pb-4 space-y-2.5">
+                    <h4 class="font-bold">Configuración General (Base y Tarifas de Envío)</h4>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Dirección de la Base:</label>
+                        <input type="text" id="admin-store-address" placeholder="Av. Principal #123" class="w-full p-2 border rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">⛽ Gasolina ($ MXN/L):</label>
+                            <input type="number" step="0.1" id="admin-gas-price" placeholder="24.00" class="w-full p-2 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">🏍️ Rendimiento (km/L):</label>
+                            <input type="number" step="0.5" id="admin-moto-kml" placeholder="33" class="w-full p-2 border rounded-lg text-sm">
+                        </div>
+                    </div>
                     <div id="admin-store-map"></div>
-                    <button type="button" onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2 cursor-pointer">Guardar Configuración Base</button>
+                    <button type="button" onclick="saveConfig()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-bold mt-2 cursor-pointer hover:bg-blue-700">Guardar Configuración Base y Tarifas</button>
                 </div>
 
                 <!-- Platillos -->
@@ -466,8 +520,8 @@
                     <input type="text" id="dish-name" placeholder="Nombre" class="w-full p-2 border rounded-lg text-sm">
                     <input type="number" id="dish-price" placeholder="Precio ($)" class="w-full p-2 border rounded-lg text-sm">
                     <input type="text" id="dish-desc" placeholder="Descripción" class="w-full p-2 border rounded-lg text-sm">
-                    <input type="text" id="dish-img" placeholder="URL Imagen" class="w-full p-2 border rounded-lg text-sm">
-                    <button type="button" onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold cursor-pointer">Guardar Platillo</button>
+                    <input type="text" id="dish-img" placeholder="URL Imagen (https://...)" class="w-full p-2 border rounded-lg text-sm">
+                    <button type="button" onclick="saveDish()" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold cursor-pointer hover:bg-green-700">Guardar Platillo</button>
                 </div>
                 <div>
                     <h4 class="font-bold mb-2">Menú Actual</h4>
@@ -484,13 +538,36 @@
                 <h3 class="text-base font-bold text-indigo-950">📍 Configurar Ubicación de Inicio (Manual)</h3>
                 <button type="button" onclick="closeAdminStartModal()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
             </div>
-            <p class="text-xs text-gray-600">Toca el mapa para fijar manualmente el punto exacto donde inicias este pedido (obligatorio antes de avanzar):</p>
+            <div class="flex justify-between items-center gap-2">
+                <p class="text-xs text-gray-600">Toca el mapa o usa tu GPS para fijar el punto exacto de inicio:</p>
+                <button type="button" onclick="useCurrentGPS('admin-start')" class="bg-indigo-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 hover:bg-indigo-700 cursor-pointer">
+                    🛰️ Mi GPS
+                </button>
+            </div>
             <input type="hidden" id="start-loc-mandado-id">
             <input type="hidden" id="start-loc-collection" value="mandaditos">
             <div id="admin-start-map"></div>
             <p id="admin-start-coords-text" class="text-xs font-semibold text-red-600">⚠️ Ubicación inicial: Sin seleccionar (Toca el mapa)</p>
             <button type="button" onclick="confirmManualMandadoStart()" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition cursor-pointer">
                 ✔ Confirmar Ubicación e Iniciar Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Calificación y Comentario (Reemplaza prompt nativo) -->
+    <div id="rating-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-5 space-y-3 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-base font-bold text-gray-900">⭐ Calificar Servicio</h3>
+                <button type="button" onclick="closeRatingModal()" class="text-gray-500 font-bold text-lg cursor-pointer">✕</button>
+            </div>
+            <input type="hidden" id="rating-order-id">
+            <input type="hidden" id="rating-collection">
+            <input type="hidden" id="rating-stars">
+            <p id="rating-modal-subtitle" class="text-xs text-gray-600">Cuéntanos qué podríamos mejorar para merecer tu mejor calificación:</p>
+            <textarea id="rating-comment-input" rows="3" placeholder="Escribe tu comentario aquí..." class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-orange-400 outline-none"></textarea>
+            <button type="button" onclick="submitRatingFeedback()" class="w-full bg-orange-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-orange-700 cursor-pointer">
+                Enviar Calificación
             </button>
         </div>
     </div>
@@ -509,7 +586,27 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
         db.enableNetwork().catch(err => console.log(err));
+
+        // Sistema de Notificaciones Toast (No bloquea listeners de Firebase)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const colors = {
+                success: 'bg-emerald-700 text-white border-emerald-900',
+                error: 'bg-red-600 text-white border-red-800',
+                warning: 'bg-amber-600 text-white border-amber-800',
+                info: 'bg-gray-900 text-white border-gray-700'
+            };
+            const toast = document.createElement('div');
+            toast.className = `toast-enter pointer-events-auto px-4 py-3 rounded-xl shadow-lg border text-xs font-semibold flex items-center justify-between gap-2 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<span>${sanitizeText(message)}</span><button type="button" onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold">✕</button>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentElement) toast.remove();
+            }, 4200);
+        }
 
         let menuItems = [];
         let cart = [];
@@ -522,9 +619,23 @@
             motoKml: 33
         };
         
+        // Registro centralizado de instancias de mapas Leaflet para evitar fugas de memoria
+        const ticketMapInstances = {};
+        function cleanupTicketMaps(prefix = '') {
+            Object.keys(ticketMapInstances).forEach(key => {
+                if (!prefix || key.startsWith(prefix)) {
+                    try {
+                        ticketMapInstances[key].remove();
+                    } catch (e) {}
+                    delete ticketMapInstances[key];
+                }
+            });
+        }
+
         let deliveryMap = null, deliveryMarker = null, selectedLat = null, selectedLng = null;
         let scheduleMap = null, scheduleMarker = null, scheduleLat = null, scheduleLng = null;
         let adminStoreMap = null, adminStoreMarker = null, adminStoreLat = null, adminStoreLng = null;
+        let adminStartMap = null, adminStartMarker = null, manualStartLat = null, manualStartLng = null;
 
         let mandadoStoreMap = null, mandadoStoreMarker = null, mandadoStoreLat = null, mandadoStoreLng = null;
         let mandadoDestMap = null, mandadoDestMarker = null, mandadoDestLat = null, mandadoDestLng = null;
@@ -532,9 +643,30 @@
         let currentDeliveryDistanceKm = 0, currentDeliveryShippingCost = 0, currentDeliveryFuelCost = 0, currentDeliveryLaborCost = 0, currentDeliveryWearCost = 0, currentDeliveryMinutes = 0;
         let currentScheduleDistanceKm = 0, currentScheduleShippingCost = 0, currentScheduleFuelCost = 0, currentScheduleLaborCost = 0, currentScheduleWearCost = 0, currentScheduleMinutes = 0;
 
+        // Listeners controlados (solo se activan cuando corresponde)
+        let unsubscribeClientMandaditos = null;
+        let unsubscribeClientFood = null;
+        let unsubscribeAdminMandaditos = null;
+        let unsubscribeAdminFood = null;
+
         function sanitizeText(str) {
-            if (!str) return '';
-            return String(str).replace(/</g, "&lt;").replace(/>/g, "&gt;").trim();
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;")
+                .trim();
+        }
+
+        function sanitizeImageUrl(url) {
+            if (!url) return 'https://via.placeholder.com/100';
+            const clean = String(url).trim();
+            if (clean.startsWith('https://') || clean.startsWith('http://')) {
+                return clean.replace(/"/g, '&quot;');
+            }
+            return 'https://via.placeholder.com/100';
         }
 
         function calculateHaversineKm(lat1, lon1, lat2, lon2) {
@@ -556,6 +688,76 @@
             const laborCost = estimatedMinutes * (39.38 / 60);
             const wearCost = distanceKm * 0.40;
             return { distanceKm, meters: Math.round(distanceKm * 1000), litersUsed, fuelCost, estimatedMinutes, laborCost, wearCost, totalCost: Math.ceil(fuelCost + laborCost + wearCost) };
+        }
+
+        // Geolocalización automática con GPS del dispositivo
+        function useCurrentGPS(target) {
+            if (!navigator.geolocation) {
+                showToast("Tu navegador no soporta geolocalización GPS.", "error");
+                return;
+            }
+            showToast("🛰️ Obteniendo tu ubicación GPS...", "info");
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+
+                    if (target === 'mandado-store') {
+                        mandadoStoreLat = lat; mandadoStoreLng = lng;
+                        if (mandadoStoreMap) {
+                            mandadoStoreMap.setView([lat, lng], 16);
+                            if (mandadoStoreMarker) mandadoStoreMarker.setLatLng([lat, lng]);
+                            else mandadoStoreMarker = L.marker([lat, lng], {draggable: true}).addTo(mandadoStoreMap);
+                        }
+                        document.getElementById("mandado-store-coords").innerText = `Tienda (Punto 2): ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                        recalculateMandaditoCost();
+                    } else if (target === 'mandado-dest') {
+                        mandadoDestLat = lat; mandadoDestLng = lng;
+                        if (mandadoDestMap) {
+                            mandadoDestMap.setView([lat, lng], 16);
+                            if (mandadoDestMarker) mandadoDestMarker.setLatLng([lat, lng]);
+                            else mandadoDestMarker = L.marker([lat, lng], {draggable: true}).addTo(mandadoDestMap);
+                        }
+                        document.getElementById("mandado-dest-coords").innerText = `Cliente (Punto 3): ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                        recalculateMandaditoCost();
+                    } else if (target === 'delivery') {
+                        if (deliveryMap) {
+                            deliveryMap.setView([lat, lng], 16);
+                            if (deliveryMarker) deliveryMarker.setLatLng([lat, lng]);
+                            else {
+                                deliveryMarker = L.marker([lat, lng], {draggable: true}).addTo(deliveryMap);
+                                deliveryMarker.on('dragend', ev => recalcDeliveryShippingFromPoint(ev.target.getLatLng().lat, ev.target.getLatLng().lng));
+                            }
+                        }
+                        recalcDeliveryShippingFromPoint(lat, lng);
+                    } else if (target === 'schedule') {
+                        if (scheduleMap) {
+                            scheduleMap.setView([lat, lng], 16);
+                            if (scheduleMarker) scheduleMarker.setLatLng([lat, lng]);
+                            else {
+                                scheduleMarker = L.marker([lat, lng], {draggable: true}).addTo(scheduleMap);
+                                scheduleMarker.on('dragend', ev => recalcScheduleShippingFromPoint(ev.target.getLatLng().lat, ev.target.getLatLng().lng));
+                            }
+                        }
+                        recalcScheduleShippingFromPoint(lat, lng);
+                    } else if (target === 'admin-start') {
+                        manualStartLat = lat; manualStartLng = lng;
+                        const coordsEl = document.getElementById("admin-start-coords-text");
+                        if (adminStartMap) {
+                            adminStartMap.setView([lat, lng], 16);
+                            if (adminStartMarker) adminStartMarker.setLatLng([lat, lng]);
+                            else adminStartMarker = L.marker([lat, lng], {draggable: true}).addTo(adminStartMap);
+                        }
+                        coordsEl.innerText = `✅ Ubicación inicial lista: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                        coordsEl.className = "text-xs font-semibold text-emerald-700";
+                    }
+                    showToast("✅ Ubicación GPS fijada con éxito.", "success");
+                },
+                (err) => {
+                    showToast("⚠️ No se pudo obtener el GPS. Verifica los permisos o toca el mapa.", "warning");
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         }
 
         function recalculateMandaditoCost() {
@@ -581,22 +783,27 @@
         }
 
         function loadStoreConfig() {
-            db.collection("config").doc("main").get().then(doc => {
+            db.collection("config").doc("main").onSnapshot(doc => {
                 if (doc.exists) {
                     const data = doc.data();
                     if (data.lat && data.lng) {
                         storeConfig.lat = data.lat;
                         storeConfig.lng = data.lng;
                     }
-                    if (data.address) {
-                        storeConfig.address = data.address;
-                    }
+                    if (data.address) storeConfig.address = data.address;
+                    if (data.gasPrice) storeConfig.gasPrice = parseFloat(data.gasPrice);
+                    if (data.motoKml) storeConfig.motoKml = parseFloat(data.motoKml);
+
                     const addrDisplay = document.getElementById("store-address-display");
                     if (addrDisplay) addrDisplay.innerText = storeConfig.address;
                     const adminAddr = document.getElementById("admin-store-address");
                     if (adminAddr) adminAddr.value = storeConfig.address;
+                    const adminGas = document.getElementById("admin-gas-price");
+                    if (adminGas) adminGas.value = storeConfig.gasPrice;
+                    const adminKml = document.getElementById("admin-moto-kml");
+                    if (adminKml) adminKml.value = storeConfig.motoKml;
                 }
-            }).catch(err => console.log("Error cargando config:", err));
+            }, err => console.log("Error cargando config:", err));
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -604,19 +811,33 @@
             const savedName = localStorage.getItem('primo_user_name');
             const savedPhone = localStorage.getItem('primo_user_phone');
             if (savedName && savedPhone) {
-                document.getElementById('client-name').value = sanitizeText(savedName);
-                document.getElementById('client-phone').value = sanitizeText(savedPhone);
+                document.getElementById('client-name').value = savedName;
+                document.getElementById('client-phone').value = savedPhone;
                 document.getElementById('user-registered-badge').classList.remove('hidden');
                 loadClientMandaditos(savedPhone);
                 loadClientFoodOrders(savedPhone);
             }
             const today = new Date().toISOString().split('T')[0];
             if (document.getElementById('schedule-date')) document.getElementById('schedule-date').value = today;
+
+            // Verificar si ya existe sesión de administrador activa en Firebase Auth
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    document.getElementById("admin-login-view").classList.add("hidden");
+                    document.getElementById("admin-panel-view").classList.remove("hidden");
+                    document.getElementById("admin-logged-email").innerText = `Admin: ${user.email}`;
+                    initAdminListeners();
+                } else {
+                    document.getElementById("admin-login-view").classList.remove("hidden");
+                    document.getElementById("admin-panel-view").classList.add("hidden");
+                    stopAdminListeners();
+                }
+            });
         });
 
         function saveClientIdentity() {
-            const name = sanitizeText(document.getElementById('client-name').value);
-            const phone = sanitizeText(document.getElementById('client-phone').value);
+            const name = document.getElementById('client-name').value.trim();
+            const phone = document.getElementById('client-phone').value.trim();
             if (name && phone) {
                 localStorage.setItem('primo_user_name', name);
                 localStorage.setItem('primo_user_phone', phone);
@@ -629,18 +850,16 @@
         function openMandaditoModal() {
             const nameInput = document.getElementById("client-name");
             const phoneInput = document.getElementById("client-phone");
-            
             const name = nameInput ? nameInput.value.trim() : "";
             const phone = phoneInput ? phoneInput.value.trim() : "";
 
             if (!name || !phone) {
-                alert("Por favor ingresa tu Nombre y Teléfono en la sección superior antes de pedir un mandadito.");
+                showToast("Ingresa tu Nombre y Teléfono en la parte superior antes de pedir.", "warning");
                 if (nameInput) nameInput.focus();
                 return;
             }
 
             saveClientIdentity();
-            
             const modal = document.getElementById("mandadito-modal");
             if (modal) {
                 modal.classList.remove("hidden");
@@ -671,7 +890,7 @@
                 }
             } else {
                 mandadoStoreMap.invalidateSize();
-                mandadoStoreMap.setView([defLat, defLng], 15);
+                mandadoStoreMap.setView([mandadoStoreLat || defLat, mandadoStoreLng || defLng], 15);
             }
 
             if (!mandadoDestMap) {
@@ -689,19 +908,19 @@
                 }
             } else {
                 mandadoDestMap.invalidateSize();
-                mandadoDestMap.setView([defLat, defLng], 15);
+                mandadoDestMap.setView([mandadoDestLat || defLat, mandadoDestLng || defLng], 15);
             }
         }
 
         function submitMandadito() {
-            const name = sanitizeText(document.getElementById("client-name").value);
-            const phone = sanitizeText(document.getElementById("client-phone").value);
-            const storeName = sanitizeText(document.getElementById("mandado-store-name").value);
-            const itemsText = sanitizeText(document.getElementById("mandado-items").value);
-            const destAddress = sanitizeText(document.getElementById("mandado-dest-address").value);
+            const name = document.getElementById("client-name").value.trim();
+            const phone = document.getElementById("client-phone").value.trim();
+            const storeName = document.getElementById("mandado-store-name").value.trim();
+            const itemsText = document.getElementById("mandado-items").value.trim();
+            const destAddress = document.getElementById("mandado-dest-address").value.trim();
 
             if (!name || !phone || !storeName || !itemsText || !destAddress || !mandadoStoreLat || !mandadoDestLat) {
-                alert("Por favor completa todos los datos y marca las ubicaciones en los mapas.");
+                showToast("Completa todos los datos y marca ambas ubicaciones en los mapas.", "warning");
                 return;
             }
 
@@ -714,26 +933,29 @@
                 timerRunning: false, timerStartedAt: null, queueMinutes: 0,
                 startTimestamp: null, storeArrivalTimestamp: null, destArrivalTimestamp: null,
                 startLat: null, startLng: null,
-                rating: null, feedbackComment: "", deletedByAdmin: false,
+                rating: null, feedbackComment: "", archived: false, deletedByAdmin: false,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert("¡Mandadito enviado con éxito!");
+                showToast("¡Mandadito enviado con éxito! Síguelo en vivo abajo.", "success");
                 closeMandaditoModal();
                 loadClientMandaditos(phone);
             }).catch(err => {
                 console.error(err);
-                alert("Error al enviar el mandadito.");
+                showToast("Error al enviar el mandadito.", "error");
             });
         }
 
         function loadClientMandaditos(phone) {
             if (!phone) return;
-            db.collection("mandaditos").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
+            if (unsubscribeClientMandaditos) unsubscribeClientMandaditos();
+
+            unsubscribeClientMandaditos = db.collection("mandaditos").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
+                cleanupTicketMaps('ticket-map-');
                 let list = [];
                 clientMandaditosCache = {};
                 snapshot.forEach(doc => {
                     const data = { id: doc.id, ...doc.data() };
-                    if (data.deletedByAdmin) return;
+                    if (data.deletedByAdmin || data.archived) return;
                     list.push(data);
                     clientMandaditosCache[doc.id] = data;
                 });
@@ -742,6 +964,7 @@
 
                 let html = "";
                 list.forEach(m => {
+                    const safeId = sanitizeText(m.id);
                     const status = m.status || 'Solicitado';
                     let badgeClass = 'bg-yellow-100 text-yellow-800';
                     let statusMsg = '⏳ Esperando aprobación...';
@@ -758,7 +981,7 @@
                     } else if (status === 'Cotizado') {
                         badgeClass = 'bg-emerald-50 text-emerald-950 ring-2 ring-emerald-300';
                         statusMsg = `💰 Productos: $${(m.productsCost||0).toFixed(2)} + Envío: $${(m.shippingCost||0).toFixed(2)} = <b>Total: $${(m.totalCost||0).toFixed(2)}</b>`;
-                        actionBtn = `<button type="button" onclick="openMandadoConfirmModal('${m.id}')" class="w-full mt-2 bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs animate-bounce cursor-pointer">👉 Aceptar Costo y Pagar</button>`;
+                        actionBtn = `<button type="button" data-id="${safeId}" onclick="openMandadoConfirmModal(this.dataset.id)" class="w-full mt-2 bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs animate-bounce cursor-pointer">👉 Aceptar Costo y Pagar</button>`;
                     } else if (status === 'Pagado y Confirmado') {
                         badgeClass = 'bg-green-100 text-green-900';
                         statusMsg = '✅ Pago confirmado. En ruta de entrega.';
@@ -789,25 +1012,20 @@
                                 
                                 <div class="mt-2 space-y-1">
                                     <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Base), 2 (Tienda), 3 (Destino)</p>
-                                    <div id="ticket-map-${m.id}" class="ticket-map"></div>
+                                    <div id="ticket-map-${safeId}" class="ticket-map"></div>
                                 </div>
 
                                 <div class="pt-2 border-t mt-2 text-center">
                                     ${m.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${m.rating} Estrellas ${m.feedbackComment ? `("${sanitizeText(m.feedbackComment)}")` : ''}</p>` : `
                                         <p class="font-semibold text-gray-700 mb-1">Califica (1 a 6 estrellas):</p>
                                         <div class="flex justify-center gap-1">
-                                            <button type="button" onclick="rateOrder('${m.id}', 1)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">1⭐</button>
-                                            <button type="button" onclick="rateOrder('${m.id}', 2)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">2⭐</button>
-                                            <button type="button" onclick="rateOrder('${m.id}', 3)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">3⭐</button>
-                                            <button type="button" onclick="rateOrder('${m.id}', 4)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">4⭐</button>
-                                            <button type="button" onclick="rateOrder('${m.id}', 5)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">5⭐</button>
-                                            <button type="button" onclick="rateOrder('${m.id}', 6)" class="px-2 py-1 bg-yellow-200 rounded cursor-pointer">6⭐</button>
+                                            ${[1,2,3,4,5,6].map(star => `<button type="button" data-id="${safeId}" onclick="handleRatingClick('mandaditos', this.dataset.id, ${star})" class="px-2 py-1 ${star===6?'bg-yellow-200':'bg-yellow-100'} rounded cursor-pointer">${star}⭐</button>`).join('')}
                                         </div>
                                     `}
                                 </div>
                             </div>
                         `;
-                        setTimeout(() => initTicketRouteMap(m), 300);
+                        setTimeout(() => initTicketRouteMap(m), 250);
                     }
 
                     let liveTrackerHtml = `
@@ -823,7 +1041,7 @@
                         <div class="p-3 rounded-xl border ${badgeClass} space-y-1.5">
                             <div class="flex justify-between items-center font-bold">
                                 <span>🏪 ${sanitizeText(m.storeName)}</span>
-                                <span class="px-2 py-0.5 rounded bg-white text-[11px]">${status}</span>
+                                <span class="px-2 py-0.5 rounded bg-white text-[11px]">${sanitizeText(status)}</span>
                             </div>
                             <p class="text-gray-700 bg-white/70 p-1.5 rounded">📝 ${sanitizeText(m.itemsText)}</p>
                             <p class="font-medium">${statusMsg}</p>
@@ -839,25 +1057,48 @@
             });
         }
 
-        function rateOrder(id, stars) {
+        // Sistema moderno de calificación con modal en vez de prompt()
+        function handleRatingClick(collectionName, id, stars) {
             if (stars <= 3) {
-                const comment = prompt("¿Qué podríamos mejorar para merecer tu mejor calificación?");
-                db.collection("mandaditos").doc(id).update({ 
-                    rating: stars, 
-                    feedbackComment: comment ? sanitizeText(comment) : "Sin comentario" 
-                }).then(() => alert("Gracias por tus comentarios."));
+                document.getElementById("rating-order-id").value = id;
+                document.getElementById("rating-collection").value = collectionName;
+                document.getElementById("rating-stars").value = stars;
+                document.getElementById("rating-comment-input").value = "";
+                document.getElementById("rating-modal").classList.remove("hidden");
             } else {
-                db.collection("mandaditos").doc(id).update({ 
+                db.collection(collectionName).doc(id).update({ 
                     rating: stars, 
                     feedbackComment: "Excelente" 
-                }).then(() => alert("¡Gracias por tus 6 estrellas!"));
+                }).then(() => showToast(`¡Gracias por tus ${stars} estrellas!`, "success"));
             }
+        }
+
+        function closeRatingModal() {
+            document.getElementById("rating-modal").classList.add("hidden");
+        }
+
+        function submitRatingFeedback() {
+            const id = document.getElementById("rating-order-id").value;
+            const col = document.getElementById("rating-collection").value;
+            const stars = parseInt(document.getElementById("rating-stars").value, 10) || 3;
+            const comment = document.getElementById("rating-comment-input").value.trim();
+
+            db.collection(col).doc(id).update({
+                rating: stars,
+                feedbackComment: comment || "Sin comentario"
+            }).then(() => {
+                closeRatingModal();
+                showToast("Gracias por tus comentarios para mejorar.", "success");
+            });
         }
 
         function initTicketRouteMap(m) {
             const containerId = `ticket-map-${m.id}`;
             const el = document.getElementById(containerId);
-            if (!el || el._leaflet_id) return;
+            if (!el) return;
+            if (ticketMapInstances[containerId]) {
+                try { ticketMapInstances[containerId].remove(); } catch (e) {}
+            }
 
             const baseLat = m.startLat || storeConfig.lat || 20.3333;
             const baseLng = m.startLng || storeConfig.lng || -102.2333;
@@ -867,6 +1108,7 @@
             const destLng = m.destLng || baseLng;
 
             const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([storeLat, storeLng], 14);
+            ticketMapInstances[containerId] = map;
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             const icon1 = L.divIcon({className: 'map-number-icon', html: '1', iconSize: [26, 26], iconAnchor: [13, 13]});
@@ -913,22 +1155,26 @@
         }
         function rejectMandadoQuote() {
             const id = document.getElementById("confirm-mandado-id").value;
-            if (id && confirm("¿Cancelar?")) { db.collection("mandaditos").doc(id).update({ status: 'Cancelado' }); closeMandadoConfirmModal(); }
+            if (id && confirm("¿Seguro que deseas cancelar este mandadito?")) { 
+                db.collection("mandaditos").doc(id).update({ status: 'Cancelado' }); 
+                closeMandadoConfirmModal(); 
+                showToast("Mandadito cancelado.", "info");
+            }
         }
         function confirmMandadoPurchase() {
             const id = document.getElementById("confirm-mandado-id").value;
             const method = document.getElementById("mandado-payment-method").value;
             const cashAmt = parseFloat(document.getElementById("mandado-cash-amount").value) || 0;
-            const transferRef = sanitizeText(document.getElementById("mandado-transfer-ref").value);
+            const transferRef = document.getElementById("mandado-transfer-ref").value.trim();
             const m = clientMandaditosCache[id];
             const total = m ? (Number(m.productsCost || 0) + Number(m.shippingCost || 0)) : 0;
 
             if (method === 'efectivo' && cashAmt < total) {
-                alert(`El monto en efectivo ($${cashAmt.toFixed(2)}) debe ser igual o mayor al total ($${total.toFixed(2)}).`);
+                showToast(`El efectivo ($${cashAmt.toFixed(2)}) debe ser mayor o igual a $${total.toFixed(2)}.`, "warning");
                 return;
             }
             if (method === 'transferencia' && !transferRef) {
-                alert("Por favor ingresa el folio o referencia de tu transferencia.");
+                showToast("Ingresa el folio o referencia de tu transferencia.", "warning");
                 return;
             }
 
@@ -941,165 +1187,312 @@
                 change: changeVal,
                 transferRef: method === 'transferencia' ? transferRef : ''
             }).then(() => {
-                alert(method === 'efectivo' ? `¡Pago confirmado! Tu cambio a recibir será de $${changeVal.toFixed(2)}.` : "¡Pago confirmado!");
+                showToast(method === 'efectivo' ? `¡Pago confirmado! Tu cambio será de $${changeVal.toFixed(2)}.` : "¡Pago confirmado!", "success");
                 closeMandadoConfirmModal();
             });
         }
 
-        db.collection("mandaditos").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
-            let mandados = [];
-            snapshot.forEach(doc => mandados.push({ id: doc.id, ...doc.data() }));
-            mandados.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
-            document.getElementById("admin-mandaditos-count").innerText = mandados.length;
+        // Listeners exclusivos del Panel de Administrador (Solo se inician tras autenticar)
+        function stopAdminListeners() {
+            if (unsubscribeAdminMandaditos) { unsubscribeAdminMandaditos(); unsubscribeAdminMandaditos = null; }
+            if (unsubscribeAdminFood) { unsubscribeAdminFood(); unsubscribeAdminFood = null; }
+        }
 
-            let html = "";
-            mandados.forEach(m => {
-                const status = m.status || 'Solicitado';
-                const clientName = sanitizeText(m.clientName);
-                const clientPhone = sanitizeText(m.clientPhone);
-                const storeName = sanitizeText(m.storeName);
-                const destAddress = sanitizeText(m.destAddress);
-                const itemsText = sanitizeText(m.itemsText);
+        function initAdminListeners() {
+            if (!unsubscribeAdminMandaditos) {
+                unsubscribeAdminMandaditos = db.collection("mandaditos").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
+                    cleanupTicketMaps('admin-ticket-map-');
+                    let mandados = [];
+                    snapshot.forEach(doc => {
+                        const data = { id: doc.id, ...doc.data() };
+                        if (!data.archived && !data.deletedByAdmin) mandados.push(data);
+                    });
+                    mandados.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+                    document.getElementById("admin-mandaditos-count").innerText = mandados.length;
 
-                const isRunning = m.timerRunning;
-                const startStr = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
-                const storeArrStr = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin llegar';
-                const destArrStr = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
-                const queueMinsAdmin = (m.queueMinutes || 0).toFixed(1);
+                    let html = "";
+                    mandados.forEach(m => {
+                        const safeId = sanitizeText(m.id);
+                        const status = m.status || 'Solicitado';
+                        const clientName = sanitizeText(m.clientName);
+                        const clientPhone = sanitizeText(m.clientPhone);
+                        const cleanPhoneDigits = (m.clientPhone || '').replace(/\D/g,'');
+                        const storeName = sanitizeText(m.storeName);
+                        const destAddress = sanitizeText(m.destAddress);
+                        const itemsText = sanitizeText(m.itemsText);
 
-                let controls = "";
+                        const isRunning = m.timerRunning;
+                        const startStr = m.startTimestamp ? new Date(m.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
+                        const storeArrStr = m.storeArrivalTimestamp ? new Date(m.storeArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin llegar';
+                        const destArrStr = m.destArrivalTimestamp ? new Date(m.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
+                        const queueMinsAdmin = (m.queueMinutes || 0).toFixed(1);
 
-                if (status === 'Solicitado') {
-                    controls = `
-                        <button type="button" onclick="updateMandadoStatus('${m.id}', 'Aceptado / En Tienda')" class="w-full bg-emerald-600 text-white py-1.5 rounded text-xs font-bold cursor-pointer hover:bg-emerald-700 shadow">
-                            ✔ Aceptar Mandadito
-                        </button>
-                    `;
-                } else if (status === 'Entregado') {
-                    const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
-                    const queueCost = ((m.queueMinutes || 0) * (39.38 / 60)).toFixed(2);
-                    const paymentInfo = m.paymentMethod === 'efectivo' ? `Efectivo (Recibe: $${(m.cashAmount||0).toFixed(2)} | <b>Cambio a entregar: $${(m.change||0).toFixed(2)}</b>)` : `${m.paymentMethod || 'No especificado'}`;
-                    
-                    controls = `
-                        <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
-                            <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (ADMIN)</p>
-                            <div class="flex justify-between"><span>Tienda:</span> <b>${storeName}</b></div>
-                            <div class="flex justify-between"><span>🕒 Hora de Inicio:</span> <b class="text-indigo-700">${startStr}</b></div>
-                            <div class="flex justify-between"><span>📍 Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArrStr}</b></div>
-                            <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min (Costo: $${queueCost})</b></div>
-                            <div class="flex justify-between"><span>🏠 Hora Llegada a Destino:</span> <b class="text-green-700">${destArrStr}</b></div>
-                            <div class="flex justify-between"><span>💳 Método y Cambio:</span> <b>${paymentInfo}</b></div>
-                            <hr class="my-1">
-                            <div class="flex justify-between"><span>Distancia Total (3 Puntos):</span> <b>${(m.distanceKm||0).toFixed(2)} km</b></div>
-                            <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${(m.fuelCost||0).toFixed(2)}</b></div>
-                            <div class="flex justify-between"><span>Pago Conductor / Trayecto:</span> <b>$${(m.laborCost||0).toFixed(2)}</b></div>
-                            <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
-                            <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
+                        let controls = "";
+
+                        if (status === 'Solicitado') {
+                            controls = `
+                                <button type="button" data-id="${safeId}" onclick="updateMandadoStatus(this.dataset.id, 'Aceptado / En Tienda')" class="w-full bg-emerald-600 text-white py-1.5 rounded text-xs font-bold cursor-pointer hover:bg-emerald-700 shadow">
+                                    ✔ Aceptar Mandadito
+                                </button>
+                            `;
+                        } else if (status === 'Entregado') {
+                            const queueMins = m.queueMinutes ? m.queueMinutes.toFixed(1) : '0';
+                            const queueCost = ((m.queueMinutes || 0) * (39.38 / 60)).toFixed(2);
+                            const paymentInfo = m.paymentMethod === 'efectivo' ? `Efectivo (Recibe: $${(m.cashAmount||0).toFixed(2)} | <b>Cambio a entregar: $${(m.change||0).toFixed(2)}</b>)` : `${sanitizeText(m.paymentMethod || 'No especificado')}`;
                             
-                            <div class="mt-2 space-y-1">
-                                <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Base), 2 (Tienda), 3 (Destino)</p>
-                                <div id="admin-ticket-map-${m.id}" class="ticket-map"></div>
-                            </div>
+                            controls = `
+                                <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
+                                    <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (ADMIN)</p>
+                                    <div class="flex justify-between"><span>Tienda:</span> <b>${storeName}</b></div>
+                                    <div class="flex justify-between"><span>🕒 Hora de Inicio:</span> <b class="text-indigo-700">${startStr}</b></div>
+                                    <div class="flex justify-between"><span>📍 Hora Llegada a Tienda:</span> <b class="text-blue-700">${storeArrStr}</b></div>
+                                    <div class="flex justify-between"><span>⏱️ Tiempo en Fila:</span> <b class="text-amber-700">${queueMins} min (Costo: $${queueCost})</b></div>
+                                    <div class="flex justify-between"><span>🏠 Hora Llegada a Destino:</span> <b class="text-green-700">${destArrStr}</b></div>
+                                    <div class="flex justify-between"><span>💳 Método y Cambio:</span> <b>${paymentInfo}</b></div>
+                                    <hr class="my-1">
+                                    <div class="flex justify-between"><span>Distancia Total (3 Puntos):</span> <b>${(m.distanceKm||0).toFixed(2)} km</b></div>
+                                    <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${(m.fuelCost||0).toFixed(2)}</b></div>
+                                    <div class="flex justify-between"><span>Pago Conductor / Trayecto:</span> <b>$${(m.laborCost||0).toFixed(2)}</b></div>
+                                    <div class="flex justify-between"><span>Costo Productos:</span> <b>$${(m.productsCost||0).toFixed(2)}</b></div>
+                                    <div class="flex justify-between font-bold border-t pt-1 text-emerald-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${(m.totalCost||0).toFixed(2)}</span></div>
+                                    
+                                    <div class="mt-2 space-y-1">
+                                        <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Base), 2 (Tienda), 3 (Destino)</p>
+                                        <div id="admin-ticket-map-${safeId}" class="ticket-map"></div>
+                                    </div>
 
-                            ${m.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación: ${m.rating} Estrellas ${m.feedbackComment ? `("${sanitizeText(m.feedbackComment)}")` : ''}</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
-                        </div>
-                    `;
-                    setTimeout(() => initAdminTicketRouteMap(m), 300);
-                } else {
-                    const hasManualStart = Boolean(m.startTimestamp && m.startLat && m.startLng);
-                    const isCotizadoOrPaid = status === 'Cotizado' || status === 'Pagado y Confirmado';
-                    const startBtnState = hasManualStart
-                        ? `<span class="text-green-600 font-bold">✔ Registrado (${Number(m.startLat).toFixed(4)}, ${Number(m.startLng).toFixed(4)})</span>`
-                        : `<button type="button" onclick="openAdminStartModal('${m.id}')" class="bg-indigo-600 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-indigo-700">📍 Configurar Inicio</button>`;
-                    const quoteBtnState = isCotizadoOrPaid
-                        ? '<span class="text-green-600 font-bold">✔ Cotización Registrada</span>'
-                        : `<button type="button" onclick="sendMandadoQuote('${m.id}', ${m.shippingCost||0})" class="w-full bg-emerald-700 text-white py-1 rounded text-xs font-bold cursor-pointer hover:bg-emerald-800">Enviar Cotización al Cliente</button>`;
-                    const computedChange = m.paymentMethod === 'efectivo'
-                        ? (m.change !== undefined && m.change !== null && Number(m.change) > 0
-                            ? Number(m.change)
-                            : Math.max(0, Number(m.cashAmount || 0) - Number(m.totalCost || 0)))
-                        : 0;
-                    const paymentInfo = m.paymentMethod === 'efectivo'
-                        ? `<div class="space-y-0.5"><p class="text-emerald-900 font-bold">💵 Pago en Efectivo Confirmado</p><p class="text-xs">Cliente paga con: <b>$${Number(m.cashAmount||0).toFixed(2)}</b> | <span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">Cambio a entregar: $${computedChange.toFixed(2)}</span></p></div>`
-                        : (m.paymentMethod && m.paymentMethod !== 'Pendiente'
-                            ? `<span class="text-blue-900 font-bold">💳 Pago Confirmado: ${sanitizeText(m.paymentMethod).toUpperCase()} ${m.transferRef ? `(Ref: ${sanitizeText(m.transferRef)})` : ''}</span>`
-                            : `<span class="text-gray-600">💳 Método de Pago: Pendiente de confirmación del cliente</span>`);
-
-                    const lockedStepsHtml = !hasManualStart
-                        ? `<div class="bg-red-50 border border-red-200 text-red-800 p-2 rounded text-[11px] font-semibold">🔒 Debes configurar manualmente la <b>Ubicación de Inicio</b> en el mapa antes de poder avanzar con el pedido.</div>`
-                        : `
-                            <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
-                                <span>📍 <b>Tienda:</b> ${storeArrStr}</span>
-                                ${!m.storeArrivalTimestamp ? `<button type="button" onclick="markStoreArrival('${m.id}')" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
-                            </div>
-
-                            <div class="bg-amber-50 p-2 rounded border border-amber-300 text-xs">
-                                <div class="flex justify-between font-bold text-amber-950 mb-1">
-                                    <span>⏱️ Fila (Cronómetro): ${isRunning ? '🔴 En Curso' : `${queueMinsAdmin} min`}</span>
+                                    ${m.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación: ${m.rating} Estrellas ${m.feedbackComment ? `("${sanitizeText(m.feedbackComment)}")` : ''}</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
                                 </div>
-                                <div class="flex gap-1">
-                                    <button type="button" onclick="startMandadoTimer('${m.id}')" class="flex-1 bg-amber-600 text-white py-1 rounded font-bold cursor-pointer hover:bg-amber-700">▶️ Iniciar Fila</button>
-                                    <button type="button" onclick="stopMandadoTimer('${m.id}')" class="flex-1 bg-gray-800 text-white py-1 rounded font-bold cursor-pointer hover:bg-gray-900">⏹️ Detener Fila</button>
+                            `;
+                            setTimeout(() => initAdminTicketRouteMap(m), 250);
+                        } else {
+                            const hasManualStart = Boolean(m.startTimestamp && m.startLat && m.startLng);
+                            const isCotizadoOrPaid = status === 'Cotizado' || status === 'Pagado y Confirmado';
+                            const startBtnState = hasManualStart
+                                ? `<span class="text-green-600 font-bold">✔ Registrado (${Number(m.startLat).toFixed(4)}, ${Number(m.startLng).toFixed(4)})</span>`
+                                : `<button type="button" data-id="${safeId}" onclick="openAdminStartModal(this.dataset.id)" class="bg-indigo-600 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-indigo-700">📍 Configurar Inicio</button>`;
+                            const quoteBtnState = isCotizadoOrPaid
+                                ? '<span class="text-green-600 font-bold">✔ Cotización Registrada</span>'
+                                : `<button type="button" data-id="${safeId}" onclick="sendMandadoQuote(this.dataset.id, ${Number(m.shippingCost)||0})" class="w-full bg-emerald-700 text-white py-1 rounded text-xs font-bold cursor-pointer hover:bg-emerald-800">Enviar Cotización al Cliente</button>`;
+                            const computedChange = m.paymentMethod === 'efectivo'
+                                ? (m.change !== undefined && m.change !== null && Number(m.change) > 0
+                                    ? Number(m.change)
+                                    : Math.max(0, Number(m.cashAmount || 0) - Number(m.totalCost || 0)))
+                                : 0;
+                            const paymentInfo = m.paymentMethod === 'efectivo'
+                                ? `<div class="space-y-0.5"><p class="text-emerald-900 font-bold">💵 Pago en Efectivo Confirmado</p><p class="text-xs">Cliente paga con: <b>$${Number(m.cashAmount||0).toFixed(2)}</b> | <span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">Cambio a entregar: $${computedChange.toFixed(2)}</span></p></div>`
+                                : (m.paymentMethod && m.paymentMethod !== 'Pendiente'
+                                    ? `<span class="text-blue-900 font-bold">💳 Pago Confirmado: ${sanitizeText(m.paymentMethod).toUpperCase()} ${m.transferRef ? `(Ref: ${sanitizeText(m.transferRef)})` : ''}</span>`
+                                    : `<span class="text-gray-600">💳 Método de Pago: Pendiente de confirmación del cliente</span>`);
+
+                            const lockedStepsHtml = !hasManualStart
+                                ? `<div class="bg-red-50 border border-red-200 text-red-800 p-2 rounded text-[11px] font-semibold">🔒 Debes configurar manualmente la <b>Ubicación de Inicio</b> en el mapa antes de poder avanzar con el pedido.</div>`
+                                : `
+                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
+                                        <span>📍 <b>Tienda:</b> ${storeArrStr}</span>
+                                        ${!m.storeArrivalTimestamp ? `<button type="button" data-id="${safeId}" onclick="markStoreArrival(this.dataset.id)" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
+                                    </div>
+
+                                    <div class="bg-amber-50 p-2 rounded border border-amber-300 text-xs">
+                                        <div class="flex justify-between font-bold text-amber-950 mb-1">
+                                            <span>⏱️ Fila (Cronómetro): ${isRunning ? '🔴 En Curso' : `${queueMinsAdmin} min`}</span>
+                                        </div>
+                                        <div class="flex gap-1">
+                                            <button type="button" data-id="${safeId}" onclick="startMandadoTimer(this.dataset.id)" class="flex-1 bg-amber-600 text-white py-1 rounded font-bold cursor-pointer hover:bg-amber-700">▶️ Iniciar Fila</button>
+                                            <button type="button" data-id="${safeId}" onclick="stopMandadoTimer(this.dataset.id)" class="flex-1 bg-gray-800 text-white py-1 rounded font-bold cursor-pointer hover:bg-gray-900">⏹️ Detener Fila</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-emerald-50 p-2 rounded border">
+                                        <label class="block text-[11px] font-semibold text-emerald-900 mb-1">Costo de productos en tienda ($):</label>
+                                        <input type="number" step="0.5" id="admin-prod-cost-${safeId}" value="${Number(m.productsCost)||''}" placeholder="Ej. 150" class="w-full p-1 bg-white border rounded font-bold mb-1 text-xs">
+                                        ${quoteBtnState}
+                                    </div>
+
+                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
+                                        <span>🏠 <b>Destino:</b> ${destArrStr}</span>
+                                        ${!m.destArrivalTimestamp ? `<button type="button" data-id="${safeId}" onclick="markDestArrivalAndDeliver(this.dataset.id)" class="bg-gray-900 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Destino y Entregar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
+                                    </div>
+                                `;
+
+                            controls = `
+                                <div class="space-y-2 pt-1 border-t border-emerald-200">
+                                    <div class="bg-yellow-50 p-2 rounded border border-yellow-300 text-xs">
+                                        ${paymentInfo}
+                                    </div>
+
+                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border border-indigo-200">
+                                        <span>🚀 <b>Inicio:</b> ${startStr}</span>
+                                        ${startBtnState}
+                                    </div>
+
+                                    ${lockedStepsHtml}
                                 </div>
-                            </div>
+                            `;
+                        }
 
-                            <div class="bg-emerald-50 p-2 rounded border">
-                                <label class="block text-[11px] font-semibold text-emerald-900 mb-1">Costo de productos en tienda ($):</label>
-                                <input type="number" step="0.5" id="admin-prod-cost-${m.id}" value="${m.productsCost||''}" placeholder="Ej. 150" class="w-full p-1 bg-white border rounded font-bold mb-1 text-xs">
-                                ${quoteBtnState}
-                            </div>
+                        html += `
+                            <div class="bg-white p-3.5 rounded-xl border-2 border-emerald-200 shadow-sm space-y-2 text-xs">
+                                <div class="flex justify-between items-center font-bold text-emerald-950 border-b pb-1">
+                                    <span>🏪 ${storeName}</span>
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-[11px] text-emerald-900">${sanitizeText(status)}</span>
+                                </div>
 
-                            <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
-                                <span>🏠 <b>Destino:</b> ${destArrStr}</span>
-                                ${!m.destArrivalTimestamp ? `<button type="button" onclick="markDestArrivalAndDeliver('${m.id}')" class="bg-gray-900 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Destino y Entregar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
+                                <div class="bg-gray-50 p-2 rounded space-y-1">
+                                    <p class="font-bold text-gray-900">👤 Cliente: ${clientName}</p>
+                                    <p class="text-gray-600">📞 Teléfono: <b>${clientPhone}</b></p>
+                                    <div class="flex gap-2 pt-1">
+                                        <a href="tel:${cleanPhoneDigits}" class="flex-1 bg-blue-600 text-white text-center py-1 rounded font-bold hover:bg-blue-700">📞 Llamar</a>
+                                        <a href="https://wa.me/52${cleanPhoneDigits}?text=Hola%20${encodeURIComponent(m.clientName || '')},%20te%20contacto%20desde%20Primo%20por%20tu%20mandadito." target="_blank" rel="noopener noreferrer" class="flex-1 bg-green-600 text-white text-center py-1 rounded font-bold hover:bg-green-700">💬 WhatsApp</a>
+                                    </div>
+                                </div>
+
+                                <p class="text-gray-700">🏠 <b>Destino:</b> ${destAddress}</p>
+                                <p class="bg-gray-50 p-1.5 rounded text-gray-800">📝 <b>Mandado:</b> ${itemsText}</p>
+                                ${controls}
                             </div>
                         `;
+                    });
+                    document.getElementById("admin-mandaditos-list").innerHTML = html || '<p class="text-gray-500 text-xs">No hay mandaditos activos.</p>';
+                });
+            }
 
-                    controls = `
-                        <div class="space-y-2 pt-1 border-t border-emerald-200">
-                            <div class="bg-yellow-50 p-2 rounded border border-yellow-300 text-xs">
-                                ${paymentInfo}
+            if (!unsubscribeAdminFood) {
+                unsubscribeAdminFood = db.collection("pedidos_comida").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
+                    cleanupTicketMaps('admin-food-ticket-map-');
+                    let orders = [];
+                    snapshot.forEach(doc => {
+                        const data = { id: doc.id, ...doc.data() };
+                        if (!data.archived) orders.push(data);
+                    });
+                    orders.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+                    document.getElementById("admin-food-count").innerText = orders.length;
+
+                    let html = "";
+                    orders.forEach(p => {
+                        const safeId = sanitizeText(p.id);
+                        const status = p.status || 'Solicitado';
+                        const isReserva = p.type === 'futuro';
+                        const tipoLabel = isReserva ? `📅 Reserva (${sanitizeText(p.scheduleDate || '')} ${sanitizeText(p.scheduleTime || '')})` : '🍽️ Compra Inmediata';
+                        const clientName = sanitizeText(p.clientName || 'Cliente');
+                        const clientPhone = sanitizeText(p.clientPhone || '');
+                        const cleanPhoneDigits = (p.clientPhone || '').replace(/\D/g,'');
+                        const destAddress = sanitizeText(p.destAddress || p.address || '');
+                        const itemsSummary = sanitizeText(p.itemsText || (Array.isArray(p.items) ? p.items.map(i => `${i.name} x${i.qty}`).join(', ') : ''));
+                        const sub = Number(p.subtotal ?? p.productsCost ?? 0);
+                        const ship = Number(p.shipping ?? p.shippingCost ?? 0);
+                        const tot = Number(p.total ?? p.totalCost ?? (sub + ship));
+
+                        const startStr = p.startTimestamp ? new Date(p.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
+                        const destArrStr = p.destArrivalTimestamp ? new Date(p.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
+
+                        const computedChange = p.paymentMethod === 'efectivo'
+                            ? (p.change !== undefined && p.change !== null && Number(p.change) > 0
+                                ? Number(p.change)
+                                : Math.max(0, Number(p.cashAmount || 0) - tot))
+                            : 0;
+                        const paymentInfo = p.paymentMethod === 'efectivo'
+                            ? `<div class="space-y-0.5"><p class="text-emerald-900 font-bold">💵 Pago en Efectivo</p><p class="text-xs">Cliente paga con: <b>$${Number(p.cashAmount||0).toFixed(2)}</b> | <span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">Cambio a entregar: $${computedChange.toFixed(2)}</span></p></div>`
+                            : `<span class="text-blue-900 font-bold">💳 Método: ${sanitizeText(p.paymentMethod || 'Pendiente').toUpperCase()} ${p.transferRef ? `(Ref: ${sanitizeText(p.transferRef)})` : ''}</span>`;
+
+                        let controls = "";
+                        if (status === 'Solicitado' || status === 'Pendiente') {
+                            controls = `
+                                <button type="button" data-id="${safeId}" onclick="db.collection('pedidos_comida').doc(this.dataset.id).update({status: 'Aceptado / En Preparación'})" class="w-full bg-orange-600 text-white py-1.5 rounded text-xs font-bold cursor-pointer hover:bg-orange-700 shadow">
+                                    ✔ Aceptar Pedido / Preparar
+                                </button>
+                            `;
+                        } else if (status === 'Entregado') {
+                            controls = `
+                                <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
+                                    <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (ADMIN)</p>
+                                    <div class="flex justify-between"><span>Modalidad:</span> <b>${tipoLabel}</b></div>
+                                    <div class="flex justify-between"><span>🚀 Hora de Inicio (Punto 1):</span> <b class="text-indigo-700">${startStr}</b></div>
+                                    <div class="flex justify-between"><span>🏁 Hora Fin / Entrega (Punto 2):</span> <b class="text-green-700">${destArrStr}</b></div>
+                                    <div class="flex justify-between"><span>💳 Pago y Cambio:</span> <b>${p.paymentMethod === 'efectivo' ? `Efectivo (Cambio: $${computedChange.toFixed(2)})` : sanitizeText(p.paymentMethod || '')}</b></div>
+                                    <hr class="my-1">
+                                    <div class="flex justify-between"><span>Subtotal Alimentos:</span> <b>$${sub.toFixed(2)}</b></div>
+                                    ${p.deliveryType === 'domicilio' ? `
+                                        <div class="flex justify-between"><span>Distancia (Punto 1 ➔ Punto 2):</span> <b>${Number(p.distanceKm||0).toFixed(2)} km</b></div>
+                                        <div class="flex justify-between"><span>Combustible:</span> <b>$${Number(p.fuelCost||0).toFixed(2)}</b></div>
+                                        <div class="flex justify-between"><span>Conductor (${p.estimatedMinutes||0} min):</span> <b>$${Number(p.laborCost||0).toFixed(2)}</b></div>
+                                        <div class="flex justify-between"><span>Desgaste:</span> <b>$${Number(p.wearCost||0).toFixed(2)}</b></div>
+                                        <div class="flex justify-between"><span>Costo Envío:</span> <b>$${ship.toFixed(2)}</b></div>
+                                    ` : `<div class="flex justify-between"><span>Entrega:</span> <b>Base ($0.00)</b></div>`}
+                                    <div class="flex justify-between font-bold border-t pt-1 text-orange-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${tot.toFixed(2)}</span></div>
+                                    <div class="mt-2 space-y-1">
+                                        <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Inicio / Base) ➔ 2 (Ubicación Final)</p>
+                                        <div id="admin-food-ticket-map-${safeId}" class="ticket-map"></div>
+                                    </div>
+                                    ${p.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación: ${p.rating} Estrellas ${p.feedbackComment ? `("${sanitizeText(p.feedbackComment)}")` : ''}</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
+                                </div>
+                            `;
+                            setTimeout(() => initFoodTicketRouteMap(p, 'admin-'), 250);
+                        } else {
+                            const hasManualStart = Boolean(p.startTimestamp && p.startLat && p.startLng);
+                            const startBtnState = hasManualStart
+                                ? `<span class="text-green-600 font-bold">✔ Registrado (${Number(p.startLat).toFixed(4)}, ${Number(p.startLng).toFixed(4)})</span>`
+                                : `<button type="button" data-id="${safeId}" onclick="openAdminStartModal(this.dataset.id, 'pedidos_comida')" class="bg-indigo-600 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-indigo-700">📍 Configurar Inicio</button>`;
+
+                            const lockedEndHtml = !hasManualStart
+                                ? `<div class="bg-red-50 border border-red-200 text-red-800 p-2 rounded text-[11px] font-semibold">🔒 Debes configurar manualmente la <b>Ubicación de Inicio (Punto 1)</b> antes de finalizar y entregar el pedido.</div>`
+                                : `
+                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
+                                        <span>🏁 <b>Fin / Destino (Punto 2):</b> ${destArrStr}</span>
+                                        <button type="button" data-id="${safeId}" onclick="markFoodDestArrivalAndDeliver(this.dataset.id)" class="bg-gray-900 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Fin y Entregar</button>
+                                    </div>
+                                `;
+
+                            controls = `
+                                <div class="space-y-2 pt-1 border-t border-orange-200">
+                                    <div class="bg-yellow-50 p-2 rounded border border-yellow-300 text-xs">
+                                        ${paymentInfo}
+                                    </div>
+                                    <div class="bg-gray-900 text-white p-2 rounded text-[11px] space-y-0.5">
+                                        <div class="flex justify-between"><span>Alimentos: <b>$${sub.toFixed(2)}</b></span><span>Envío: <b>$${ship.toFixed(2)}</b></span><span>Total: <b class="text-emerald-400">$${tot.toFixed(2)}</b></span></div>
+                                        ${p.deliveryType === 'domicilio' ? `<div class="text-gray-300">📏 ${Number(p.distanceKm||0).toFixed(2)} km | ⛽ $${Number(p.fuelCost||0).toFixed(2)} | ⏱️ $${Number(p.laborCost||0).toFixed(2)} | 🔧 $${Number(p.wearCost||0).toFixed(2)}</div>` : ''}
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border border-indigo-200">
+                                        <span>🚀 <b>Inicio (Punto 1):</b> ${startStr}</span>
+                                        ${startBtnState}
+                                    </div>
+                                    ${lockedEndHtml}
+                                </div>
+                            `;
+                        }
+
+                        html += `
+                            <div class="bg-white p-3.5 rounded-xl border-2 border-orange-200 shadow-sm space-y-2 text-xs">
+                                <div class="flex justify-between items-center font-bold text-orange-950 border-b pb-1">
+                                    <span>${tipoLabel}</span>
+                                    <span class="px-2 py-0.5 rounded bg-orange-100 text-[11px] text-orange-900">${sanitizeText(status)}</span>
+                                </div>
+                                <div class="bg-gray-50 p-2 rounded space-y-1">
+                                    <p class="font-bold text-gray-900">👤 Cliente: ${clientName}</p>
+                                    <p class="text-gray-600">📞 Teléfono: <b>${clientPhone}</b></p>
+                                    <div class="flex gap-2 pt-1">
+                                        <a href="tel:${cleanPhoneDigits}" class="flex-1 bg-blue-600 text-white text-center py-1 rounded font-bold hover:bg-blue-700">📞 Llamar</a>
+                                        <a href="https://wa.me/52${cleanPhoneDigits}?text=Hola%20${encodeURIComponent(p.clientName || '')},%20te%20contacto%20desde%20Primo%20por%20tu%20pedido." target="_blank" rel="noopener noreferrer" class="flex-1 bg-green-600 text-white text-center py-1 rounded font-bold hover:bg-green-700">💬 WhatsApp</a>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700">🏠 <b>Entrega:</b> ${destAddress}</p>
+                                <p class="bg-gray-50 p-1.5 rounded text-gray-800">🍽️ <b>Platillos:</b> ${itemsSummary}</p>
+                                ${controls}
                             </div>
-
-                            <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border border-indigo-200">
-                                <span>🚀 <b>Inicio:</b> ${startStr}</span>
-                                ${startBtnState}
-                            </div>
-
-                            ${lockedStepsHtml}
-                        </div>
-                    `;
-                }
-
-                html += `
-                    <div class="bg-white p-3.5 rounded-xl border-2 border-emerald-200 shadow-sm space-y-2 text-xs">
-                        <div class="flex justify-between items-center font-bold text-emerald-950 border-b pb-1">
-                            <span>🏪 ${storeName}</span>
-                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-[11px] text-emerald-900">${status}</span>
-                        </div>
-
-                        <div class="bg-gray-50 p-2 rounded space-y-1">
-                            <p class="font-bold text-gray-900">👤 Cliente: ${clientName}</p>
-                            <p class="text-gray-600">📞 Teléfono: <b>${clientPhone}</b></p>
-                            <div class="flex gap-2 pt-1">
-                                <a href="tel:${clientPhone}" class="flex-1 bg-blue-600 text-white text-center py-1 rounded font-bold hover:bg-blue-700">📞 Llamar</a>
-                                <a href="https://wa.me/52${clientPhone.replace(/\D/g,'')}?text=Hola%20${encodeURIComponent(clientName)},%20te%20contacto%20desde%20Primo%20por%20tu%20mandadito." target="_blank" class="flex-1 bg-green-600 text-white text-center py-1 rounded font-bold hover:bg-green-700">💬 WhatsApp</a>
-                            </div>
-                        </div>
-
-                        <p class="text-gray-700">🏠 <b>Destino:</b> ${destAddress}</p>
-                        <p class="bg-gray-50 p-1.5 rounded text-gray-800">📝 <b>Mandado:</b> ${itemsText}</p>
-                        ${controls}
-                    </div>
-                `;
-            });
-            document.getElementById("admin-mandaditos-list").innerHTML = html || '<p class="text-gray-500 text-xs">No hay mandaditos activos.</p>';
-        });
+                        `;
+                    });
+                    document.getElementById("admin-food-list").innerHTML = html || '<p class="text-gray-500 text-xs">No hay pedidos de comida o reservas activas.</p>';
+                });
+            }
+        }
 
         function initAdminTicketRouteMap(m) {
             const containerId = `admin-ticket-map-${m.id}`;
             const el = document.getElementById(containerId);
-            if (!el || el._leaflet_id) return;
+            if (!el) return;
+            if (ticketMapInstances[containerId]) {
+                try { ticketMapInstances[containerId].remove(); } catch (e) {}
+            }
 
             const baseLat = m.startLat || storeConfig.lat || 20.3333;
             const baseLng = m.startLng || storeConfig.lng || -102.2333;
@@ -1109,6 +1502,7 @@
             const destLng = m.destLng || baseLng;
 
             const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([storeLat, storeLng], 14);
+            ticketMapInstances[containerId] = map;
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             const icon1 = L.divIcon({className: 'map-number-icon', html: '1', iconSize: [26, 26], iconAnchor: [13, 13]});
@@ -1129,8 +1523,6 @@
         }
 
         function updateMandadoStatus(id, newStatus) { db.collection("mandaditos").doc(id).update({ status: newStatus }); }
-        
-        let adminStartMap = null, adminStartMarker = null, manualStartLat = null, manualStartLng = null;
 
         function openAdminStartModal(id, collectionName = 'mandaditos') {
             manualStartLat = null;
@@ -1178,7 +1570,7 @@
             const id = document.getElementById("start-loc-mandado-id").value;
             const col = document.getElementById("start-loc-collection").value || "mandaditos";
             if (!manualStartLat || !manualStartLng) {
-                alert("⛔ Prohibido avanzar: Debes tocar el mapa para seleccionar manualmente la ubicación inicial antes de dar inicio al pedido.");
+                showToast("⛔ Toca el mapa para seleccionar la ubicación inicial antes de avanzar.", "error");
                 return;
             }
             const updatePayload = {
@@ -1191,20 +1583,20 @@
             }
             db.collection(col).doc(id).update(updatePayload).then(() => {
                 closeAdminStartModal();
-                alert(`🚀 Ubicación inicial guardada manualmente (${manualStartLat.toFixed(5)}, ${manualStartLng.toFixed(5)}). Ya puedes avanzar con el pedido.`);
+                showToast(`🚀 Ubicación inicial guardada (${manualStartLat.toFixed(5)}, ${manualStartLng.toFixed(5)}).`, "success");
             });
         }
 
         function markStoreArrival(id) {
-            db.collection("mandaditos").doc(id).update({ storeArrivalTimestamp: Date.now() }).then(() => alert("📍 Llegada a tienda registrada."));
+            db.collection("mandaditos").doc(id).update({ storeArrivalTimestamp: Date.now() }).then(() => showToast("📍 Llegada a tienda registrada.", "success"));
         }
 
         function markDestArrivalAndDeliver(id) {
-            db.collection("mandaditos").doc(id).update({ destArrivalTimestamp: Date.now(), status: 'Entregado' }).then(() => alert("🏁 Llegada a destino registrada y pedido entregado."));
+            db.collection("mandaditos").doc(id).update({ destArrivalTimestamp: Date.now(), status: 'Entregado' }).then(() => showToast("🏁 Llegada a destino registrada y entregado.", "success"));
         }
 
         function startMandadoTimer(id) {
-            db.collection("mandaditos").doc(id).update({ timerStartedAt: Date.now(), timerRunning: true }).then(() => alert("⏱️ Cronómetro de fila iniciado."));
+            db.collection("mandaditos").doc(id).update({ timerStartedAt: Date.now(), timerRunning: true }).then(() => showToast("⏱️ Cronómetro de fila iniciado.", "info"));
         }
 
         function stopMandadoTimer(id) {
@@ -1219,22 +1611,26 @@
                 db.collection("mandaditos").doc(id).update({
                     timerRunning: false, queueMinutes: (d.queueMinutes || 0) + elapsedMins,
                     laborCost: newTotalLabor, shippingCost: newShipping, totalCost: (d.productsCost || 0) + newShipping
-                }).then(() => alert(`⏱️ Se sumaron ${elapsedMins.toFixed(1)} min de fila.`));
+                }).then(() => showToast(`⏱️ Se sumaron ${elapsedMins.toFixed(1)} min de fila.`, "success"));
             });
         }
 
         function sendMandadoQuote(id, shipCost) {
             const prodCost = parseFloat(document.getElementById(`admin-prod-cost-${id}`).value);
-            if (isNaN(prodCost) || prodCost <= 0) { alert("Ingresa costo válido de productos"); return; }
-            db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => alert("Cotización enviada al cliente."));
+            if (isNaN(prodCost) || prodCost <= 0) { showToast("Ingresa un costo válido de productos.", "warning"); return; }
+            db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => showToast("Cotización enviada al cliente.", "success"));
         }
 
-        async function clearAllMandaditos() {
-            if (confirm("¿Borrar historial?")) {
+        // Archivado no destructivo para conservar historial contable
+        async function archiveAllMandaditos() {
+            if (confirm("¿Archivar mandaditos visibles? (Se conservarán en tu base de datos para historial)")) {
                 const snap = await db.collection("mandaditos").get();
                 const batch = db.batch();
-                snap.forEach(d => batch.delete(d.ref));
+                snap.forEach(d => {
+                    if (!d.data().archived) batch.update(d.ref, { archived: true });
+                });
                 await batch.commit();
+                showToast("Mandaditos archivados correctamente.", "info");
             }
         }
 
@@ -1248,6 +1644,7 @@
                 cart.push({ ...item, qty: 1 });
             }
             updateCartUI();
+            showToast(`+ ${item.name} agregado al carrito`, "success");
         }
 
         db.collection("menu").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
@@ -1255,11 +1652,13 @@
             let html = "", adminHtml = "";
             snapshot.forEach((doc) => {
                 const item = { id: doc.id, ...doc.data() };
+                const safeId = sanitizeText(item.id);
+                const safeImg = sanitizeImageUrl(item.image);
                 menuItems.push(item);
-                html += `<div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center"><img src="${item.image||'https://via.placeholder.com/100'}" class="w-16 h-16 object-cover rounded"><div class="flex-1"><h3 class="font-bold text-sm">${sanitizeText(item.name)}</h3>${item.description ? `<p class="text-[11px] text-gray-500">${sanitizeText(item.description)}</p>` : ''}<p class="text-xs text-orange-600 font-semibold">$${item.price}</p></div><button type="button" onclick="addToCart('${item.id}')" class="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded text-xs font-bold cursor-pointer">+ Agregar</button></div>`;
-                adminHtml += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-xs"><span><b>${sanitizeText(item.name)}</b> - $${item.price}</span><button type="button" onclick="db.collection('menu').doc('${item.id}').delete()" class="bg-red-500 text-white px-2 py-1 rounded cursor-pointer">Eliminar</button></div>`;
+                html += `<div class="bg-white p-3 rounded-xl shadow-sm flex gap-3 items-center"><img src="${safeImg}" alt="${sanitizeText(item.name)}" class="w-16 h-16 object-cover rounded"><div class="flex-1"><h3 class="font-bold text-sm">${sanitizeText(item.name)}</h3>${item.description ? `<p class="text-[11px] text-gray-500">${sanitizeText(item.description)}</p>` : ''}<p class="text-xs text-orange-600 font-semibold">$${Number(item.price).toFixed(2)}</p></div><button type="button" data-id="${safeId}" onclick="addToCart(this.dataset.id)" class="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded text-xs font-bold cursor-pointer">+ Agregar</button></div>`;
+                adminHtml += `<div class="flex justify-between items-center bg-gray-50 p-2 rounded text-xs"><span><b>${sanitizeText(item.name)}</b> - $${Number(item.price).toFixed(2)}</span><button type="button" data-id="${safeId}" onclick="db.collection('menu').doc(this.dataset.id).delete()" class="bg-red-500 text-white px-2 py-1 rounded cursor-pointer">Eliminar</button></div>`;
             });
-            document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay menú.</p>';
+            document.getElementById("menu-container").innerHTML = html || '<p class="text-center text-gray-500">No hay menú disponible.</p>';
             document.getElementById("admin-dish-list").innerHTML = adminHtml;
         });
 
@@ -1268,7 +1667,7 @@
             let html = "", subtotal = 0;
             cart.forEach((i, idx) => {
                 subtotal += i.price * i.qty;
-                html += `<div class="flex justify-between items-center py-2 text-sm"><div><p class="font-bold">${sanitizeText(i.name)}</p><p class="text-xs text-gray-500">$${i.price} x ${i.qty}</p></div><button type="button" onclick="cart.splice(${idx},1);updateCartUI();" class="text-red-500 text-xs font-bold cursor-pointer">Quitar</button></div>`;
+                html += `<div class="flex justify-between items-center py-2 text-sm"><div><p class="font-bold">${sanitizeText(i.name)}</p><p class="text-xs text-gray-500">$${Number(i.price).toFixed(2)} x ${i.qty}</p></div><button type="button" onclick="cart.splice(${idx},1);updateCartUI();" class="text-red-500 text-xs font-bold cursor-pointer">Quitar</button></div>`;
             });
             document.getElementById("cart-items").innerHTML = html || '<p class="text-center text-gray-500 text-sm">Carrito vacío</p>';
             document.getElementById("cart-subtotal").innerText = `$${subtotal.toFixed(2)}`;
@@ -1333,42 +1732,97 @@
             }, 100);
         }
         function closeScheduleModal() { document.getElementById("schedule-modal").classList.add("hidden"); }
-        function openAdminLogin() { document.getElementById("admin-modal").classList.remove("hidden"); }
+        function openAdminLogin() {
+            document.getElementById("admin-modal").classList.remove("hidden");
+            if (auth.currentUser) {
+                setTimeout(initAdminStoreMap, 100);
+            }
+        }
         function closeAdmin() { document.getElementById("admin-modal").classList.add("hidden"); }
 
+        // Autenticación segura con Firebase Auth (reemplaza contraseña hardcodeada)
         function verifyAdmin() {
-            if (document.getElementById("admin-pass").value === "PocilloInc") {
-                document.getElementById("admin-login-view").classList.add("hidden");
-                document.getElementById("admin-panel-view").classList.remove("hidden");
-                setTimeout(initAdminStoreMap, 100);
-            } else { alert("Contraseña incorrecta"); }
+            const email = document.getElementById("admin-email").value.trim();
+            const pass = document.getElementById("admin-pass").value;
+            const btn = document.getElementById("admin-login-btn");
+
+            if (!email || !pass) {
+                showToast("Ingresa tu correo y contraseña de administrador.", "warning");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Verificando...";
+
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => {
+                    showToast("✅ Sesión de administrador iniciada.", "success");
+                    setTimeout(initAdminStoreMap, 100);
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast("❌ Credenciales incorrectas o usuario no autorizado.", "error");
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerText = "Ingresar con Cuenta Admin";
+                });
+        }
+
+        function logoutAdmin() {
+            auth.signOut().then(() => {
+                showToast("Sesión de administrador cerrada.", "info");
+                closeAdmin();
+            });
         }
 
         function saveConfig() {
-            const newAddress = sanitizeText(document.getElementById("admin-store-address").value);
+            const newAddress = document.getElementById("admin-store-address").value.trim();
             const latToSave = adminStoreLat || storeConfig.lat;
             const lngToSave = adminStoreLng || storeConfig.lng;
+            const gasPrice = parseFloat(document.getElementById("admin-gas-price").value) || 24.00;
+            const motoKml = parseFloat(document.getElementById("admin-moto-kml").value) || 33;
 
             db.collection("config").doc("main").set({
                 address: newAddress,
                 lat: latToSave,
-                lng: lngToSave
+                lng: lngToSave,
+                gasPrice: gasPrice,
+                motoKml: motoKml
             }, { merge: true }).then(() => {
                 storeConfig.address = newAddress;
                 storeConfig.lat = latToSave;
                 storeConfig.lng = lngToSave;
+                storeConfig.gasPrice = gasPrice;
+                storeConfig.motoKml = motoKml;
                 document.getElementById("store-address-display").innerText = newAddress;
-                alert("Configuración de la Base guardada y persistida con éxito.");
+                showToast("Configuración de Base y tarifas guardada.", "success");
             }).catch(err => {
                 console.error(err);
-                alert("Error al guardar la configuración.");
+                showToast("Error al guardar la configuración.", "error");
             });
         }
 
         function saveDish() {
-            const name = sanitizeText(document.getElementById("dish-name").value), price = parseFloat(document.getElementById("dish-price").value);
-            if (!name || !price) return;
-            db.collection("menu").add({ name, price, description: sanitizeText(document.getElementById("dish-desc").value), image: sanitizeText(document.getElementById("dish-img").value), available: true }).then(() => alert("Platillo guardado"));
+            const name = document.getElementById("dish-name").value.trim();
+            const price = parseFloat(document.getElementById("dish-price").value);
+            if (!name || !price) {
+                showToast("Ingresa el nombre y el precio del platillo.", "warning");
+                return;
+            }
+            db.collection("menu").add({ 
+                name, 
+                price, 
+                description: document.getElementById("dish-desc").value.trim(), 
+                image: document.getElementById("dish-img").value.trim(), 
+                available: true 
+            }).then(() => {
+                document.getElementById("dish-name").value = "";
+                document.getElementById("dish-price").value = "";
+                document.getElementById("dish-desc").value = "";
+                document.getElementById("dish-img").value = "";
+                showToast("Platillo agregado al menú.", "success");
+            });
         }
 
         function recalcDeliveryShippingFromPoint(lat, lng) {
@@ -1520,15 +1974,15 @@
         }
         function checkoutOrder(type) {
             if (cart.length === 0) {
-                alert("Tu carrito está vacío. Agrega al menos un alimento del menú.");
+                showToast("Tu carrito está vacío. Agrega al menos un alimento.", "warning");
                 return;
             }
-            const name = sanitizeText(document.getElementById("client-name").value) || "Cliente";
+            const name = document.getElementById("client-name").value.trim() || "Cliente";
             const phone = type === 'futuro'
-                ? sanitizeText(document.getElementById("schedule-phone").value)
-                : sanitizeText(document.getElementById("client-phone").value);
+                ? document.getElementById("schedule-phone").value.trim()
+                : document.getElementById("client-phone").value.trim();
             if (!phone) {
-                alert("Por favor ingresa tu número telefónico.");
+                showToast("Por favor ingresa tu número telefónico.", "warning");
                 return;
             }
 
@@ -1540,11 +1994,11 @@
             const destLat = type === 'futuro' ? scheduleLat : selectedLat;
             const destLng = type === 'futuro' ? scheduleLng : selectedLng;
             const destAddress = type === 'futuro'
-                ? sanitizeText(document.getElementById("schedule-address").value)
-                : sanitizeText(document.getElementById("delivery-address").value);
+                ? document.getElementById("schedule-address").value.trim()
+                : document.getElementById("delivery-address").value.trim();
 
             if (isDomicilio && (!destLat || !destLng)) {
-                alert("Por favor toca el mapa para marcar tu ubicación final de entrega (Punto 2).");
+                showToast("Toca el mapa o usa tu GPS para marcar tu ubicación final (Punto 2).", "warning");
                 return;
             }
 
@@ -1564,15 +2018,15 @@
                 ? (parseFloat(document.getElementById(type === 'futuro' ? "schedule-cash-amount" : "cash-amount").value) || 0)
                 : 0;
             const transferRef = method === 'transferencia'
-                ? sanitizeText(document.getElementById(type === 'futuro' ? "schedule-transfer-ref" : "cart-transfer-ref").value)
+                ? document.getElementById(type === 'futuro' ? "schedule-transfer-ref" : "cart-transfer-ref").value.trim()
                 : '';
 
             if (method === 'efectivo' && cashAmt > 0 && cashAmt < total) {
-                alert(`El monto en efectivo ($${cashAmt.toFixed(2)}) debe ser igual o mayor al total ($${total.toFixed(2)}).`);
+                showToast(`El efectivo ($${cashAmt.toFixed(2)}) debe ser mayor o igual a $${total.toFixed(2)}.`, "warning");
                 return;
             }
             if (method === 'transferencia' && !transferRef) {
-                alert("Por favor ingresa el folio o referencia de tu transferencia.");
+                showToast("Ingresa el folio o referencia de tu transferencia.", "warning");
                 return;
             }
             const changeVal = (method === 'efectivo' && cashAmt >= total) ? Number((cashAmt - total).toFixed(2)) : 0;
@@ -1611,11 +2065,12 @@
                 scheduleTime: type === 'futuro' ? document.getElementById("schedule-time").value : null,
                 rating: null,
                 feedbackComment: "",
+                archived: false,
                 status: 'Solicitado',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
                 saveClientIdentity();
-                alert(type === 'futuro' ? "¡Reserva agendada con éxito! Puedes seguirla en vivo abajo." : "¡Pedido enviado con éxito! Puedes seguirlo en vivo abajo.");
+                showToast(type === 'futuro' ? "¡Reserva agendada con éxito!" : "¡Pedido enviado con éxito!", "success");
                 cart = [];
                 updateCartUI();
                 closeCart();
@@ -1623,14 +2078,17 @@
                 loadClientFoodOrders(phone);
             }).catch(err => {
                 console.error(err);
-                alert("Error al enviar el pedido.");
+                showToast("Error al enviar el pedido.", "error");
             });
         }
 
         function initFoodTicketRouteMap(p, prefix = '') {
             const containerId = `${prefix}food-ticket-map-${p.id}`;
             const el = document.getElementById(containerId);
-            if (!el || el._leaflet_id) return;
+            if (!el) return;
+            if (ticketMapInstances[containerId]) {
+                try { ticketMapInstances[containerId].remove(); } catch (e) {}
+            }
 
             const baseLat = p.startLat || storeConfig.lat || 20.3333;
             const baseLng = p.startLng || storeConfig.lng || -102.2333;
@@ -1638,6 +2096,7 @@
             const destLng = p.destLng || baseLng;
 
             const map = L.map(containerId, {attributionControl: false, zoomControl: false}).setView([baseLat, baseLng], 14);
+            ticketMapInstances[containerId] = map;
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             const icon1 = L.divIcon({className: 'map-number-icon', html: '1', iconSize: [26, 26], iconAnchor: [13, 13]});
@@ -1654,49 +2113,44 @@
             map.fitBounds(polyline.getBounds(), {padding: [25, 25]});
         }
 
-        function rateFoodOrder(id, stars) {
-            if (stars <= 3) {
-                const comment = prompt("¿Qué podríamos mejorar para merecer tu mejor calificación?");
-                db.collection("pedidos_comida").doc(id).update({ 
-                    rating: stars, 
-                    feedbackComment: comment ? sanitizeText(comment) : "Sin comentario" 
-                }).then(() => alert("Gracias por tus comentarios."));
-            } else {
-                db.collection("pedidos_comida").doc(id).update({ 
-                    rating: stars, 
-                    feedbackComment: "Excelente" 
-                }).then(() => alert("¡Gracias por tus estrellas!"));
-            }
-        }
-
         function markFoodDestArrivalAndDeliver(id) {
             db.collection("pedidos_comida").doc(id).update({
                 destArrivalTimestamp: Date.now(),
                 status: 'Entregado'
-            }).then(() => alert("🏁 Llegada a ubicación final registrada y pedido entregado."));
+            }).then(() => showToast("🏁 Llegada registrada y pedido entregado.", "success"));
         }
 
-        async function clearAllFoodOrders() {
-            if (confirm("¿Borrar historial de pedidos de comida y reservas?")) {
+        async function archiveAllFoodOrders() {
+            if (confirm("¿Archivar pedidos visibles de comida? (Se conservarán en tu historial contable)")) {
                 const snap = await db.collection("pedidos_comida").get();
                 const batch = db.batch();
-                snap.forEach(d => batch.delete(d.ref));
+                snap.forEach(d => {
+                    if (!d.data().archived) batch.update(d.ref, { archived: true });
+                });
                 await batch.commit();
+                showToast("Pedidos de comida archivados correctamente.", "info");
             }
         }
 
         function loadClientFoodOrders(phone) {
             if (!phone) return;
-            db.collection("pedidos_comida").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
+            if (unsubscribeClientFood) unsubscribeClientFood();
+
+            unsubscribeClientFood = db.collection("pedidos_comida").where("clientPhone", "==", phone).onSnapshot((snapshot) => {
+                cleanupTicketMaps('food-ticket-map-');
                 let list = [];
-                snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+                snapshot.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    if (!data.archived) list.push(data);
+                });
                 list.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
 
                 let html = "";
                 list.forEach(p => {
+                    const safeId = sanitizeText(p.id);
                     const status = p.status || 'Solicitado';
                     const isReserva = p.type === 'futuro';
-                    const tipoLabel = isReserva ? `📅 Reserva (${p.scheduleDate || ''} ${p.scheduleTime || ''})` : '🍽️ Compra Inmediata';
+                    const tipoLabel = isReserva ? `📅 Reserva (${sanitizeText(p.scheduleDate || '')} ${sanitizeText(p.scheduleTime || '')})` : '🍽️ Compra Inmediata';
                     const startStr = p.startTimestamp ? new Date(p.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pendiente';
                     const destArrStr = p.destArrivalTimestamp ? new Date(p.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pendiente';
 
@@ -1713,7 +2167,7 @@
                         statusMsg = '🏁 Pedido entregado con éxito.';
                     }
 
-                    const itemsSummary = p.itemsText || (Array.isArray(p.items) ? p.items.map(i => `${sanitizeText(i.name)} x${i.qty}`).join(', ') : '');
+                    const itemsSummary = sanitizeText(p.itemsText || (Array.isArray(p.items) ? p.items.map(i => `${i.name} x${i.qty}`).join(', ') : ''));
                     const sub = Number(p.subtotal ?? p.productsCost ?? 0);
                     const ship = Number(p.shipping ?? p.shippingCost ?? 0);
                     const tot = Number(p.total ?? p.totalCost ?? (sub + ship));
@@ -1729,7 +2183,7 @@
                                 <hr class="my-1">
                                 <div class="flex justify-between"><span>Subtotal Alimentos:</span> <b>$${sub.toFixed(2)}</b></div>
                                 ${p.deliveryType === 'domicilio' ? `
-                                    <div class="flex justify-between"><span>Distancia (Punto 1 ➔ Punto 2):</span> <b>${~~Number(p.distanceKm||0)} km</b></div>
+                                    <div class="flex justify-between"><span>Distancia (Punto 1 ➔ Punto 2):</span> <b>${Number(p.distanceKm||0).toFixed(2)} km</b></div>
                                     <div class="flex justify-between"><span>Combustible exacto:</span> <b>$${Number(p.fuelCost||0).toFixed(2)}</b></div>
                                     <div class="flex justify-between"><span>Pago Conductor (${p.estimatedMinutes||0} min):</span> <b>$${Number(p.laborCost||0).toFixed(2)}</b></div>
                                     <div class="flex justify-between"><span>Desgaste vehículo:</span> <b>$${Number(p.wearCost||0).toFixed(2)}</b></div>
@@ -1739,32 +2193,27 @@
 
                                 <div class="mt-2 space-y-1">
                                     <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Inicio / Base) ➔ 2 (Ubicación Final)</p>
-                                    <div id="food-ticket-map-${p.id}" class="ticket-map"></div>
+                                    <div id="food-ticket-map-${safeId}" class="ticket-map"></div>
                                 </div>
 
                                 <div class="pt-2 border-t mt-2 text-center">
                                     ${p.rating ? `<p class="font-bold text-green-700">⭐ Calificación: ${p.rating} Estrellas ${p.feedbackComment ? `("${sanitizeText(p.feedbackComment)}")` : ''}</p>` : `
                                         <p class="font-semibold text-gray-700 mb-1">Califica el servicio (1 a 6 estrellas):</p>
                                         <div class="flex justify-center gap-1">
-                                            <button type="button" onclick="rateFoodOrder('${p.id}', 1)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">1⭐</button>
-                                            <button type="button" onclick="rateFoodOrder('${p.id}', 2)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">2⭐</button>
-                                            <button type="button" onclick="rateFoodOrder('${p.id}', 3)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">3⭐</button>
-                                            <button type="button" onclick="rateFoodOrder('${p.id}', 4)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">4⭐</button>
-                                            <button type="button" onclick="rateFoodOrder('${p.id}', 5)" class="px-2 py-1 bg-yellow-100 rounded cursor-pointer">5⭐</button>
-                                            <button type="button" onclick="rateFoodOrder('${p.id}', 6)" class="px-2 py-1 bg-yellow-200 rounded cursor-pointer">6⭐</button>
+                                            ${[1,2,3,4,5,6].map(star => `<button type="button" data-id="${safeId}" onclick="handleRatingClick('pedidos_comida', this.dataset.id, ${star})" class="px-2 py-1 ${star===6?'bg-yellow-200':'bg-yellow-100'} rounded cursor-pointer">${star}⭐</button>`).join('')}
                                         </div>
                                     `}
                                 </div>
                             </div>
                         `;
-                        setTimeout(() => initFoodTicketRouteMap(p, ''), 300);
+                        setTimeout(() => initFoodTicketRouteMap(p, ''), 250);
                     }
 
                     html += `
                         <div class="p-3 rounded-xl border ${badgeClass} space-y-1.5">
                             <div class="flex justify-between items-center font-bold">
                                 <span>${tipoLabel}</span>
-                                <span class="px-2 py-0.5 rounded bg-white text-[11px]">${status}</span>
+                                <span class="px-2 py-0.5 rounded bg-white text-[11px]">${sanitizeText(status)}</span>
                             </div>
                             <p class="text-gray-700 bg-white/70 p-1.5 rounded">🍽️ ${itemsSummary}</p>
                             <p class="font-medium">${statusMsg}</p>
@@ -1782,126 +2231,6 @@
                 document.getElementById("client-my-food-list").innerHTML = html;
             });
         }
-
-        db.collection("pedidos_comida").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
-            let orders = [];
-            snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-            orders.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
-            document.getElementById("admin-food-count").innerText = orders.length;
-
-            let html = "";
-            orders.forEach(p => {
-                const status = p.status || 'Solicitado';
-                const isReserva = p.type === 'futuro';
-                const tipoLabel = isReserva ? `📅 Reserva (${p.scheduleDate || ''} ${p.scheduleTime || ''})` : '🍽️ Compra Inmediata';
-                const clientName = sanitizeText(p.clientName || 'Cliente');
-                const clientPhone = sanitizeText(p.clientPhone || '');
-                const destAddress = sanitizeText(p.destAddress || p.address || '');
-                const itemsSummary = sanitizeText(p.itemsText || (Array.isArray(p.items) ? p.items.map(i => `${i.name} x${i.qty}`).join(', ') : ''));
-                const sub = Number(p.subtotal ?? p.productsCost ?? 0);
-                const ship = Number(p.shipping ?? p.shippingCost ?? 0);
-                const tot = Number(p.total ?? p.totalCost ?? (sub + ship));
-
-                const startStr = p.startTimestamp ? new Date(p.startTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'No iniciado';
-                const destArrStr = p.destArrivalTimestamp ? new Date(p.destArrivalTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Sin entregar';
-
-                const computedChange = p.paymentMethod === 'efectivo'
-                    ? (p.change !== undefined && p.change !== null && Number(p.change) > 0
-                        ? Number(p.change)
-                        : Math.max(0, Number(p.cashAmount || 0) - tot))
-                    : 0;
-                const paymentInfo = p.paymentMethod === 'efectivo'
-                    ? `<div class="space-y-0.5"><p class="text-emerald-900 font-bold">💵 Pago en Efectivo</p><p class="text-xs">Cliente paga con: <b>$${Number(p.cashAmount||0).toFixed(2)}</b> | <span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded font-bold">Cambio a entregar: $${computedChange.toFixed(2)}</span></p></div>`
-                    : `<span class="text-blue-900 font-bold">💳 Método: ${sanitizeText(p.paymentMethod || 'Pendiente').toUpperCase()} ${p.transferRef ? `(Ref: ${sanitizeText(p.transferRef)})` : ''}</span>`;
-
-                let controls = "";
-                if (status === 'Solicitado' || status === 'Pendiente') {
-                    controls = `
-                        <button type="button" onclick="db.collection('pedidos_comida').doc('${p.id}').update({status: 'Aceptado / En Preparación'})" class="w-full bg-orange-600 text-white py-1.5 rounded text-xs font-bold cursor-pointer hover:bg-orange-700 shadow">
-                            ✔ Aceptar Pedido / Preparar
-                        </button>
-                    `;
-                } else if (status === 'Entregado') {
-                    controls = `
-                        <div class="bg-white p-3 rounded-lg border border-gray-300 text-xs space-y-1.5 mt-2 shadow-inner">
-                            <p class="font-bold text-center text-gray-900 border-b pb-1">🧾 TICKET DIGITAL COMPLETO (ADMIN)</p>
-                            <div class="flex justify-between"><span>Modalidad:</span> <b>${tipoLabel}</b></div>
-                            <div class="flex justify-between"><span>🚀 Hora de Inicio (Punto 1):</span> <b class="text-indigo-700">${startStr}</b></div>
-                            <div class="flex justify-between"><span>🏁 Hora Fin / Entrega (Punto 2):</span> <b class="text-green-700">${destArrStr}</b></div>
-                            <div class="flex justify-between"><span>💳 Pago y Cambio:</span> <b>${p.paymentMethod === 'efectivo' ? `Efectivo (Cambio: $${computedChange.toFixed(2)})` : sanitizeText(p.paymentMethod || '')}</b></div>
-                            <hr class="my-1">
-                            <div class="flex justify-between"><span>Subtotal Alimentos:</span> <b>$${sub.toFixed(2)}</b></div>
-                            ${p.deliveryType === 'domicilio' ? `
-                                <div class="flex justify-between"><span>Distancia (Punto 1 ➔ Punto 2):</span> <b>${Number(p.distanceKm||0).toFixed(2)} km</b></div>
-                                <div class="flex justify-between"><span>Combustible:</span> <b>$${Number(p.fuelCost||0).toFixed(2)}</b></div>
-                                <div class="flex justify-between"><span>Conductor (${p.estimatedMinutes||0} min):</span> <b>$${Number(p.laborCost||0).toFixed(2)}</b></div>
-                                <div class="flex justify-between"><span>Desgaste:</span> <b>$${Number(p.wearCost||0).toFixed(2)}</b></div>
-                                <div class="flex justify-between"><span>Costo Envío:</span> <b>$${ship.toFixed(2)}</b></div>
-                            ` : `<div class="flex justify-between"><span>Entrega:</span> <b>Base ($0.00)</b></div>`}
-                            <div class="flex justify-between font-bold border-t pt-1 text-orange-900 text-sm"><span>TOTAL COBRADO:</span> <span>$${tot.toFixed(2)}</span></div>
-                            <div class="mt-2 space-y-1">
-                                <p class="font-bold text-center text-gray-800">🗺️ Ruta: 1 (Inicio / Base) ➔ 2 (Ubicación Final)</p>
-                                <div id="admin-food-ticket-map-${p.id}" class="ticket-map"></div>
-                            </div>
-                            ${p.rating ? `<p class="font-bold text-green-700 text-center pt-1 border-t">⭐ Calificación: ${p.rating} Estrellas ${p.feedbackComment ? `("${sanitizeText(p.feedbackComment)}")` : ''}</p>` : '<p class="text-gray-500 text-center italic pt-1">Cliente aún no califica</p>'}
-                        </div>
-                    `;
-                    setTimeout(() => initFoodTicketRouteMap(p, 'admin-'), 300);
-                } else {
-                    const hasManualStart = Boolean(p.startTimestamp && p.startLat && p.startLng);
-                    const startBtnState = hasManualStart
-                        ? `<span class="text-green-600 font-bold">✔ Registrado (${Number(p.startLat).toFixed(4)}, ${Number(p.startLng).toFixed(4)})</span>`
-                        : `<button type="button" onclick="openAdminStartModal('${p.id}', 'pedidos_comida')" class="bg-indigo-600 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-indigo-700">📍 Configurar Inicio</button>`;
-
-                    const lockedEndHtml = !hasManualStart
-                        ? `<div class="bg-red-50 border border-red-200 text-red-800 p-2 rounded text-[11px] font-semibold">🔒 Debes configurar manualmente la <b>Ubicación de Inicio (Punto 1)</b> antes de finalizar y entregar el pedido.</div>`
-                        : `
-                            <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
-                                <span>🏁 <b>Fin / Destino (Punto 2):</b> ${destArrStr}</span>
-                                <button type="button" onclick="markFoodDestArrivalAndDeliver('${p.id}')" class="bg-gray-900 text-white px-2 py-1 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Fin y Entregar</button>
-                            </div>
-                        `;
-
-                    controls = `
-                        <div class="space-y-2 pt-1 border-t border-orange-200">
-                            <div class="bg-yellow-50 p-2 rounded border border-yellow-300 text-xs">
-                                ${paymentInfo}
-                            </div>
-                            <div class="bg-gray-900 text-white p-2 rounded text-[11px] space-y-0.5">
-                                <div class="flex justify-between"><span>Alimentos: <b>$${sub.toFixed(2)}</b></span><span>Envío: <b>$${ship.toFixed(2)}</b></span><span>Total: <b class="text-emerald-400">$${tot.toFixed(2)}</b></span></div>
-                                ${p.deliveryType === 'domicilio' ? `<div class="text-gray-300">📏 ${Number(p.distanceKm||0).toFixed(2)} km | ⛽ $${Number(p.fuelCost||0).toFixed(2)} | ⏱️ $${Number(p.laborCost||0).toFixed(2)} | 🔧 $${Number(p.wearCost||0).toFixed(2)}</div>` : ''}
-                            </div>
-                            <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border border-indigo-200">
-                                <span>🚀 <b>Inicio (Punto 1):</b> ${startStr}</span>
-                                ${startBtnState}
-                            </div>
-                            ${lockedEndHtml}
-                        </div>
-                    `;
-                }
-
-                html += `
-                    <div class="bg-white p-3.5 rounded-xl border-2 border-orange-200 shadow-sm space-y-2 text-xs">
-                        <div class="flex justify-between items-center font-bold text-orange-950 border-b pb-1">
-                            <span>${tipoLabel}</span>
-                            <span class="px-2 py-0.5 rounded bg-orange-100 text-[11px] text-orange-900">${status}</span>
-                        </div>
-                        <div class="bg-gray-50 p-2 rounded space-y-1">
-                            <p class="font-bold text-gray-900">👤 Cliente: ${clientName}</p>
-                            <p class="text-gray-600">📞 Teléfono: <b>${clientPhone}</b></p>
-                            <div class="flex gap-2 pt-1">
-                                <a href="tel:${clientPhone}" class="flex-1 bg-blue-600 text-white text-center py-1 rounded font-bold hover:bg-blue-700">📞 Llamar</a>
-                                <a href="https://wa.me/52${clientPhone.replace(/\D/g,'')}?text=Hola%20${encodeURIComponent(clientName)},%20te%20contacto%20desde%20Primo%20por%20tu%20pedido." target="_blank" class="flex-1 bg-green-600 text-white text-center py-1 rounded font-bold hover:bg-green-700">💬 WhatsApp</a>
-                            </div>
-                        </div>
-                        <p class="text-gray-700">🏠 <b>Entrega:</b> ${destAddress}</p>
-                        <p class="bg-gray-50 p-1.5 rounded text-gray-800">🍽️ <b>Platillos:</b> ${itemsSummary}</p>
-                        ${controls}
-                    </div>
-                `;
-            });
-            document.getElementById("admin-food-list").innerHTML = html || '<p class="text-gray-500 text-xs">No hay pedidos de comida o reservas activas.</p>';
-        });
     </script>
 </body>
 </html>
