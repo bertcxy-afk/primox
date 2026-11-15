@@ -473,7 +473,10 @@
                         <h4 class="font-bold text-orange-950 flex items-center gap-1.5">
                             🍽️ Pedidos de Comida y Reservas (<span id="admin-food-count">0</span>)
                         </h4>
-                        <button type="button" onclick="archiveAllFoodOrders()" class="bg-amber-600 text-white px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-amber-700">📦 Archivar</button>
+                        <div class="flex gap-1.5">
+                            <button type="button" onclick="archiveAllFoodOrders()" class="bg-amber-600 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-amber-700">📦 Archivar</button>
+                            <button type="button" onclick="deleteAllTestRecords('pedidos_comida')" class="bg-red-600 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-red-700">🗑️ Limpiar Pruebas</button>
+                        </div>
                     </div>
                     <div id="admin-food-list" class="space-y-3 text-sm">
                         <p class="text-gray-500 text-xs">No hay pedidos de comida o reservas activas.</p>
@@ -486,7 +489,10 @@
                         <h4 class="font-bold text-emerald-950 flex items-center gap-1.5">
                             🛵 Mandaditos en Vivo (<span id="admin-mandaditos-count">0</span>)
                         </h4>
-                        <button type="button" onclick="archiveAllMandaditos()" class="bg-amber-600 text-white px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-amber-700">📦 Archivar</button>
+                        <div class="flex gap-1.5">
+                            <button type="button" onclick="archiveAllMandaditos()" class="bg-amber-600 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-amber-700">📦 Archivar</button>
+                            <button type="button" onclick="deleteAllTestRecords('mandaditos')" class="bg-red-600 text-white px-2 py-1 rounded text-[11px] font-bold cursor-pointer hover:bg-red-700">🗑️ Limpiar Pruebas</button>
+                        </div>
                     </div>
                     <div id="admin-mandaditos-list" class="space-y-3 text-sm">
                         <p class="text-gray-500 text-xs">No hay mandaditos activos.</p>
@@ -1201,7 +1207,7 @@
         function initAdminListeners() {
             if (!unsubscribeAdminMandaditos) {
                 unsubscribeAdminMandaditos = db.collection("mandaditos").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
-                    cleanupTicketMaps('admin-ticket-map-');
+                    cleanupTicketMaps('admin-ticket-map-'); cleanupTicketMaps('admin-live-mandado-map-');
                     let mandados = [];
                     snapshot.forEach(doc => {
                         const data = { id: doc.id, ...doc.data() };
@@ -1331,11 +1337,23 @@
                             `;
                         }
 
+                        const storeNavHtml = (m.storeLat && m.storeLng) ? buildAdminNavigationBlock(m.storeLat, m.storeLng, `Ir a Tienda: ${storeName}`, '') : '';
+                        const destNavHtml = (m.destLat && m.destLng && status !== 'Entregado')
+                            ? buildAdminNavigationBlock(m.destLat, m.destLng, 'Ruta y Destino de Entrega', `admin-live-mandado-map-${safeId}`)
+                            : ((m.destLat && m.destLng) ? buildAdminNavigationBlock(m.destLat, m.destLng, 'Ubicación de Entrega', '') : '');
+
+                        if (m.destLat && m.destLng && status !== 'Entregado') {
+                            setTimeout(() => initAdminLiveNavMap(`admin-live-mandado-map-${m.id}`, m.destLat, m.destLng, 'Destino Cliente', m.storeLat, m.storeLng), 250);
+                        }
+
                         html += `
                             <div class="bg-white p-3.5 rounded-xl border-2 border-emerald-200 shadow-sm space-y-2 text-xs">
-                                <div class="flex justify-between items-center font-bold text-emerald-950 border-b pb-1">
+                                <div class="flex justify-between items-center font-bold text-emerald-950 border-b pb-1 gap-1">
                                     <span>🏪 ${storeName}</span>
-                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-[11px] text-emerald-900">${sanitizeText(status)}</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="px-2 py-0.5 rounded bg-emerald-100 text-[11px] text-emerald-900">${sanitizeText(status)}</span>
+                                        <button type="button" data-id="${safeId}" onclick="deleteSingleOrder('mandaditos', this.dataset.id)" title="Eliminar pedido o prueba" class="bg-red-100 text-red-700 hover:bg-red-600 hover:text-white px-2 py-0.5 rounded font-bold cursor-pointer transition">🗑️</button>
+                                    </div>
                                 </div>
 
                                 <div class="bg-gray-50 p-2 rounded space-y-1">
@@ -1347,7 +1365,9 @@
                                     </div>
                                 </div>
 
+                                ${storeNavHtml}
                                 <p class="text-gray-700">🏠 <b>Destino:</b> ${destAddress}</p>
+                                ${destNavHtml}
                                 <p class="bg-gray-50 p-1.5 rounded text-gray-800">📝 <b>Mandado:</b> ${itemsText}</p>
                                 ${controls}
                             </div>
@@ -1359,7 +1379,7 @@
 
             if (!unsubscribeAdminFood) {
                 unsubscribeAdminFood = db.collection("pedidos_comida").onSnapshot({ includeMetadataChanges: false }, (snapshot) => {
-                    cleanupTicketMaps('admin-food-ticket-map-');
+                    cleanupTicketMaps('admin-food-ticket-map-'); cleanupTicketMaps('admin-live-food-map-');
                     let orders = [];
                     snapshot.forEach(doc => {
                         const data = { id: doc.id, ...doc.data() };
@@ -1461,11 +1481,23 @@
                             `;
                         }
 
+                        const isFoodDomicilio = p.deliveryType === 'domicilio' && p.destLat && p.destLng;
+                        const foodNavHtml = isFoodDomicilio
+                            ? buildAdminNavigationBlock(p.destLat, p.destLng, 'Mapa y Navegación al Destino', status !== 'Entregado' ? `admin-live-food-map-${safeId}` : '')
+                            : '';
+
+                        if (isFoodDomicilio && status !== 'Entregado') {
+                            setTimeout(() => initAdminLiveNavMap(`admin-live-food-map-${p.id}`, p.destLat, p.destLng, 'Destino Cliente'), 250);
+                        }
+
                         html += `
                             <div class="bg-white p-3.5 rounded-xl border-2 border-orange-200 shadow-sm space-y-2 text-xs">
-                                <div class="flex justify-between items-center font-bold text-orange-950 border-b pb-1">
+                                <div class="flex justify-between items-center font-bold text-orange-950 border-b pb-1 gap-1">
                                     <span>${tipoLabel}</span>
-                                    <span class="px-2 py-0.5 rounded bg-orange-100 text-[11px] text-orange-900">${sanitizeText(status)}</span>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="px-2 py-0.5 rounded bg-orange-100 text-[11px] text-orange-900">${sanitizeText(status)}</span>
+                                        <button type="button" data-id="${safeId}" onclick="deleteSingleOrder('pedidos_comida', this.dataset.id)" title="Eliminar pedido o prueba" class="bg-red-100 text-red-700 hover:bg-red-600 hover:text-white px-2 py-0.5 rounded font-bold cursor-pointer transition">🗑️</button>
+                                    </div>
                                 </div>
                                 <div class="bg-gray-50 p-2 rounded space-y-1">
                                     <p class="font-bold text-gray-900">👤 Cliente: ${clientName}</p>
@@ -1476,6 +1508,7 @@
                                     </div>
                                 </div>
                                 <p class="text-gray-700">🏠 <b>Entrega:</b> ${destAddress}</p>
+                                ${foodNavHtml}
                                 <p class="bg-gray-50 p-1.5 rounded text-gray-800">🍽️ <b>Platillos:</b> ${itemsSummary}</p>
                                 ${controls}
                             </div>
@@ -1619,6 +1652,91 @@
             const prodCost = parseFloat(document.getElementById(`admin-prod-cost-${id}`).value);
             if (isNaN(prodCost) || prodCost <= 0) { showToast("Ingresa un costo válido de productos.", "warning"); return; }
             db.collection("mandaditos").doc(id).update({ productsCost: prodCost, totalCost: prodCost + shipCost, status: 'Cotizado' }).then(() => showToast("Cotización enviada al cliente.", "success"));
+        }
+
+        
+        // Limpieza total de registros de prueba (borrado físico en Firestore)
+        async function deleteAllTestRecords(collectionName) {
+            const label = collectionName === 'mandaditos' ? 'mandaditos' : 'pedidos de comida y reservas';
+            if (!confirm(`⚠️ ¿Eliminar PERMANENTEMENTE todos los ${label} de prueba de la base de datos? Esta acción dejará los registros limpios.`)) return;
+            try {
+                const snap = await db.collection(collectionName).get();
+                if (snap.empty) {
+                    showToast("No hay registros que limpiar.", "info");
+                    return;
+                }
+                const batch = db.batch();
+                snap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                showToast(`🗑️ Todos los ${label} han sido eliminados.`, "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Error al limpiar registros.", "error");
+            }
+        }
+
+        // Eliminar un pedido individual (cancelado o prueba)
+        async function deleteSingleOrder(collectionName, id) {
+            if (!confirm("¿Eliminar este pedido de forma permanente? (Ideal para pruebas o pedidos cancelados)")) return;
+            try {
+                await db.collection(collectionName).doc(id).delete();
+                showToast("🗑️ Pedido eliminado correctamente.", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Error al eliminar el pedido.", "error");
+            }
+        }
+
+        // Renderiza mapa interactivo de entrega y enlaces directos a Google Maps / Apple Maps (iOS)
+        function buildAdminNavigationBlock(lat, lng, labelText = 'Destino de Entrega', mapDomId = '') {
+            if (!lat || !lng) return '';
+            const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            const appleUrl = `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+            return `
+                <div class="bg-blue-50/80 border border-blue-200 p-2 rounded-lg space-y-1.5">
+                    <div class="flex justify-between items-center text-[11px] font-bold text-blue-950">
+                        <span>🗺️ ${sanitizeText(labelText)}</span>
+                        <span class="font-mono text-[10px] text-blue-700">${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}</span>
+                    </div>
+                    ${mapDomId ? `<div id="${mapDomId}" class="ticket-map border border-blue-200"></div>` : ''}
+                    <div class="grid grid-cols-2 gap-1.5 pt-0.5">
+                        <a href="${googleUrl}" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white text-center py-1.5 px-2 rounded-lg font-bold text-[11px] hover:bg-blue-700 flex items-center justify-center gap-1 shadow-sm">
+                            📍 Google Maps
+                        </a>
+                        <a href="${appleUrl}" target="_blank" rel="noopener noreferrer" class="bg-gray-900 text-white text-center py-1.5 px-2 rounded-lg font-bold text-[11px] hover:bg-black flex items-center justify-center gap-1 shadow-sm">
+                            🍎 Mapas iOS
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initAdminLiveNavMap(containerId, targetLat, targetLng, title, storeLat = null, storeLng = null) {
+            const el = document.getElementById(containerId);
+            if (!el || !targetLat || !targetLng) return;
+            if (ticketMapInstances[containerId]) {
+                try { ticketMapInstances[containerId].remove(); } catch (e) {}
+            }
+            const baseLat = storeConfig.lat || 20.3333;
+            const baseLng = storeConfig.lng || -102.2333;
+
+            const map = L.map(containerId, {attributionControl: false, zoomControl: true}).setView([targetLat, targetLng], 15);
+            ticketMapInstances[containerId] = map;
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            const points = [[baseLat, baseLng]];
+            L.marker([baseLat, baseLng]).addTo(map).bindPopup('🏠 Base');
+
+            if (storeLat && storeLng) {
+                points.push([storeLat, storeLng]);
+                L.marker([storeLat, storeLng]).addTo(map).bindPopup('🏪 Tienda');
+            }
+
+            points.push([targetLat, targetLng]);
+            L.marker([targetLat, targetLng]).addTo(map).bindPopup(`📍 ${title}`).openPopup();
+
+            const poly = L.polyline(points, {color: '#2563eb', weight: 3, dashArray: '5, 5'}).addTo(map);
+            map.fitBounds(poly.getBounds(), {padding: [22, 22]});
         }
 
         // Archivado no destructivo para conservar historial contable
