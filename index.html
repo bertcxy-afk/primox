@@ -312,14 +312,15 @@
             </div>
 
             <div class="mb-4">
-                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
-                <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                <label class="block font-semibold text-sm mb-1">Método de Pago *:</label>
+                <select id="payment-method" onchange="togglePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2 font-medium">
+                    <option value="">-- Selecciona cómo vas a pagar --</option>
                     <option value="efectivo">Efectivo</option>
                     <option value="tarjeta">Tarjeta / Mercado Pago</option>
                     <option value="transferencia">Transferencia Bancaria BBVA</option>
                 </select>
 
-                <div id="cash-fields">
+                <div id="cash-fields" class="hidden">
                     <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para cambio):</label>
                     <input type="number" id="cash-amount" placeholder="Ej. 200" oninput="calculateChange()" class="w-full p-2 border rounded-lg text-sm">
                     <p id="change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
@@ -446,13 +447,14 @@
                 </div>
             </div>
             <div>
-                <label class="block font-semibold text-sm mb-1">Método de Pago:</label>
-                <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2">
+                <label class="block font-semibold text-sm mb-1">Método de Pago *:</label>
+                <select id="schedule-payment-method" onchange="toggleSchedulePaymentFields()" class="w-full p-2 border rounded-lg text-sm mb-2 font-medium">
+                    <option value="">-- Selecciona cómo vas a pagar --</option>
                     <option value="efectivo">Efectivo</option>
                     <option value="tarjeta">Tarjeta / Mercado Pago</option>
                     <option value="transferencia">Transferencia Bancaria BBVA</option>
                 </select>
-                <div id="schedule-cash-fields">
+                <div id="schedule-cash-fields" class="hidden">
                     <label class="block text-xs text-gray-600 mb-1">¿Con cuánto vas a pagar? (Para cambio):</label>
                     <input type="number" id="schedule-cash-amount" placeholder="Ej. 200" oninput="calculateScheduleChange()" class="w-full p-2 border rounded-lg text-sm">
                     <p id="schedule-change-text" class="text-sm font-semibold text-green-600 mt-1"></p>
@@ -1179,7 +1181,8 @@
             if (!m) return;
             const total = (m.productsCost||0) + (m.shippingCost||0);
             const cash = parseFloat(document.getElementById("mandado-cash-amount").value) || 0;
-            document.getElementById("mandado-change-text").innerText = cash >= total ? `💵 Cambio: $${(cash - total).toFixed(2)}` : "⚠️ Monto menor";
+            if (!cash) { document.getElementById("mandado-change-text").innerText = ""; return; }
+            document.getElementById("mandado-change-text").innerText = cash >= total ? `💵 Cambio a recibir: $${(cash - total).toFixed(2)}` : "⚠️ El monto es menor al total";
         }
         function rejectMandadoQuote() {
             const id = document.getElementById("confirm-mandado-id").value;
@@ -1197,9 +1200,15 @@
             const m = clientMandaditosCache[id];
             const total = m ? (Number(m.productsCost || 0) + Number(m.shippingCost || 0)) : 0;
 
-            if (method === 'efectivo' && cashAmt < total) {
-                showToast(`El efectivo ($${cashAmt.toFixed(2)}) debe ser mayor o igual a $${total.toFixed(2)}.`, "warning");
-                return;
+            if (method === 'efectivo') {
+                if (!cashAmt || cashAmt <= 0) {
+                    showToast("⚠️ Ingresa el monto en efectivo con el que vas a pagar.", "warning");
+                    return;
+                }
+                if (cashAmt < total) {
+                    showToast(`⚠️ El efectivo ($${cashAmt.toFixed(2)}) debe ser mayor o igual a $${total.toFixed(2)}.`, "warning");
+                    return;
+                }
             }
             if (method === 'transferencia' && !transferRef) {
                 showToast("Ingresa el folio o referencia de tu transferencia.", "warning");
@@ -1314,48 +1323,55 @@
                                     ? `<span class="text-blue-900 font-bold">💳 Pago Confirmado: ${sanitizeText(m.paymentMethod).toUpperCase()} ${m.transferRef ? `(Ref: ${sanitizeText(m.transferRef)})` : ''}</span>`
                                     : `<span class="text-gray-600">💳 Método de Pago: Pendiente de confirmación del cliente</span>`);
 
-                            const lockedStepsHtml = !hasManualStart
-                                ? `<div class="bg-red-50 border border-red-200 text-red-800 p-2 rounded text-[11px] font-semibold">🔒 Debes configurar manualmente la <b>Ubicación de Inicio</b> en el mapa antes de poder avanzar con el pedido.</div>`
+                            const orderedStepsHtml = !hasManualStart
+                                ? `<div class="bg-red-50 border border-red-200 text-red-800 p-2 rounded text-[11px] font-semibold">🔒 Paso 1 obligatorio: Configura manualmente la <b>Ubicación de Inicio</b> en el mapa antes de avanzar.</div>`
                                 : `
-                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
-                                        <span>📍 <b>Tienda:</b> ${storeArrStr}</span>
-                                        ${!m.storeArrivalTimestamp ? `<button type="button" data-id="${safeId}" onclick="markStoreArrival(this.dataset.id)" class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
+                                    <!-- Paso 2: Llegada a Tienda -->
+                                    <div class="flex justify-between items-center text-xs bg-white p-2 rounded border">
+                                        <span>2️⃣ <b>Llegada a Tienda:</b> ${storeArrStr}</span>
+                                        ${!m.storeArrivalTimestamp ? `<button type="button" data-id="${safeId}" onclick="markStoreArrival(this.dataset.id)" class="bg-blue-600 text-white px-2.5 py-1 rounded font-bold cursor-pointer hover:bg-blue-700">Llegué a Tienda</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
                                     </div>
 
-                                    <div class="bg-amber-50 p-2 rounded border border-amber-300 text-xs">
-                                        <div class="flex justify-between font-bold text-amber-950 mb-1">
-                                            <span>⏱️ Fila (Cronómetro): ${isRunning ? '🔴 En Curso' : `${queueMinsAdmin} min`}</span>
-                                        </div>
-                                        <div class="flex gap-1">
-                                            <button type="button" data-id="${safeId}" onclick="startMandadoTimer(this.dataset.id)" class="flex-1 bg-amber-600 text-white py-1 rounded font-bold cursor-pointer hover:bg-amber-700">▶️ Iniciar Fila</button>
-                                            <button type="button" data-id="${safeId}" onclick="stopMandadoTimer(this.dataset.id)" class="flex-1 bg-gray-800 text-white py-1 rounded font-bold cursor-pointer hover:bg-gray-900">⏹️ Detener Fila</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-emerald-50 p-2 rounded border">
-                                        <label class="block text-[11px] font-semibold text-emerald-900 mb-1">Costo de productos en tienda ($):</label>
-                                        <input type="number" step="0.5" id="admin-prod-cost-${safeId}" value="${Number(m.productsCost)||''}" placeholder="Ej. 150" class="w-full p-1 bg-white border rounded font-bold mb-1 text-xs">
+                                    <!-- Paso 3: Enviar Costo del Producto al Cliente -->
+                                    <div class="bg-emerald-50 p-2.5 rounded border border-emerald-200">
+                                        <label class="block text-[11px] font-bold text-emerald-950 mb-1">3️⃣ Costo de productos en tienda ($):</label>
+                                        <input type="number" step="0.5" id="admin-prod-cost-${safeId}" value="${Number(m.productsCost)||''}" placeholder="Ej. 150" class="w-full p-1.5 bg-white border rounded font-bold mb-1.5 text-xs">
                                         ${quoteBtnState}
                                     </div>
 
-                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border">
-                                        <span>🏠 <b>Destino:</b> ${destArrStr}</span>
-                                        ${!m.destArrivalTimestamp ? `<button type="button" data-id="${safeId}" onclick="markDestArrivalAndDeliver(this.dataset.id)" class="bg-gray-900 text-white px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Destino y Entregar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
+                                    <!-- Paso 4: Confirmación de Método de Pago y Cambio -->
+                                    <div class="bg-yellow-50 p-2.5 rounded border border-yellow-300 text-xs">
+                                        <p class="text-[11px] font-bold text-yellow-950 mb-0.5">4️⃣ Confirmación de Pago del Cliente:</p>
+                                        ${paymentInfo}
+                                    </div>
+
+                                    <!-- Paso 5: Cronómetro de Fila -->
+                                    <div class="bg-amber-50 p-2.5 rounded border border-amber-300 text-xs">
+                                        <div class="flex justify-between font-bold text-amber-950 mb-1.5">
+                                            <span>5️⃣ Fila (Cronómetro): ${isRunning ? '🔴 En Curso' : `${queueMinsAdmin} min`}</span>
+                                        </div>
+                                        <div class="flex gap-1.5">
+                                            <button type="button" data-id="${safeId}" onclick="startMandadoTimer(this.dataset.id)" class="flex-1 bg-amber-600 text-white py-1.5 rounded font-bold cursor-pointer hover:bg-amber-700">▶️ Iniciar Fila</button>
+                                            <button type="button" data-id="${safeId}" onclick="stopMandadoTimer(this.dataset.id)" class="flex-1 bg-gray-800 text-white py-1.5 rounded font-bold cursor-pointer hover:bg-gray-900">⏹️ Detener Fila</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Paso 6: Marcar Destino y Entrega -->
+                                    <div class="flex justify-between items-center text-xs bg-white p-2 rounded border border-gray-300">
+                                        <span>6️⃣ <b>Destino:</b> ${destArrStr}</span>
+                                        ${!m.destArrivalTimestamp ? `<button type="button" data-id="${safeId}" onclick="markDestArrivalAndDeliver(this.dataset.id)" class="bg-gray-900 text-white px-2.5 py-1 rounded font-bold cursor-pointer hover:bg-black">🏁 Marcar Destino y Entregar</button>` : '<span class="text-green-600 font-bold">✔ Registrado</span>'}
                                     </div>
                                 `;
 
                             controls = `
-                                <div class="space-y-2 pt-1 border-t border-emerald-200">
-                                    <div class="bg-yellow-50 p-2 rounded border border-yellow-300 text-xs">
-                                        ${paymentInfo}
-                                    </div>
-
-                                    <div class="flex justify-between items-center text-xs bg-white p-1.5 rounded border border-indigo-200">
-                                        <span>🚀 <b>Inicio:</b> ${startStr}</span>
+                                <div class="space-y-2 pt-1.5 border-t border-emerald-200">
+                                    <!-- Paso 1: Inicio -->
+                                    <div class="flex justify-between items-center text-xs bg-white p-2 rounded border border-indigo-200">
+                                        <span>1️⃣ <b>Inicio:</b> ${startStr}</span>
                                         ${startBtnState}
                                     </div>
 
-                                    ${lockedStepsHtml}
+                                    ${orderedStepsHtml}
                                 </div>
                             `;
                         }
@@ -2170,12 +2186,22 @@
                 ? document.getElementById(type === 'futuro' ? "schedule-transfer-ref" : "cart-transfer-ref").value.trim()
                 : '';
 
-            if (method === 'efectivo' && cashAmt > 0 && cashAmt < total) {
-                showToast(`El efectivo ($${cashAmt.toFixed(2)}) debe ser mayor o igual a $${total.toFixed(2)}.`, "warning");
+            if (!method) {
+                showToast("⚠️ Por favor selecciona y confirma tu método de pago antes de enviar.", "warning");
                 return;
             }
+            if (method === 'efectivo') {
+                if (!cashAmt || cashAmt <= 0) {
+                    showToast("⚠️ Ingresa el monto en efectivo con el que vas a pagar.", "warning");
+                    return;
+                }
+                if (cashAmt < total) {
+                    showToast(`⚠️ El monto en efectivo ($${cashAmt.toFixed(2)}) debe ser mayor o igual al total ($${total.toFixed(2)}).`, "warning");
+                    return;
+                }
+            }
             if (method === 'transferencia' && !transferRef) {
-                showToast("Ingresa el folio o referencia de tu transferencia.", "warning");
+                showToast("⚠️ Escribe el folio o referencia de tu transferencia antes de enviar.", "warning");
                 return;
             }
             const changeVal = (method === 'efectivo' && cashAmt >= total) ? Number((cashAmt - total).toFixed(2)) : 0;
